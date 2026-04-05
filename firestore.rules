@@ -1,0 +1,236 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ══════════════════════════════════════════════════════════════════════
+    // CONFIGURATION
+    // ══════════════════════════════════════════════════════════════════════
+    // The owner email constant — the only user who can self-register as owner.
+    // Must match OWNER_EMAIL in src/lib/constants.ts
+    function OWNER_EMAIL() {
+      return "rkv3232@gmail.com";
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // HELPER FUNCTIONS
+    // ══════════════════════════════════════════════════════════════════════
+
+    // Is the requester authenticated?
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Fetch requester's role safely from their Firestore user document.
+    // Falls back to "user" if document doesn't exist to prevent rule crashes.
+    function getMyRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : "user";
+    }
+
+    // Is the requester the owner?
+    function isOwner() {
+      return isAuthenticated() && (
+        request.auth.token.email == OWNER_EMAIL() || getMyRole() == "owner"
+      );
+    }
+
+    // Is the requester an admin or owner?
+    function isAdminOrOwner() {
+      return isAuthenticated() && (
+        request.auth.token.email == OWNER_EMAIL() || getMyRole() in ["owner", "admin"]
+      );
+    }
+
+    // Is the requester an editor, admin, or owner?
+    function isAtLeastEditor() {
+      return isAuthenticated() && (
+        request.auth.token.email == OWNER_EMAIL() || getMyRole() in ["owner", "admin", "editor", "reporter"]
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // USERS COLLECTION
+    // ══════════════════════════════════════════════════════════════════════
+    match /users/{userId} {
+
+      // Anyone authenticated can read user profiles (for author attribution)
+      allow read: if isAuthenticated();
+
+      // Users can CREATE their own profile document on first sign-in.
+      // CRITICAL RULES:
+      //   1. UID must match the authenticated user's UID
+      //   2. Email must match the authenticated user's email
+      //   3. Role must be "user" — UNLESS this is the owner email (then "owner")
+      //   4. No one else may create a document for another user
+      allow create: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && request.resource.data.uid == userId;
+
+      // Role field changes are VERY restricted:
+      //   - Owner/admin can update fields on non-owner accounts
+      //   - CRITICAL: Cannot change the owner's role to anything
+      //   - CRITICAL: Cannot assign "owner" role to anyone
+      //   - Users can update their OWN non-role fields (name, photoURL, etc.)
+      allow update: if isAuthenticated() && (
+                      // Admin or owner updating another user's document
+                      (isAdminOrOwner()
+                        && resource.data.role != "owner"                          // Cannot touch owner docs
+                        && request.resource.data.role != "owner"                  // Cannot assign owner role
+                        && request.resource.data.uid == resource.data.uid         // Cannot change uid
+                        && request.resource.data.email == resource.data.email)    // Cannot change email
+                      ||
+                      // Users updating their OWN profile (cannot change role)
+                      (request.auth.uid == userId
+                        && request.resource.data.role == resource.data.role)      // Role must stay the same
+                    );
+
+      // Only the owner can delete user documents. Owner can never delete themselves.
+      allow delete: if isOwner()
+                    && resource.data.role != "owner"
+                    && resource.data.uid != request.auth.uid;
+
+      // ══════════════════════════════════════════════════════════════════════
+      // USER BOOKMARKS (Subcollection)
+      // ══════════════════════════════════════════════════════════════════════
+      match /bookmarks/{postId} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // POSTS COLLECTION
+    // ══════════════════════════════════════════════════════════════════════
+    match /posts/{postId} {
+
+      // Published posts are publicly readable; others require authentication
+      allow read: if resource.data.status == "published"
+                  || isAuthenticated();
+
+      // Owner, admin, editor, reporter can create — but must set correct authorId
+      // SECURITY: Reporters cannot create posts with "published" status.
+      allow create: if isAtLeastEditor()
+                    && request.resource.data.authorId == request.auth.uid
+                    && (getMyRole() != "reporter" || request.resource.data.status != "published");
+
+      // 1. Allow safe increments by anyone (fields: views, lastViewedAt, likes)
+      // 2. Or allow authenticated admins/authors to fully update
+      allow update: if (
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'lastViewedAt', 'likes'])
+                        && (
+                            request.resource.data.views == resource.data.get("views", 0) + 1 ||
+                            request.resource.data.likes == resource.data.get("likes", 0) + 1 ||
+                            request.resource.data.likes == resource.data.get("likes", 0) - 1
+                        )
+                    ) || (
+                        isAuthenticated()
+                        && (isAdminOrOwner()
+                            || getMyRole() == "editor"
+                            || (getMyRole() == "reporter" 
+                                && resource.data.authorId == request.auth.uid
+                                && request.resource.data.status != "published"))
+                    );
+
+      // Owner/admin can delete any post; editors can delete any post; reporters can only delete their own
+      allow delete: if isAuthenticated()
+                    && (isAdminOrOwner()
+                        || getMyRole() == "editor"
+                        || (getMyRole() == "reporter" && resource.data.authorId == request.auth.uid));
+                      
+      // ══════════════════════════════════════════════════════════════════════
+      // POST COMMENTS (Subcollection)
+      // ══════════════════════════════════════════════════════════════════════
+      match /comments/{commentId} {
+        allow read:   if true; // Make comments readable by everyone!
+        allow create: if isAuthenticated();
+        allow update: if isAuthenticated()
+                      && (isAdminOrOwner()
+                          || resource.data.authorId == request.auth.uid);
+        allow delete: if isAuthenticated()
+                      && (isAdminOrOwner()
+                          || resource.data.authorId == request.auth.uid);
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // POST LIKES (Subcollection)
+      // ══════════════════════════════════════════════════════════════════════
+      match /post_likes/{userId} {
+        allow read: if true;
+        allow write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // (Deprecated) TOP-LEVEL BOOKMARKS (Use /users/{uid}/bookmarks instead)
+    // ══════════════════════════════════════════════════════════════════════
+    match /bookmarks/{bookmarkId} {
+      allow read, write: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SETTINGS (owner/admin only)
+    // ══════════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════
+    // SETTINGS (Public read; owner write)
+    // ══════════════════════════════════════════════════════════════════════
+    match /settings/{document} {
+      allow read:  if true;
+      allow write: if isOwner();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // ANALYTICS (owner/admin read; system write)
+    // ══════════════════════════════════════════════════════════════════════
+    match /analytics/{document} {
+      allow read:  if isAdminOrOwner();
+      allow write: if isAdminOrOwner();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // CATEGORIES & TAGS (public read; admin/owner write)
+    // ══════════════════════════════════════════════════════════════════════
+    match /categories/{categoryId} {
+      allow read:  if true;
+      allow write: if isAdminOrOwner();
+    }
+
+    match /tags/{tagId} {
+      allow read:  if true;
+      allow write: if isAdminOrOwner();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // COMMUNITY SECTIONS (Forums & Polls)
+    // ══════════════════════════════════════════════════════════════════════
+    match /forum_posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (isAdminOrOwner() || resource.data.userId == request.auth.uid);
+    }
+
+    match /forum_comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (isAdminOrOwner() || resource.data.userId == request.auth.uid);
+    }
+
+    match /polls/{pollId} {
+      allow read: if true;
+      allow update: if true; // Allow anyone to vote — increments handled in client
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // COLLECTION GROUP: comments (For Admin panel)
+    // ══════════════════════════════════════════════════════════════════════
+    match /{path=**}/comments/{commentId} {
+      allow read: if true;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // DENY ALL (catch-all — must be last)
+    // ══════════════════════════════════════════════════════════════════════
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

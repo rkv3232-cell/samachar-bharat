@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+:root {
+  --foreground-rgb: 17, 17, 17;
+  --background-rgb: 245, 245, 248;
+}
+
+.dark {
+  --foreground-rgb: 243, 244, 246;
+  --background-rgb: 10, 10, 12;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dc2626;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b91c1c;
+}
+
+/* Hide scrollbar for ticker/nav */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Breaking news ticker */
+@keyframes ticker {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.ticker-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker 30s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -800px 0;
+  }
+
+  100% {
+    background-position: 800px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.75rem;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Marquee for Finance Widget */
+@keyframes marquee-fast {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee-fast {
+  animation: marquee-fast 50s linear infinite;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/* News content rich text */
+.news-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+  margin: 1.5rem 0 .75rem;
+}
+
+.news-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  margin: 1.25rem 0 .5rem;
+}
+
+.news-content p {
+  line-height: 1.9;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.news-content ul,
+.news-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.news-content li {
+  margin-bottom: .5rem;
+  line-height: 1.7;
+}
+
+.news-content blockquote {
+  border-left: 4px solid #dc2626;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.news-content strong {
+  font-weight: 700;
+  color: #111;
+}
+
+/* Card image hover zoom wrapper */
+.card-media {
+  overflow: hidden;
+}
+
+.card-media img,
+.card-media video {
+  transition: transform .4s ease;
+}
+
+.card-media:hover img,
+.card-media:hover video {
+  transform: scale(1.05);
+}

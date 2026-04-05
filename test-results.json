@@ -1,0 +1,1936 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\Play Edit Solution\\Desktop\\n\\playwright.config.ts",
+    "rootDir": "C:/Users/Play Edit Solution/Desktop/n/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Play Edit Solution/Desktop/n/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "setup",
+        "name": "setup",
+        "testDir": "C:/Users/Play Edit Solution/Desktop/n/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.setup\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Play Edit Solution/Desktop/n/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/Play Edit Solution/Desktop/n/tests",
+        "testIgnore": [
+          "/.*\\.setup\\.ts/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.2",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "auth.setup.ts",
+      "file": "auth.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "authenticate as owner",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 15994,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-03-29T10:44:52.680Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                },
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 16009,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-03-29T10:45:09.362Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup-retry1\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup-retry1\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup-retry1\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-owner-setup-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-a71f6abddd1f433d4204",
+          "file": "auth.setup.ts",
+          "line": 13,
+          "column": 10
+        },
+        {
+          "title": "authenticate as admin",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 16003,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-03-29T10:45:26.115Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                },
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 16027,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-03-29T10:45:42.811Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup-retry1\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup-retry1\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup-retry1\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-admin-setup-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-1580989d32f149e984ed",
+          "file": "auth.setup.ts",
+          "line": 13,
+          "column": 10
+        },
+        {
+          "title": "authenticate as editor",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 16023,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-03-29T10:45:59.533Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                },
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 15995,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-03-29T10:46:16.255Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup-retry1\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup-retry1\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup-retry1\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-editor-setup-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-045519d61c1e5db1f4e9",
+          "file": "auth.setup.ts",
+          "line": 13,
+          "column": 10
+        },
+        {
+          "title": "authenticate as reporter",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 15982,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-03-29T10:46:32.929Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                },
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 16018,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-03-29T10:46:49.588Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup-retry1\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup-retry1\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup-retry1\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-reporter-setup-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-42bae4ed2221cb473470",
+          "file": "auth.setup.ts",
+          "line": 13,
+          "column": 10
+        },
+        {
+          "title": "authenticate as user",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 16014,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-03-29T10:47:06.299Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                },
+                {
+                  "workerIndex": 9,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 15996,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                      "column": 44,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m     setup(\u001b[32m`authenticate as ${role}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 14 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'form'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m email)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m password)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                        "column": 44,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('form')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('form')\u001b[22m\n\n\n  13 |     setup(`authenticate as ${role}`, async ({ page }) => {\n  14 |         await page.goto('/login');\n> 15 |         await expect(page.locator('form')).toBeVisible();\n     |                                            ^\n  16 |\n  17 |         await page.fill('input[type=\"email\"]', email);\n  18 |         await page.fill('input[type=\"password\"]', password);\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts:15:44"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-03-29T10:47:22.989Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup-retry1\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup-retry1\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup-retry1\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\auth.setup.ts-authenticate-as-user-setup-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\auth.setup.ts",
+                    "column": 44,
+                    "line": 15
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-368b23621c7c58cdb338",
+          "file": "auth.setup.ts",
+          "line": 13,
+          "column": 10
+        }
+      ]
+    },
+    {
+      "title": "setup\\auth.setup.ts",
+      "file": "setup/auth.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "authenticate as owner",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 10,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 10767,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[type=\"email\"], input[id=\"login-email\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[id=\"login-email\"]')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[type=\"email\"], input[id=\"login-email\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[id=\"login-email\"]')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts:22:80",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts",
+                      "column": 80,
+                      "line": 22
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 20 |\u001b[39m     \u001b[90m// Navigate to login page\u001b[39m\n \u001b[90m 21 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 22 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[type=\"email\"], input[id=\"login-email\"]'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m     \u001b[90m// Make sure we're on login tab\u001b[39m\n \u001b[90m 25 |\u001b[39m     \u001b[36mconst\u001b[39m loginTabBtn \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#login-tab-btn, button:has-text(\"लॉगिन\"), button:has-text(\"Login\")'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts",
+                        "column": 80,
+                        "line": 22
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[type=\"email\"], input[id=\"login-email\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[id=\"login-email\"]')\u001b[22m\n\n\n  20 |     // Navigate to login page\n  21 |     await page.goto('/login');\n> 22 |     await expect(page.locator('input[type=\"email\"], input[id=\"login-email\"]')).toBeVisible({ timeout: 10000 });\n     |                                                                                ^\n  23 |\n  24 |     // Make sure we're on login tab\n  25 |     const loginTabBtn = page.locator('#login-tab-btn, button:has-text(\"लॉगिन\"), button:has-text(\"Login\")').first();\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts:22:80"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "\n🔐 Setting up auth state for: owner\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-03-29T10:47:39.710Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts",
+                    "column": 80,
+                    "line": 22
+                  }
+                },
+                {
+                  "workerIndex": 11,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 10747,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[type=\"email\"], input[id=\"login-email\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[id=\"login-email\"]')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[type=\"email\"], input[id=\"login-email\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[id=\"login-email\"]')\u001b[22m\n\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts:22:80",
+                    "location": {
+                      "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts",
+                      "column": 80,
+                      "line": 22
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 20 |\u001b[39m     \u001b[90m// Navigate to login page\u001b[39m\n \u001b[90m 21 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 22 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[type=\"email\"], input[id=\"login-email\"]'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m     \u001b[90m// Make sure we're on login tab\u001b[39m\n \u001b[90m 25 |\u001b[39m     \u001b[36mconst\u001b[39m loginTabBtn \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#login-tab-btn, button:has-text(\"लॉगिन\"), button:has-text(\"Login\")'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts",
+                        "column": 80,
+                        "line": 22
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[type=\"email\"], input[id=\"login-email\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[id=\"login-email\"]')\u001b[22m\n\n\n  20 |     // Navigate to login page\n  21 |     await page.goto('/login');\n> 22 |     await expect(page.locator('input[type=\"email\"], input[id=\"login-email\"]')).toBeVisible({ timeout: 10000 });\n     |                                                                                ^\n  23 |\n  24 |     // Make sure we're on login tab\n  25 |     const loginTabBtn = page.locator('#login-tab-btn, button:has-text(\"लॉगिन\"), button:has-text(\"Login\")').first();\n    at C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts:22:80"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "\n🔐 Setting up auth state for: owner\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-03-29T10:47:51.150Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup-retry1\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup-retry1\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup-retry1\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Play Edit Solution\\Desktop\\n\\test-results\\setup-auth.setup.ts-authenticate-as-owner-setup-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Play Edit Solution\\Desktop\\n\\tests\\setup\\auth.setup.ts",
+                    "column": 80,
+                    "line": 22
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "e717b06d8d484d1cd946-d08b35660881d616063f",
+          "file": "setup/auth.setup.ts",
+          "line": 13,
+          "column": 6
+        }
+      ]
+    },
+    {
+      "title": "auth\\login.spec.ts",
+      "file": "auth/login.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 2: Authentication Flow - Valid Login",
+          "file": "auth/login.spec.ts",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "[2.1] Login as owner and verify redirect",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-6bf494994a70c6852f50",
+              "file": "auth/login.spec.ts",
+              "line": 13,
+              "column": 13
+            },
+            {
+              "title": "[2.1] Login as user and verify redirect",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-c1d5c0b51136ec7242dc",
+              "file": "auth/login.spec.ts",
+              "line": 13,
+              "column": 13
+            }
+          ]
+        },
+        {
+          "title": "Phase 2: Authentication Flow - Validation and Edge Cases",
+          "file": "auth/login.spec.ts",
+          "line": 42,
+          "column": 6,
+          "specs": [
+            {
+              "title": "[2.2] Invalid email format",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-61740ef06fd1946c033a",
+              "file": "auth/login.spec.ts",
+              "line": 47,
+              "column": 9
+            },
+            {
+              "title": "[2.2] Valid email + wrong password",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-bc3891fb4cb5e1b65e8b",
+              "file": "auth/login.spec.ts",
+              "line": 56,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "Phase 2: Authentication Flow - Session Persistence",
+          "file": "auth/login.spec.ts",
+          "line": 65,
+          "column": 6,
+          "specs": [
+            {
+              "title": "[2.3] Session persistence across tabs/closing (owner)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-0d9cced1f3dfa36cdf6d",
+              "file": "auth/login.spec.ts",
+              "line": 66,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "Phase 2: Authentication Flow - Logout",
+          "file": "auth/login.spec.ts",
+          "line": 92,
+          "column": 6,
+          "specs": [
+            {
+              "title": "[2.4] Logout correctly clears auth state",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-2e3b8ad32da524260793",
+              "file": "auth/login.spec.ts",
+              "line": 93,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "modules\\posts.spec.ts",
+      "file": "modules/posts.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 4B: Posts Module - Deep Functional Testing",
+          "file": "modules/posts.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Create Post with Validation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be13d61def5e8711f645-54f5ea1deb0fa7de617b",
+              "file": "modules/posts.spec.ts",
+              "line": 12,
+              "column": 9
+            },
+            {
+              "title": "XSS Payload in Post Title Sanitized",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be13d61def5e8711f645-e0ce397719908d14a29b",
+              "file": "modules/posts.spec.ts",
+              "line": 42,
+              "column": 9
+            },
+            {
+              "title": "Pagination / Search",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be13d61def5e8711f645-fdc2b3e3264a086281e3",
+              "file": "modules/posts.spec.ts",
+              "line": 59,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rbac\\admin-access.spec.ts",
+      "file": "rbac/admin-access.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 3B: Admin Access UI & API",
+          "file": "rbac/admin-access.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Admin UI Access Verification",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6020d5eb9a677520ddda-1a38ce75aa5ddbce687e",
+              "file": "rbac/admin-access.spec.ts",
+              "line": 7,
+              "column": 9
+            },
+            {
+              "title": "Admin Privilege Escalation API attempts (CRITICAL)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6020d5eb9a677520ddda-f063c574a06cf9082cae",
+              "file": "rbac/admin-access.spec.ts",
+              "line": 26,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rbac\\editor-access.spec.ts",
+      "file": "rbac/editor-access.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 3C: Editor Access UI & API",
+          "file": "rbac/editor-access.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Editor UI Access Verification",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "a42a726dddd368c06749-d15f9f827667f6e6bd3f",
+              "file": "rbac/editor-access.spec.ts",
+              "line": 7,
+              "column": 9
+            },
+            {
+              "title": "Editor API Restrictions",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "a42a726dddd368c06749-712e7833c82d80945a12",
+              "file": "rbac/editor-access.spec.ts",
+              "line": 28,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rbac\\owner-access.spec.ts",
+      "file": "rbac/owner-access.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 3A: Owner Access UI & API",
+          "file": "rbac/owner-access.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Owner UI Access Verification",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "178054f9702be467911d-a2c7489f1c4b08d37553",
+              "file": "rbac/owner-access.spec.ts",
+              "line": 7,
+              "column": 9
+            },
+            {
+              "title": "Owner API Access Verification",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "178054f9702be467911d-25001c71736818cb2436",
+              "file": "rbac/owner-access.spec.ts",
+              "line": 43,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rbac\\rbac.spec.ts",
+      "file": "rbac/rbac.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 3A: OWNER RBAC — UI Access",
+          "file": "rbac/rbac.spec.ts",
+          "line": 26,
+          "column": 6,
+          "specs": [
+            {
+              "title": "3A.1 — Owner can access /admin dashboard",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-268a03d85b2650236fa3",
+              "file": "rbac/rbac.spec.ts",
+              "line": 34,
+              "column": 9
+            },
+            {
+              "title": "3A.2 — Owner can access /admin/users",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-f5dcb9f4e1d17e3bb9ce",
+              "file": "rbac/rbac.spec.ts",
+              "line": 44,
+              "column": 9
+            },
+            {
+              "title": "3A.3 — Owner can access /admin/settings",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-ba672f9d435ed23be3a9",
+              "file": "rbac/rbac.spec.ts",
+              "line": 54,
+              "column": 9
+            },
+            {
+              "title": "3A.4 — Owner can access /admin/analytics",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-ab3949aa3faeb8d6f100",
+              "file": "rbac/rbac.spec.ts",
+              "line": 63,
+              "column": 9
+            },
+            {
+              "title": "3A.5 — Owner can access /admin/posts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-b1e42dd6de7896e84b51",
+              "file": "rbac/rbac.spec.ts",
+              "line": 72,
+              "column": 9
+            },
+            {
+              "title": "3A.6 — Owner can access /admin/categories",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-a48c4af0c3fd2ee04d0a",
+              "file": "rbac/rbac.spec.ts",
+              "line": 80,
+              "column": 9
+            },
+            {
+              "title": "3A.7 — Owner can access /admin/comments",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-183bb603202ab56561c7",
+              "file": "rbac/rbac.spec.ts",
+              "line": 88,
+              "column": 9
+            },
+            {
+              "title": "3A.8 — Owner OWNER badge is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-94b38980d0dff8524310",
+              "file": "rbac/rbac.spec.ts",
+              "line": 96,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "Phase 3E: UNAUTHENTICATED ACCESS — Must be blocked",
+          "file": "rbac/rbac.spec.ts",
+          "line": 105,
+          "column": 6,
+          "specs": [
+            {
+              "title": "3E.1 — /admin without login → redirect to /login or /",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-2c683c1ad07d7bb2d9d8",
+              "file": "rbac/rbac.spec.ts",
+              "line": 107,
+              "column": 9
+            },
+            {
+              "title": "3E.2 — /admin/users without login → blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-44c223fb27c033557c14",
+              "file": "rbac/rbac.spec.ts",
+              "line": 116,
+              "column": 9
+            },
+            {
+              "title": "3E.3 — /admin/settings without login → blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-4430d016fc0faca4b46b",
+              "file": "rbac/rbac.spec.ts",
+              "line": 123,
+              "column": 9
+            },
+            {
+              "title": "3E.4 — Public homepage accessible without login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-e90096844e9d967487ae",
+              "file": "rbac/rbac.spec.ts",
+              "line": 130,
+              "column": 9
+            },
+            {
+              "title": "3E.5 — /api/auth/verify without session → 401",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-7304c5891ec931a81854",
+              "file": "rbac/rbac.spec.ts",
+              "line": 137,
+              "column": 9
+            },
+            {
+              "title": "3E.6 — /api/list-users without auth → 401/403",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-f53f73ed873d6c07bf58",
+              "file": "rbac/rbac.spec.ts",
+              "line": 145,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "Phase 3F: Security — Privilege Escalation Attempts",
+          "file": "rbac/rbac.spec.ts",
+          "line": 152,
+          "column": 6,
+          "specs": [
+            {
+              "title": "3F.1 — Direct API call to update-user-role without auth → rejected",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-c246a443049cf958297a",
+              "file": "rbac/rbac.spec.ts",
+              "line": 154,
+              "column": 9
+            },
+            {
+              "title": "3F.2 — Tampered request body cannot escalate to owner",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-1cd5094084c93d6c32b7",
+              "file": "rbac/rbac.spec.ts",
+              "line": 162,
+              "column": 9
+            },
+            {
+              "title": "3F.3 — XSS injection in URL params → safely handled",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f7fe901727779741979-e14044270aaa9abc008d",
+              "file": "rbac/rbac.spec.ts",
+              "line": 180,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rbac\\reporter-access.spec.ts",
+      "file": "rbac/reporter-access.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 3D: Reporter Access UI & API",
+          "file": "rbac/reporter-access.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Reporter UI Access Verification",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9ec78502bba5c70a1c9f-c86ddaf43d9d468c2f65",
+              "file": "rbac/reporter-access.spec.ts",
+              "line": 7,
+              "column": 9
+            },
+            {
+              "title": "Reporter API Restrictions",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9ec78502bba5c70a1c9f-01ccc4e7cf5619ca10f3",
+              "file": "rbac/reporter-access.spec.ts",
+              "line": 28,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rbac\\user-access.spec.ts",
+      "file": "rbac/user-access.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 3E: User Access UI & API",
+          "file": "rbac/user-access.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "User completely blocked from /admin",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f24a021cafb3e7c3459e-a697e7bd7bce953b8ccf",
+              "file": "rbac/user-access.spec.ts",
+              "line": 7,
+              "column": 9
+            },
+            {
+              "title": "User API Restrictions",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f24a021cafb3e7c3459e-a28fbb6142c62c62938b",
+              "file": "rbac/user-access.spec.ts",
+              "line": 26,
+              "column": 9
+            },
+            {
+              "title": "Public tests without authentication",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f24a021cafb3e7c3459e-acc28344a6c508b2da57",
+              "file": "rbac/user-access.spec.ts",
+              "line": 41,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "security\\security.spec.ts",
+      "file": "security/security.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase 5 & Security: Security Vulnerabilites Detection",
+          "file": "security/security.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Missing rate limiting on Auth/API endpoints",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "383db6a520c6ba3bf4e3-2341ac7b037903d9af91",
+              "file": "security/security.spec.ts",
+              "line": 8,
+              "column": 9
+            },
+            {
+              "title": "SQL Injection / NoSQL Injection attempts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "383db6a520c6ba3bf4e3-321f5089a740d3937483",
+              "file": "security/security.spec.ts",
+              "line": 22,
+              "column": 9
+            },
+            {
+              "title": "XSS Verification in Settings",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "383db6a520c6ba3bf4e3-ab0952033bc6e28ee0ee",
+              "file": "security/security.spec.ts",
+              "line": 34,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-03-29T10:44:52.070Z",
+    "duration": 189940.63100000002,
+    "expected": 0,
+    "skipped": 40,
+    "unexpected": 6,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,49 @@
+{
+    "name": "Samachar Bharat | ताजा समाचार",
+    "short_name": "SamacharBharat",
+    "description": "भारत का सबसे भरोसेमंद हिंदी न्यूज़ पोर्टल। ताज़ा ख़बरें, राजनीति, खेल और मनोरंजन।",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#dc2626",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "categories": [
+        "news",
+        "magazines"
+    ],
+    "shortcuts": [
+        {
+            "name": "ताजा खबरें",
+            "url": "/",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "ग्लोबल न्यूज़",
+            "url": "/explore",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}
