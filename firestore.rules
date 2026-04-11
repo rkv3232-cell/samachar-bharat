@@ -5,15 +5,14 @@ service cloud.firestore {
     // ══════════════════════════════════════════════════════════════════════
     // CONFIGURATION
     // ══════════════════════════════════════════════════════════════════════
-    // The owner email constant — the only user who can self-register as owner.
-    // Must match OWNER_EMAIL in src/lib/constants.ts
-    function OWNER_EMAIL() {
-      return "rkv3232@gmail.com";
-    }
-
     // ══════════════════════════════════════════════════════════════════════
     // HELPER FUNCTIONS
     // ══════════════════════════════════════════════════════════════════════
+
+    // Is the requester an authorized owner by email?
+    function isAuthOwner() {
+      return request.auth.token.email in ["rkv3232@gmail.com", "ckv3232@gmail.com"];
+    }
 
     // Is the requester authenticated?
     function isAuthenticated() {
@@ -21,7 +20,6 @@ service cloud.firestore {
     }
 
     // Fetch requester's role safely from their Firestore user document.
-    // Falls back to "user" if document doesn't exist to prevent rule crashes.
     function getMyRole() {
       return exists(/databases/$(database)/documents/users/$(request.auth.uid))
         ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
@@ -31,21 +29,21 @@ service cloud.firestore {
     // Is the requester the owner?
     function isOwner() {
       return isAuthenticated() && (
-        request.auth.token.email == OWNER_EMAIL() || getMyRole() == "owner"
+        isAuthOwner() || getMyRole() == "owner"
       );
     }
 
     // Is the requester an admin or owner?
     function isAdminOrOwner() {
       return isAuthenticated() && (
-        request.auth.token.email == OWNER_EMAIL() || getMyRole() in ["owner", "admin"]
+        isAuthOwner() || getMyRole() in ["owner", "admin"]
       );
     }
 
     // Is the requester an editor, admin, or owner?
     function isAtLeastEditor() {
       return isAuthenticated() && (
-        request.auth.token.email == OWNER_EMAIL() || getMyRole() in ["owner", "admin", "editor", "reporter"]
+        isAuthOwner() || getMyRole() in ["owner", "admin", "editor", "reporter"]
       );
     }
 
@@ -179,9 +177,13 @@ service cloud.firestore {
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // ANALYTICS (owner/admin read; system write)
+    // ANALYTICS & STATS (owner/admin read; system write)
     // ══════════════════════════════════════════════════════════════════════
     match /analytics/{document} {
+      allow read, write: if isAdminOrOwner();
+    }
+
+    match /stats/{document} {
       allow read:  if isAdminOrOwner();
       allow write: if isAdminOrOwner();
     }

@@ -6,7 +6,7 @@
 // ─── Owner Configuration ──────────────────────────────────────────────────────
 // CRITICAL: This is the ONE user who can never be deleted or demoted.
 // Change this to your actual owner email before deployment.
-export const OWNER_EMAIL = "rkv3232@gmail.com";
+export const OWNER_EMAIL = "ckv3232@gmail.com";
 
 // ─── Role Hierarchy (numeric levels for comparison) ──────────────────────────
 export const ROLE_HIERARCHY = {
