@@ -18,10 +18,11 @@ interface LegacyAuthContextType {
     logout: () => Promise<void>;
 }
 
-export function useAuth(): AuthContextType & { login: any; logout: any; userRole: any } {
+export function useAuth(): AuthContextType & { login: any; logout: any; userRole: any; firestoreUser: any } {
     const ctx = useNewAuth();
     return {
         ...ctx,
+        firestoreUser: ctx.firestoreUser,
         login: ctx.signIn,
         logout: ctx.signOut,
         userRole: ctx.role,
