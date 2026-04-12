@@ -375,7 +375,7 @@ export default function Navbar() {
 
             {/* ── Mobile Drawer ───────────────────────────────────────── */}
             {menuOpen && (
-                <nav className="md:hidden bg-gray-900 border-t border-gray-800 absolute w-full shadow-2xl max-h-[85vh] overflow-y-auto overscroll-contain no-scrollbar">
+                <nav className="md:hidden bg-gray-900 border-t border-gray-800 fixed left-0 right-0 bottom-0 top-[110px] z-50 shadow-2xl overflow-y-auto overscroll-contain pb-10">
                     <ul className="flex flex-col py-2">
                         <li>
                             <Link
