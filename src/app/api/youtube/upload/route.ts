@@ -11,9 +11,14 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing postId or uid' }, { status: 400 });
         }
 
-        const post = await getPostById(postId);
+        const { adminDb } = await import('@/lib/firebase-admin');
+        const postDoc = await adminDb.collection('posts').doc(postId).get();
+        if (!postDoc.exists) {
+            return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+        }
+        const post = postDoc.data();
         if (!post || !post.image) {
-            return NextResponse.json({ error: 'Post or video not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Post has no video/media' }, { status: 404 });
         }
 
         const youtube = await getAuthorizedYouTubeClient(uid);

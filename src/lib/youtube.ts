@@ -13,10 +13,15 @@ export const youtubeOAuthClient = new google.auth.OAuth2(
 );
 
 export async function getYouTubeTokens(userId: string) {
-    const userRef = doc(db, 'users', userId);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) return null;
-    return userSnap.data().youtubeTokens || null;
+    try {
+        const { adminDb } = await import('./firebase-admin');
+        const userDoc = await adminDb.collection('users').doc(userId).get();
+        if (!userDoc.exists) return null;
+        return userDoc.data()?.youtubeTokens || null;
+    } catch (error) {
+        console.error('[YouTube Lib] getYouTubeTokens Admin Error:', error);
+        return null;
+    }
 }
 
 export async function saveYouTubeTokens(userId: string, tokens: any) {
