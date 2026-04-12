@@ -41,6 +41,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const { loading, isAdmin, role, user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
     const router = useRouter();
     const pathname = usePathname();
@@ -52,39 +54,56 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         const onChange = () => {
             const mobile = mql.matches;
             setIsMobile(mobile);
-            setIsSidebarOpen(!mobile); // Default open on PC, closed on Mobile
+            setIsSidebarOpen(!mobile);
         };
-
-        onChange(); // Initial check
+        onChange();
         mql.addEventListener("change", onChange);
         return () => mql.removeEventListener("change", onChange);
     }, []);
 
-    // Helper to toggle with priority tracking
-    const toggleSidebar = () => {
-        setIsSidebarOpen(prev => !prev);
+    // Super Sensitive Swipe Gestures
+    const minSwipeDistance = 10; // Extremely sensitive
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
     };
 
-    // Close on navigation ONLY on mobile
-    useEffect(() => {
-        if (isMobile) {
-            setIsSidebarOpen(false);
-        }
-    }, [pathname, isMobile]);
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
 
-    // Real-time role watch
-    useEffect(() => {
-        if (!loading && !isAdmin && !isLoginPage) {
-            router.replace("/");
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isMobile) {
+            // Priority Swipe Detection
+            if (isRightSwipe && !isSidebarOpen && touchStart < 60) {
+                setIsSidebarOpen(true); // Open from left edge (wide hit zone)
+            } else if (isLeftSwipe && isSidebarOpen) {
+                setIsSidebarOpen(false); // Close with any leftward flick
+            }
         }
-    }, [loading, isAdmin, isLoginPage, router]);
+    };
+
+    useEffect(() => {
+        if (isMobile) setIsSidebarOpen(false);
+    }, [pathname, isMobile]);
 
     if (isLoginPage) return <>{children}</>;
     if (loading || !isAdmin) return <AdminLoadingScreen />;
 
     return (
         <ToastProvider>
-            <div className="flex h-screen bg-gray-50/50 overflow-hidden relative">
+            <div
+                className="flex h-screen bg-gray-50/50 overflow-hidden relative touch-none md:touch-auto"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+            >
                 {/* Backdrop - High Priority */}
                 {isMobile && isSidebarOpen && (
                     <div
@@ -95,9 +114,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
                 <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950 h-full">
-                    <AdminHeader onMenuClick={toggleSidebar} />
-                    <main className="flex-1 overflow-y-auto w-full h-full">
+                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950 h-full overflow-hidden">
+                    <AdminHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+                    <main className="flex-1 overflow-y-auto w-full h-full touch-auto">
                         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-full">
                             {children}
                         </div>
