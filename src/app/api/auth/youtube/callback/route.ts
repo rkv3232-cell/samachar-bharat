@@ -11,8 +11,10 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        console.log('[YouTube Callback] Exchange started for UID:', uid);
         const { tokens } = await youtubeOAuthClient.getToken(code);
         await saveYouTubeTokens(uid, tokens);
+        console.log('[YouTube Callback] Success for UID:', uid);
 
         // Redirect back to admin posts or settings
         return NextResponse.redirect(new URL('/admin/posts?success=youtube_connected', request.url));
