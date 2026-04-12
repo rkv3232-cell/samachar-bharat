@@ -148,10 +148,10 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
                                     disabled={isUploading || (isYouTubeConnected && !isVideo)}
                                     onClick={handleYouTubeAction}
                                     className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-sm ${!isYouTubeConnected
-                                            ? 'bg-gray-800 text-white hover:bg-black'
-                                            : isVideo
-                                                ? 'bg-red-600 text-white hover:bg-red-700'
-                                                : 'bg-red-100 text-red-300 cursor-not-allowed'
+                                        ? 'bg-gray-800 text-white hover:bg-black'
+                                        : isVideo
+                                            ? 'bg-red-600 text-white hover:bg-red-700'
+                                            : 'bg-red-100 text-red-300 cursor-not-allowed'
                                         }`}
                                 >
                                     {isUploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Youtube className="w-5 h-5" />}
@@ -264,7 +264,7 @@ export default function AdminPostsPage() {
 
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-gray-800">Admin Dashboard</h1>
+                    <h1 className="text-2xl font-extrabold text-gray-800">Admin Dashboard v2</h1>
                     <p className="text-gray-500 text-sm mt-1">{posts.length} कुल खबरें</p>
                 </div>
                 <Link
