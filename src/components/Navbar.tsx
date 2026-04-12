@@ -297,21 +297,20 @@ export default function Navbar() {
                         </div>
                     )}
 
-                    {/* Nav Actions (Mobile hamburger, Theme, Lang) */}
-                    <div className="flex items-center gap-2">
-                        <button
-                            id="mobile-menu-toggle"
-                            className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition focus:outline-none"
-                            onClick={() => setMenuOpen(!menuOpen)}
-                            aria-label="Toggle menu"
+                    {/* Mobile Menu Icon (Links to /menu) */}
+                    <div className="flex md:hidden items-center gap-2">
+                        <Link
+                            href="/menu"
+                            className="p-2 rounded-lg hover:bg-gray-100 transition focus:outline-none"
+                            aria-label="Menu"
                         >
-                            {menuOpen ? <X className="w-6 h-6 text-gray-800 dark:text-gray-200" /> : <Menu className="w-6 h-6 text-gray-800 dark:text-gray-200" />}
-                        </button>
+                            <Menu className="w-6 h-6 text-gray-800" />
+                        </Link>
                     </div>
                 </div>
             </div>
 
-            {/* ── Category Nav (Desktop) ──────────────────────────────── */}
+            {/* ── Category Nav (Desktop Only) ─────────────────────────── */}
             <nav className="bg-gray-900 border-t border-gray-800 hidden md:block">
                 <div className="max-w-7xl mx-auto px-4">
                     <ul className="flex items-center gap-1 overflow-x-auto no-scrollbar">
@@ -343,163 +342,47 @@ export default function Navbar() {
                             );
                         })}
                         <li>
-                            <Link
-                                href="/live"
-                                className={`flex items-center gap-2 px-6 py-3.5 text-[15px] font-black transition-all whitespace-nowrap border-b-2 bg-red-700 text-white hover:bg-red-600 ${isActive('/live')
-                                    ? 'border-white'
-                                    : 'border-transparent'
-                                    }`}
-                            >
-                                <Radio size={16} className="animate-pulse" />
-                                LIVE TV
+                            <Link href="/live" className="flex items-center gap-2 px-6 py-3.5 text-[15px] font-black transition-all bg-red-700 text-white">
+                                <Radio size={16} className="animate-pulse" /> LIVE TV
                             </Link>
                         </li>
-
-                        <li className="shrink-0">
-                            <Link
-                                href="/explore"
-                                className={`flex items-center gap-2 px-6 py-3.5 text-[15px] font-bold transition-all whitespace-nowrap border-b-2 ${isActive('/explore')
-                                    ? 'bg-red-600 text-white border-red-500'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white border-transparent'
-                                    }`}
-                            >
-                                <Globe size={16} />
-                                ग्लोबल न्यूज़
-                            </Link>
-                        </li>
-                        {/* Right padding guard for scrolling */}
-                        <li className="pr-4 shrink-0" aria-hidden="true"></li>
                     </ul>
                 </div>
             </nav>
 
-            {/* ── Mobile Drawer ───────────────────────────────────────── */}
-            {menuOpen && (
-                <nav className="md:hidden bg-gray-900 border-t border-gray-800 fixed left-0 right-0 bottom-0 top-[110px] z-50 shadow-2xl overflow-y-auto overscroll-contain pb-10">
-                    <ul className="flex flex-col py-2">
-                        <li>
-                            <Link
-                                href="/"
-                                className={`block px-6 py-4 text-[15px] font-bold transition-all border-l-4 ${isActive('/')
-                                    ? 'bg-red-600 text-white border-red-500'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white border-transparent'
-                                    }`}
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                होम
-                            </Link>
-                        </li>
-                        {navCategories.map((cat: Category) => {
-                            const path = `/category/${cat.slug}`;
-                            return (
-                                <li key={cat.slug}>
-                                    <Link
-                                        href={path}
-                                        className={`block px-6 py-4 text-[15px] font-bold transition-all border-l-4 ${isActive(path)
-                                            ? 'bg-red-600 text-white border-red-500'
-                                            : 'text-gray-300 hover:bg-gray-800 hover:text-white border-transparent'
-                                            }`}
-                                        onClick={() => setMenuOpen(false)}
-                                    >
-                                        {cat.name}
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                        <li>
-                            <Link
-                                href="/live"
-                                className={`flex items-center gap-3 px-6 py-4 text-[15px] font-black transition-all border-l-4 bg-red-700 text-white ${isActive('/live')
-                                    ? 'border-white'
-                                    : 'border-transparent'
-                                    }`}
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                <Radio size={18} className="animate-pulse" />
-                                LIVE TV
-                            </Link>
-                        </li>
-
-                        <li>
-                            <Link
-                                href="/explore"
-                                className={`flex items-center gap-3 px-6 py-4 text-[15px] font-bold transition-all border-l-4 ${isActive('/explore')
-                                    ? 'bg-red-600 text-white border-red-500'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white border-transparent'
-                                    }`}
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                <Globe size={18} />
-                                ग्लोबल न्यूज़
-                            </Link>
-                        </li>
-
-                        {/* Mobile: Auth section at the bottom */}
-                        <li className="border-t border-gray-700 mt-2 pt-2">
-                            {!user ? (
-                                <div className="flex flex-col gap-2 px-4 pb-3">
-                                    <Link
-                                        href="/login"
-                                        className="flex items-center justify-center gap-2 border border-gray-500 text-gray-300 px-4 py-3 rounded-lg text-sm font-semibold"
-                                        onClick={() => setMenuOpen(false)}
-                                    >
-                                        <LogIn className="w-4 h-4" />
-                                        Login
-                                    </Link>
-                                    <Link
-                                        href="/login?tab=signup"
-                                        className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg text-sm font-bold"
-                                        onClick={() => setMenuOpen(false)}
-                                    >
-                                        <UserPlus className="w-4 h-4" />
-                                        Signup
-                                    </Link>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-1 px-4 pb-3">
-                                    {/* User info */}
-                                    <div className="flex items-center gap-2 py-2">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-red-500 to-orange-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                                            {displayName.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-white font-semibold text-sm truncate">{displayName}</p>
-                                            {role && <RolePill role={role} />}
-                                        </div>
-                                    </div>
-                                    {/* Panel link */}
-                                    {showPanelButton && (
-                                        <Link
-                                            href={panelLink!.href}
-                                            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg text-sm font-semibold"
-                                            onClick={() => setMenuOpen(false)}
-                                        >
-                                            {panelLink!.icon}
-                                            {panelLink!.label}
-                                        </Link>
-                                    )}
-                                    <Link
-                                        href="/bookmarks"
-                                        className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg text-sm font-semibold"
-                                        onClick={() => setMenuOpen(false)}
-                                    >
-                                        <Bookmark className="w-4 h-4 text-blue-400" />
-                                        Saved Articles
-                                    </Link>
-                                    {/* Sign out */}
-                                    <button
-                                        onClick={() => { handleSignOut(); setMenuOpen(false); }}
-                                        className="flex items-center gap-2 text-red-400 hover:text-red-300 px-4 py-3 rounded-lg text-sm font-semibold text-left"
-                                    >
-                                        <LogOut className="w-4 h-4" />
-                                        Sign Out
-                                    </button>
-                                </div>
-                            )}
-                        </li>
-                    </ul>
-                </nav>
-            )}
+            {/* ── Mobile Category Nav (Scrollable) ─────────────────── */}
+            <div className="md:hidden bg-gray-900 border-t border-gray-800 flex items-center gap-1 overflow-x-auto no-scrollbar px-2 py-2">
+                <Link
+                    href="/"
+                    className={`block px-4 py-2 text-[13px] font-bold transition-all rounded-lg whitespace-nowrap ${isActive('/')
+                        ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                        : 'text-gray-400 hover:text-white'
+                        }`}
+                >
+                    होम
+                </Link>
+                {navCategories.slice(0, 6).map((cat: Category) => {
+                    const path = `/category/${cat.slug}`;
+                    return (
+                        <Link
+                            key={cat.slug}
+                            href={path}
+                            className={`block px-4 py-2 text-[13px] font-bold transition-all rounded-lg whitespace-nowrap ${isActive(path)
+                                ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
+                        >
+                            {cat.name}
+                        </Link>
+                    );
+                })}
+                <Link
+                    href="/menu"
+                    className="block px-4 py-2 text-[13px] font-black text-red-500 rounded-lg whitespace-nowrap border border-red-500/30 bg-red-500/10"
+                >
+                    सभी +
+                </Link>
+            </div>
         </header>
     );
 }
