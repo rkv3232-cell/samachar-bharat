@@ -20,13 +20,17 @@ export async function getYouTubeTokens(userId: string) {
 }
 
 export async function saveYouTubeTokens(userId: string, tokens: any) {
-    console.log('[YouTube Lib] Saving tokens for UID:', userId);
-    const { setDoc } = await import('firebase/firestore');
-    const userRef = doc(db, 'users', userId);
-    await setDoc(userRef, {
-        youtubeTokens: tokens
-    }, { merge: true });
-    console.log('[YouTube Lib] Tokens saved successfully');
+    console.log('[YouTube Lib] Saving tokens (Admin) for UID:', userId);
+    try {
+        const { adminDb } = await import('./firebase-admin');
+        await adminDb.collection('users').doc(userId).set({
+            youtubeTokens: tokens
+        }, { merge: true });
+        console.log('[YouTube Lib] Tokens saved successfully with Admin SDK');
+    } catch (error) {
+        console.error('[YouTube Lib] Admin Save Error:', error);
+        throw error;
+    }
 }
 
 export async function getAuthorizedYouTubeClient(userId: string) {
