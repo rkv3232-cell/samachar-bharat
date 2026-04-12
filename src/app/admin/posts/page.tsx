@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllPosts, deletePost, Post, formatDate } from '@/lib/posts';
-import { PlusCircle, Pencil, Trash2, Search, AlertCircle, Eye, X, Share2, MessageCircle, Youtube, Copy, CheckCircle, RefreshCw, ExternalLink } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Search, AlertCircle, Eye, X, Share2, MessageCircle, Video, Copy, CheckCircle, RefreshCw, ExternalLink } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { fetchCategories } from '@/lib/firestore/categories';
 import { useAuth } from '@/lib/auth-context';
@@ -125,7 +125,7 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isYouTubeConnected ? 'bg-red-600 shadow-red-200' : 'bg-gray-400'}`}>
-                                        <Youtube className="w-4 h-4 text-white" />
+                                        <Video className="w-4 h-4 text-white" />
                                     </div>
                                     <span className="text-sm font-bold text-gray-800">YouTube Channel</span>
                                 </div>
@@ -154,7 +154,7 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
                                             : 'bg-red-100 text-red-300 cursor-not-allowed'
                                         }`}
                                 >
-                                    {isUploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Youtube className="w-5 h-5" />}
+                                    {isUploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Video className="w-5 h-5" />}
                                     {!isYouTubeConnected
                                         ? 'Connect YouTube Channel'
                                         : isVideo
