@@ -6,7 +6,7 @@
 "use client";
 
 export { AuthProvider } from "@/context/AuthContext";
-import { useAuth as useNewAuth } from "@/context/AuthContext";
+import { useAuth as useNewAuth, type AuthContextType } from "@/context/AuthContext";
 import type { User } from "firebase/auth";
 import type { UserRole } from "@/types/auth.types";
 
@@ -18,15 +18,12 @@ interface LegacyAuthContextType {
     logout: () => Promise<void>;
 }
 
-export function useAuth(): LegacyAuthContextType & { isAdmin: boolean; isOwner: boolean } {
+export function useAuth(): AuthContextType & { login: any; logout: any; userRole: any } {
     const ctx = useNewAuth();
     return {
-        user: ctx.user,
-        userRole: ctx.role,
-        loading: ctx.loading,
+        ...ctx,
         login: ctx.signIn,
         logout: ctx.signOut,
-        isAdmin: ctx.isAdmin,
-        isOwner: ctx.isOwner,
+        userRole: ctx.role,
     };
 }
