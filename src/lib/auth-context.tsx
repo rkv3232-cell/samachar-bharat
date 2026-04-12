@@ -18,7 +18,7 @@ interface LegacyAuthContextType {
     logout: () => Promise<void>;
 }
 
-export function useAuth(): LegacyAuthContextType & { isAdmin: boolean } {
+export function useAuth(): LegacyAuthContextType & { isAdmin: boolean; isOwner: boolean } {
     const ctx = useNewAuth();
     return {
         user: ctx.user,
@@ -27,5 +27,6 @@ export function useAuth(): LegacyAuthContextType & { isAdmin: boolean } {
         login: ctx.signIn,
         logout: ctx.signOut,
         isAdmin: ctx.isAdmin,
+        isOwner: ctx.isOwner,
     };
 }

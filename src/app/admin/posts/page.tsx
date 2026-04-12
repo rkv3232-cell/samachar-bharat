@@ -4,15 +4,16 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllPosts, deletePost, Post, formatDate } from '@/lib/posts';
-import { PlusCircle, Pencil, Trash2, Search, AlertCircle, Eye } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Search, AlertCircle, Eye, Share2, MessageCircle, Video } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { fetchCategories } from '@/lib/firestore/categories';
+import { useAuth } from '@/lib/auth-context';
 
 const DEFAULT_CATEGORIES = [
     { name: 'उत्तर प्रदेश', slug: 'uttar-pradesh' },
     { name: 'देश', slug: 'desh' },
     { name: 'विदेश', slug: 'videsh' },
-    { name: 'कारोबार', slug: 'karobar' },
+    { name: 'कारो कारोबार', slug: 'karobar' },
     { name: 'क्राइम', slug: 'crime' },
     { name: 'धर्म', slug: 'dharm' },
     { name: 'राजनीति', slug: 'rajniti' },
@@ -21,6 +22,7 @@ const DEFAULT_CATEGORIES = [
 
 
 export default function AdminPostsPage() {
+    const { isOwner } = useAuth();
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -206,6 +208,49 @@ export default function AdminPostsPage() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-2">
+                                                    {/* ── Owner Only Social Quick-Actions ── */}
+                                                    {isOwner && (
+                                                        <div className="flex items-center gap-1.5 mr-3 pr-3 border-r border-gray-100">
+                                                            <button
+                                                                onClick={() => {
+                                                                    const url = `${window.location.origin}/post/${post.id}`;
+                                                                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                                                                }}
+                                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                                title="Share on Facebook"
+                                                            >
+                                                                <Share2 className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const url = `${window.location.origin}/post/${post.id}`;
+                                                                    const text = `*${post.title}*\n\nRead full news here:\n${url}`;
+                                                                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+                                                                }}
+                                                                className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition"
+                                                                title="Share on WhatsApp"
+                                                            >
+                                                                <MessageCircle className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const url = `${window.location.origin}/post/${post.id}`;
+                                                                    const tagsArr = Array.isArray(post.tags) ? post.tags : [];
+                                                                    const tags = tagsArr.join(' #');
+                                                                    const safeContent = post.content ? post.content.substring(0, 150).replace(/<[^>]*>/g, '') : '';
+                                                                    const fullText = `${post.title}\n\n${safeContent}...\n\n#${tags}\n\nLink: ${url}`;
+
+                                                                    navigator.clipboard.writeText(fullText);
+                                                                    alert("Post details copied! You can now paste this on YouTube Community or Twitter.");
+                                                                }}
+                                                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                                title="Copy for Social/YouTube"
+                                                            >
+                                                                <Video className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    )}
+
                                                     <Link
                                                         href={`/admin/posts/edit/${post.id}`}
                                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
