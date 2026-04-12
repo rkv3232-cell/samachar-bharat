@@ -28,16 +28,16 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
     const displayName = firestoreUser?.name ?? "Admin";
 
     return (
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex items-center gap-4">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6 dark:border-gray-800 dark:bg-gray-900">
+            <div className="flex items-center gap-2 md:gap-4">
                 <button
                     onClick={onMenuClick}
-                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-800"
-                    aria-label="Open sidebar"
+                    className="group flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition-all hover:bg-gray-100 hover:text-blue-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+                    aria-label="Toggle sidebar"
                 >
-                    <Menu size={24} />
+                    <Menu size={20} className="transition-transform group-hover:scale-110" />
                 </button>
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">{title}</h2>
+                <h2 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white truncate">{title}</h2>
             </div>
 
             <div className="flex items-center gap-4">

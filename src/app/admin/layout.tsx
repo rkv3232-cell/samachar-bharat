@@ -39,16 +39,31 @@ function AdminLoadingScreen() {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const { loading, isAdmin, role, user } = useAuth();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default to open
+    const [isMobile, setIsMobile] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
 
     const isLoginPage = pathname === "/admin/login";
 
-    // Close sidebar on navigation (mobile)
+    // Detect screen size for responsive behavior
     useEffect(() => {
-        setIsSidebarOpen(false);
-    }, [pathname]);
+        const checkMobile = () => {
+            const mobile = window.innerWidth < 1024;
+            setIsMobile(mobile);
+            if (mobile) setIsSidebarOpen(false); // Close by default on mobile
+            else setIsSidebarOpen(true); // Open by default on desktop
+        };
+
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    // Close sidebar on navigation (mobile only)
+    useEffect(() => {
+        if (isMobile) setIsSidebarOpen(false);
+    }, [pathname, isMobile]);
 
     // ─── Diagnostics ───
     useEffect(() => {
@@ -57,48 +72,42 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             isLoginPage,
             loading,
             isAdmin,
-            email: user?.email
+            email: user?.email,
+            isMobile,
+            isSidebarOpen
         });
-    }, [loading, isAdmin, role, user, pathname, isLoginPage]);
+    }, [loading, isAdmin, role, user, pathname, isLoginPage, isMobile, isSidebarOpen]);
 
-    // Real-time role watch — if admin/owner access is revoked, redirect immediately
-    // EXCEPT for the login page itself!
+    // Real-time role watch
     useEffect(() => {
         if (!loading && !isAdmin && !isLoginPage) {
-            console.log("[AdminLayout] Access Denied, redirecting...");
-            // Use replace "/" safely
             router.replace("/");
         }
     }, [loading, isAdmin, isLoginPage, router]);
 
-    // OPT-OUT for login page:
-    // If we're on the login page, just render the child (which is the login form)
-    if (isLoginPage) {
-        return <>{children}</>;
-    }
-
-    // Show neutral loading screen — never show admin UI during loading
-    if (loading || !isAdmin) {
-        return <AdminLoadingScreen />;
-    }
+    if (isLoginPage) return <>{children}</>;
+    if (loading || !isAdmin) return <AdminLoadingScreen />;
 
     return (
         <ToastProvider>
-            <div className="flex h-screen bg-gray-50/50">
+            <div className="flex h-screen bg-gray-50/50 overflow-hidden">
                 {/* Backdrop for mobile */}
-                {isSidebarOpen && (
+                {isMobile && isSidebarOpen && (
                     <div
-                        className="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"
+                        className="fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-sm transition-opacity"
                         onClick={() => setIsSidebarOpen(false)}
                     />
                 )}
 
+                {/* Sidebar */}
                 <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-                <div className="flex-1 flex flex-col overflow-hidden w-full">
-                    <AdminHeader onMenuClick={() => setIsSidebarOpen(true)} />
-                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-                        {children}
+                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950">
+                    <AdminHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-full">
+                        <div className="mx-auto max-w-7xl h-full">
+                            {children}
+                        </div>
                     </main>
                 </div>
                 <ToastContainer />

@@ -50,11 +50,12 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
 
     return (
         <aside
-            className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-300 dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
+            className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-gray-200 bg-white shadow-xl transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 lg:static lg:shadow-none ${isOpen ? "w-64 translate-x-0 opacity-100" : "w-0 -translate-x-full opacity-0 lg:w-0"
                 }`}
+            style={{ width: isOpen ? "16rem" : "0" }}
         >
-            <div className="flex h-16 shrink-0 items-center justify-between px-6">
-                <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <div className={`flex h-16 shrink-0 items-center justify-between px-6 transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0"}`}>
+                <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white truncate">
                     <span className="text-blue-600 dark:text-blue-400">News</span>Admin
                 </h1>
                 {/* Close button for mobile */}
@@ -68,7 +69,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
                 </button>
             </div>
 
-            <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-4">
+            <nav className={`flex-1 space-y-1 overflow-y-auto px-4 py-4 transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 invisible"}`}>
                 {menuItems.map((item) => {
                     const isActive = pathname === item.href;
 
@@ -81,20 +82,20 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
                                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
                                 }`}
                         >
-                            {item.icon}
-                            {item.label}
+                            <span className="shrink-0">{item.icon}</span>
+                            <span className="truncate">{item.label}</span>
                         </Link>
                     );
                 })}
             </nav>
 
-            <div className="border-t border-gray-200 p-4 dark:border-gray-800">
+            <div className={`border-t border-gray-200 p-4 dark:border-gray-800 transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 invisible"}`}>
                 <button
                     onClick={handleSignOut}
                     className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                 >
-                    <LogOut size={20} />
-                    Sign Out
+                    <LogOut size={20} className="shrink-0" />
+                    <span className="truncate">Sign Out</span>
                 </button>
             </div>
         </aside>
