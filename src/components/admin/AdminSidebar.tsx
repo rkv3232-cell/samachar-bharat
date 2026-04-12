@@ -29,7 +29,12 @@ const menuItems = [
     { href: "/admin/settings", icon: <Settings size={20} />, label: "Settings" },
 ];
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+    isOpen: boolean;
+    setIsOpen: (open: boolean) => void;
+}
+
+export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const { logout } = useAuth();
@@ -44,11 +49,23 @@ export default function AdminSidebar() {
     };
 
     return (
-        <aside className="flex w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex h-16 shrink-0 items-center px-6">
+        <aside
+            className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-300 dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
+        >
+            <div className="flex h-16 shrink-0 items-center justify-between px-6">
                 <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                     <span className="text-blue-600 dark:text-blue-400">News</span>Admin
                 </h1>
+                {/* Close button for mobile */}
+                <button
+                    onClick={() => setIsOpen(false)}
+                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+                >
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-4">

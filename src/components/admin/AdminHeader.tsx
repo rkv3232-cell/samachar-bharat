@@ -4,11 +4,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Bell, Search, UserCircle, Crown, ShieldCheck } from "lucide-react";
+import { Bell, Search, UserCircle, Crown, ShieldCheck, Menu } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types/auth.types";
 
-export default function AdminHeader() {
+interface AdminHeaderProps {
+    onMenuClick: () => void;
+}
+
+export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
     const pathname = usePathname();
     const { firestoreUser, role } = useAuth();
 
@@ -25,7 +29,14 @@ export default function AdminHeader() {
 
     return (
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
+                <button
+                    onClick={onMenuClick}
+                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+                    aria-label="Open sidebar"
+                >
+                    <Menu size={24} />
+                </button>
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-white">{title}</h2>
             </div>
 

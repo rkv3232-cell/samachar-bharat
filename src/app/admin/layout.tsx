@@ -12,7 +12,7 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
@@ -39,10 +39,16 @@ function AdminLoadingScreen() {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const { loading, isAdmin, role, user } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
 
     const isLoginPage = pathname === "/admin/login";
+
+    // Close sidebar on navigation (mobile)
+    useEffect(() => {
+        setIsSidebarOpen(false);
+    }, [pathname]);
 
     // ─── Diagnostics ───
     useEffect(() => {
@@ -79,9 +85,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return (
         <ToastProvider>
             <div className="flex h-screen bg-gray-50/50">
-                <AdminSidebar />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    <AdminHeader />
+                {/* Backdrop for mobile */}
+                {isSidebarOpen && (
+                    <div
+                        className="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
+                <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+
+                <div className="flex-1 flex flex-col overflow-hidden w-full">
+                    <AdminHeader onMenuClick={() => setIsSidebarOpen(true)} />
                     <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
                         {children}
                     </main>
