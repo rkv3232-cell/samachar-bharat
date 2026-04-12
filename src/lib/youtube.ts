@@ -20,10 +20,13 @@ export async function getYouTubeTokens(userId: string) {
 }
 
 export async function saveYouTubeTokens(userId: string, tokens: any) {
+    console.log('[YouTube Lib] Saving tokens for UID:', userId);
+    const { setDoc } = await import('firebase/firestore');
     const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, {
+    await setDoc(userRef, {
         youtubeTokens: tokens
-    });
+    }, { merge: true });
+    console.log('[YouTube Lib] Tokens saved successfully');
 }
 
 export async function getAuthorizedYouTubeClient(userId: string) {
