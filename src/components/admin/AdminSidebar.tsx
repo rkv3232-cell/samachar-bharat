@@ -50,7 +50,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
 
     return (
         <aside
-            className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-gray-200 bg-white shadow-xl transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 lg:static lg:shadow-none ${isOpen ? "w-64 translate-x-0 opacity-100" : "w-0 -translate-x-full opacity-0 lg:w-0"
+            className={`fixed inset-y-0 left-0 z-[70] flex flex-col border-r border-gray-200 bg-white shadow-xl transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 lg:static lg:shadow-none ${isOpen ? "w-64 translate-x-0 opacity-100" : "w-0 -translate-x-full opacity-0 lg:w-0"
                 }`}
             style={{ width: isOpen ? "16rem" : "0" }}
         >

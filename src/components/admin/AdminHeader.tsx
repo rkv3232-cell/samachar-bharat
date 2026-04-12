@@ -31,11 +31,14 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center gap-2 md:gap-4">
                 <button
-                    onClick={onMenuClick}
-                    className="group flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition-all hover:bg-gray-100 hover:text-blue-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+                    onClick={(e) => {
+                        e.stopPropagation(); // Prevent swipe interference
+                        onMenuClick();
+                    }}
+                    className="group flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition-all hover:bg-gray-100 hover:text-blue-600 active:scale-95 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 md:h-10 md:w-10"
                     aria-label="Toggle sidebar"
                 >
-                    <Menu size={20} className="transition-transform group-hover:scale-110" />
+                    <Menu size={24} className="transition-transform group-hover:scale-110 md:size-5" />
                 </button>
                 <h2 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white truncate">{title}</h2>
             </div>

@@ -39,26 +39,52 @@ function AdminLoadingScreen() {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const { loading, isAdmin, role, user } = useAuth();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default to open
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
     const router = useRouter();
     const pathname = usePathname();
 
     const isLoginPage = pathname === "/admin/login";
 
-    // Detect screen size for responsive behavior
+    // Detect screen size
     useEffect(() => {
         const checkMobile = () => {
             const mobile = window.innerWidth < 1024;
             setIsMobile(mobile);
-            if (mobile) setIsSidebarOpen(false); // Close by default on mobile
-            else setIsSidebarOpen(true); // Open by default on desktop
+            if (mobile) setIsSidebarOpen(false);
+            else setIsSidebarOpen(true);
         };
-
         checkMobile();
         window.addEventListener("resize", checkMobile);
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
+
+    // Swipe Gesture Controls
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isMobile) {
+            if (isLeftSwipe && isSidebarOpen) setIsSidebarOpen(false); // Close on swipe left
+            if (isRightSwipe && !isSidebarOpen && touchStart < 40) setIsSidebarOpen(true); // Open on swipe from left edge
+        }
+    };
 
     // Close sidebar on navigation (mobile only)
     useEffect(() => {
@@ -90,11 +116,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     return (
         <ToastProvider>
-            <div className="flex h-screen bg-gray-50/50 overflow-hidden">
-                {/* Backdrop for mobile */}
+            <div
+                className="flex h-screen bg-gray-50/50 overflow-hidden select-none"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+            >
+                {/* Backdrop with better touch priority */}
                 {isMobile && isSidebarOpen && (
                     <div
-                        className="fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-sm transition-opacity"
+                        className="fixed inset-0 z-[60] bg-gray-900/60 backdrop-blur-sm transition-opacity"
                         onClick={() => setIsSidebarOpen(false)}
                     />
                 )}
@@ -104,8 +135,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
                 <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950">
                     <AdminHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
-                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-full">
-                        <div className="mx-auto max-w-7xl h-full">
+                    <main className="flex-1 overflow-y-auto w-full">
+                        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
                             {children}
                         </div>
                     </main>
