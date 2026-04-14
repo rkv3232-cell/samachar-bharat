@@ -36,11 +36,12 @@ export async function POST(req: Request) {
         // 2. Determine AI Provider (Groq or Local LM Studio)
         // ─────────────────────────────────────────────────────────
         const groqKey = process.env.GROQ_API_KEY;
-        const isGroq = !!groqKey;
+        const useLocal = process.env.USE_LOCAL_AI === "true";
+        const isGroq = !!groqKey && !useLocal;
 
         const apiTarget = isGroq
             ? "https://api.groq.com/openai/v1/chat/completions"
-            : (process.env.LOCAL_AI_BASE_URL || "http://localhost:1234/v1/chat/completions");
+            : (process.env.LOCAL_AI_BASE_URL || "http://localhost:1234/v1") + "/chat/completions";
 
         const modelName = isGroq ? "llama-3.3-70b-versatile" : "local-model";
 

@@ -15,6 +15,7 @@ import {
     BarChart3,
     LogOut,
     Radio,
+    Bell,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -22,6 +23,7 @@ const menuItems = [
     { href: "/admin", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { href: "/admin/analytics", icon: <BarChart3 size={20} />, label: "Analytics" },
     { href: "/admin/posts", icon: <FileText size={20} />, label: "Posts" },
+    { href: "/admin/notifications", icon: <Bell size={20} />, label: "Notifications" },
     { href: "/admin/live", icon: <Radio size={20} />, label: "Live Telecast" },
     { href: "/menu", icon: <LayoutDashboard size={20} className="text-red-500" />, label: "Explore Hub (Public)" },
     { href: "/admin/categories", icon: <Tags size={20} />, label: "Categories" },

@@ -37,6 +37,7 @@ export const metadata: Metadata = {
 import AIAssistant from '@/components/AIAssistant';
 import { SettingsProvider } from '@/context/SettingsContext';
 import { AdminOnly } from '@/components/auth/AdminOnly';
+import NotificationManager from '@/components/NotificationManager';
 
 export default function RootLayout({
   children,
@@ -48,6 +49,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <SettingsProvider>
+            <NotificationManager />
             {children}
             <AdminOnly>
               <AIAssistant />
