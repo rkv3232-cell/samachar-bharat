@@ -182,7 +182,7 @@ export default async function PostPage({ params }: Props) {
 
                         {/* Content */}
                         <div
-                            className="news-content text-gray-700 leading-relaxed text-base mb-10"
+                            className="news-content prose prose-red max-w-none prose-p:leading-relaxed prose-headings:font-extrabold prose-p:text-gray-700 prose-p:text-lg mb-10"
                             dangerouslySetInnerHTML={{ __html: post.content || plainContent }}
                         />
 

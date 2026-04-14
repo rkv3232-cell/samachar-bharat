@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getPostById } from "@/lib/posts";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: Request) {
     try {
@@ -10,8 +7,6 @@ export async function POST(req: Request) {
 
         const post = await getPostById(postId);
         if (!post) return NextResponse.json({ error: "Post not found" }, { status: 404 });
-
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const prompt = `
             You are a professional news strategist. Analyze this news article and create an AMP Web Story (JSON format).
@@ -29,9 +24,27 @@ export async function POST(req: Request) {
             Return ONLY the JSON.
         `;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        const apiTarget = process.env.LOCAL_AI_BASE_URL || "http://localhost:1234/v1";
+
+        const response = await fetch(`${apiTarget}/chat/completions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: "gemma",
+                messages: [
+                    { role: "system", content: "You are a web story strategist." },
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.5,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Gemma Error: ${await response.text()}`);
+        }
+
+        const data = await response.json();
+        const text = data.choices[0].message.content;
 
         // Clean markdown if any
         const cleaned = text.replace(/```json|```/g, "").trim();
@@ -40,6 +53,6 @@ export async function POST(req: Request) {
         return NextResponse.json(json);
     } catch (error: any) {
         console.error("Web Story Error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "AI Story Generator (Gemma) offline. Please start LM Studio Server." }, { status: 500 });
     }
 }

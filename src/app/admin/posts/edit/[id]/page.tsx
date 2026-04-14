@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import RichTextEditor from '@/components/RichTextEditor';
 
 const DEFAULT_CATEGORIES = [
     { name: 'उत्तर प्रदेश', slug: 'uttar-pradesh' },
@@ -125,7 +126,7 @@ export default function EditPostPage() {
         e.preventDefault();
         setError(''); setSuccess('');
         if (!form.title.trim()) return setError('Title जरूरी है।');
-        if (!form.content.trim()) return setError('Content जरूरी है।');
+        if (!form.content.trim() || form.content === '<p><br></p>') return setError('Content जरूरी है।');
         if (!form.category) return setError('Category चुनें।');
 
         setSaving(true);
@@ -342,8 +343,11 @@ export default function EditPostPage() {
                                     AI Write Full News
                                 </button>
                             </div>
-                            <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })}
-                                rows={14} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 resize-none leading-relaxed" />
+                            <RichTextEditor
+                                value={form.content}
+                                onChange={(content) => setForm({ ...form, content })}
+                                placeholder="खबर का विस्तृत विवरण लिखें..."
+                            />
                         </div>
                     </div>
 

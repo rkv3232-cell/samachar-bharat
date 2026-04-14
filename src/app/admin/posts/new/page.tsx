@@ -9,6 +9,7 @@ import { ImageIcon, Save, X, ChevronLeft, AlertCircle, CheckCircle, Video, FileT
 import Link from 'next/link';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import RichTextEditor from '@/components/RichTextEditor';
 
 const DEFAULT_CATEGORIES = [
     { name: 'उत्तर प्रदेश', slug: 'uttar-pradesh' },
@@ -113,14 +114,13 @@ export default function NewPostPage() {
         setError('');
         setSuccess('');
 
-        const wordCount = form.content.replace(/<[^>]+>/g, '').trim().split(/\s+/).length;
         if (!form.title.trim()) {
             setSaving(false);
             return setError('शीर्षक (Title) खाली है। कृपया लिखें।');
         }
-        if (wordCount < 50) {
+        if (!form.content.trim() || form.content === '<p><br></p>') {
             setSaving(false);
-            return setError(`सामग्री बहुत छोटी है (${wordCount} शब्द)। कम से कम 50 शब्द लिखें।`);
+            return setError('खबर की सामग्री (Content) खाली है। कृपया लिखें।');
         }
         if (!form.category) {
             setSaving(false);
@@ -421,11 +421,9 @@ export default function NewPostPage() {
                                     AI Write Full News
                                 </button>
                             </div>
-                            <textarea
+                            <RichTextEditor
                                 value={form.content}
-                                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                                rows={14}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 resize-none leading-relaxed"
+                                onChange={(content) => setForm({ ...form, content })}
                                 placeholder="खबर का विस्तृत विवरण लिखें..."
                             />
                         </div>
@@ -642,8 +640,8 @@ export default function NewPostPage() {
                             </div>
                             {validationResult && (
                                 <div className={`rounded-xl p-3 text-xs space-y-1.5 ${validationResult.status === 'ai-generated' ? 'bg-amber-50 border border-amber-200' :
-                                        validationResult.isValid ? 'bg-green-50 border border-green-200' :
-                                            'bg-red-50 border border-red-200'
+                                    validationResult.isValid ? 'bg-green-50 border border-green-200' :
+                                        'bg-red-50 border border-red-200'
                                     }`}>
                                     <div className="flex items-center gap-2 font-bold">
                                         {validationResult.status === 'ai-generated' ? (

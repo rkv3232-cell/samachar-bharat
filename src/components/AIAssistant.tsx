@@ -34,11 +34,13 @@ export default function AIAssistant() {
         if (!messageText) setInput('');
         setIsLoading(true);
 
+        // Add a placeholder for the model response
+        setMessages((prev) => [...prev, { role: 'model', parts: [{ text: "" }] }]);
+
         try {
-            // Filter out the initial welcome greeting from the context history
             const chatHistory = messages
                 .filter(m => m.parts[0].text !== "नमस्ते! मैं न्यूज़पोर्टल का एडवांस AI एनालिस्ट हूँ। मैं आपको ताज़ा खबरें, विश्लेषण और किसी भी विषय पर सटीक जानकारी दे सकता हूँ। आप क्या जानना चाहते हैं?")
-                .slice(-8); // Increased context window to 8 messages
+                .slice(-6);
 
             const response = await fetch('/api/chat', {
                 method: 'POST',
@@ -49,14 +51,55 @@ export default function AIAssistant() {
                 }),
             });
 
-            const data = await response.json();
-            if (data.text) {
-                setMessages((prev) => [...prev, { role: 'model', parts: [{ text: data.text }] }]);
-            } else if (data.error) {
-                setMessages((prev) => [...prev, { role: 'model', parts: [{ text: `Error: ${data.error}` }] }]);
+            if (!response.ok || !response.body) throw new Error("Connection failed");
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                // Handle Event-Stream format (data: {...}\n\n)
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.replace('data: ', '').trim();
+                        if (dataStr === '[DONE]') continue;
+                        try {
+                            const json = JSON.parse(dataStr);
+                            const content = json.choices[0]?.delta?.content || "";
+                            if (content) {
+                                fullText += content;
+                                // Update only the last message (the AI's response)
+                                setMessages((prev) => {
+                                    const newMessages = [...prev];
+                                    const lastMessage = newMessages[newMessages.length - 1];
+                                    if (lastMessage && lastMessage.role === 'model') {
+                                        lastMessage.parts = [{ text: fullText }];
+                                    }
+                                    return newMessages;
+                                });
+                            }
+                        } catch (e) {
+                            // Skip non-json or malformed lines
+                        }
+                    }
+                }
             }
+
         } catch (error) {
-            setMessages((prev) => [...prev, { role: 'model', parts: [{ text: "क्षमा करें, मुझे अभी उत्तर देने में समस्या हो रही है।" }] }]);
+            setMessages((prev) => {
+                const newMsgs = [...prev];
+                const last = newMsgs[newMsgs.length - 1];
+                if (last && last.role === 'model' && last.parts[0].text === "") {
+                    last.parts = [{ text: "क्षमा करें, सर्वर से कनेक्शन नहीं हो पाया। कृपया LM Studio चेक करें।" }];
+                }
+                return newMsgs;
+            });
         } finally {
             setIsLoading(false);
         }

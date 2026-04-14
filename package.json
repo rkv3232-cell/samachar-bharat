@@ -27,6 +27,7 @@
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",
+    "react-quill-new": "^3.8.3",
     "recharts": "^3.8.1",
     "rss-parser": "^3.13.0",
     "sanitize-html": "^2.17.2",

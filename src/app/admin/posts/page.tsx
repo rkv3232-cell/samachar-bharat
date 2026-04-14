@@ -193,10 +193,11 @@ export default function AdminPostsPage() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [sharePost, setSharePost] = useState<Post | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ id: string; title: string } | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
-    const [sharePost, setSharePost] = useState<Post | null>(null);
 
     const isYouTubeConnected = !!(firestoreUser as any)?.youtubeTokens;
 
@@ -215,6 +216,7 @@ export default function AdminPostsPage() {
             await loadPosts();
         } catch (e: any) {
             setError('Data load nahi ho saka');
+            toast.error('Categories load nahi ho saki');
         } finally {
             setLoading(false);
         }
@@ -227,21 +229,29 @@ export default function AdminPostsPage() {
             setPosts(data);
         } catch (e: any) {
             setError('Posts load nahi ho sake');
+            toast.error('Khabrein load nahi ho saki');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async (id: string, title: string) => {
-        if (!confirm(`Kya aap delete karna chahte hain?`)) return;
+    const handleDelete = async () => {
+        if (!confirmDelete) return;
+        const { id } = confirmDelete;
+
         setDeletingId(id);
+        const toastId = toast.loading('खबर डिलीट की जा रही है...');
+
         try {
             await deletePost(id);
             setPosts((prev) => prev.filter((p) => p.id !== id));
+            toast.success('खबर सफलतापूर्वक डिलीट हो गई', { id: toastId });
         } catch (e: any) {
-            alert('Delete fail');
+            console.error('Delete error:', e);
+            toast.error('डिलीट करने में समस्या आई। फिर से कोशिश करें।', { id: toastId });
         } finally {
             setDeletingId(null);
+            setConfirmDelete(null);
         }
     };
 
@@ -260,6 +270,35 @@ export default function AdminPostsPage() {
                     userUid={user?.uid || ''}
                     isYouTubeConnected={isYouTubeConnected}
                 />
+            )}
+
+            {/* Robust Delete Confirmation Modal */}
+            {confirmDelete && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => !deletingId && setConfirmDelete(null)}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-100">
+                            <Trash2 className="w-8 h-8 text-red-600 animate-pulse" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 text-center mb-2">खबर डिलीट करें?</h3>
+                        <p className="text-gray-500 text-sm text-center mb-6 px-2">क्या आप वाकई इस खबर को डिलीट करना चाहते हैं? यह एक्शन वापस नहीं लिया जा सकता।</p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                disabled={!!deletingId}
+                                onClick={handleDelete}
+                                className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-red-200 disabled:opacity-50"
+                            >
+                                {deletingId ? <RefreshCw className="w-5 h-5 animate-spin" /> : "हां, डिलीट करें"}
+                            </button>
+                            <button
+                                disabled={!!deletingId}
+                                onClick={() => setConfirmDelete(null)}
+                                className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold transition"
+                            >
+                                कैंसिल
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             <div className="flex items-center justify-between mb-6">
@@ -287,55 +326,91 @@ export default function AdminPostsPage() {
             </div>
 
             {loading ? (
-                <LoadingSpinner />
+                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <LoadingSpinner />
+                    <p className="text-gray-400 text-sm mt-4 font-medium animate-pulse">खबरें लोड हो रही हैं...</p>
+                </div>
             ) : (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-100 text-gray-600">
-                                    <th className="text-left px-4 py-4 font-bold">Media</th>
-                                    <th className="text-left px-4 py-4 font-bold">Khabar Title</th>
-                                    <th className="text-left px-4 py-4 font-bold hidden md:table-cell">Status</th>
-                                    <th className="text-right px-4 py-4 font-bold">Actions</th>
+                                    <th className="text-left px-4 py-4 font-extrabold tracking-wider uppercase text-[10px]">Media</th>
+                                    <th className="text-left px-4 py-4 font-extrabold tracking-wider uppercase text-[10px]">Khabar Title</th>
+                                    <th className="text-left px-4 py-4 font-extrabold tracking-wider uppercase text-[10px] hidden md:table-cell">Status</th>
+                                    <th className="text-right px-4 py-4 font-extrabold tracking-wider uppercase text-[10px]">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
-                                {filtered.map((post) => {
-                                    const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/) || post.image?.includes('/video/upload/');
-                                    return (
-                                        <tr key={post.id} className="hover:bg-gray-50 transition">
-                                            <td className="px-4 py-3">
-                                                <div className="relative w-12 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                                                    {post.image ? (
-                                                        isVideo ? <div className="w-full h-full flex items-center justify-center bg-black text-[10px] text-white">VID</div> : <Image src={post.image} alt="" fill className="object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-lg">�</div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <p className="font-bold text-gray-800 line-clamp-1">{post.title}</p>
-                                                <p className="text-[10px] font-bold text-red-500 uppercase mt-0.5">{categoryMap[post.category] || post.category}</p>
-                                            </td>
-                                            <td className="px-4 py-3 hidden md:table-cell font-bold text-gray-400">{post.status || 'published'}</td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {isOwner && (
-                                                        <button
-                                                            onClick={() => setSharePost(post)}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-[11px] font-bold rounded-lg hover:bg-black transition shadow-sm"
+                                {filtered.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-20 text-gray-400 italic">कोई खबर नहीं मिली</td>
+                                    </tr>
+                                ) : (
+                                    filtered.map((post) => {
+                                        const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/) || post.image?.includes('/video/upload/');
+                                        return (
+                                            <tr key={post.id} className="hover:bg-gray-50/80 transition-colors group">
+                                                <td className="px-4 py-4">
+                                                    <div className="relative w-14 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
+                                                        {post.image ? (
+                                                            isVideo ? (
+                                                                <div className="w-full h-full flex items-center justify-center bg-gray-900 border-2 border-gray-800">
+                                                                    <Video className="w-5 h-5 text-gray-400" />
+                                                                </div>
+                                                            ) : (
+                                                                <Image src={post.image} alt="" fill className="object-cover group-hover:scale-110 transition duration-500" />
+                                                            )
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-lg bg-gray-50 text-gray-300"></div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-4">
+                                                    <p className="font-bold text-gray-900 line-clamp-1 group-hover:text-red-600 transition tracking-tight">{post.title}</p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-[10px] font-black text-white bg-red-600 px-2 py-0.5 rounded-md uppercase tracking-tighter">
+                                                            {categoryMap[post.category] || post.category}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 font-medium">#{post.id?.substring(0, 8)}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-4 hidden md:table-cell">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100 uppercase">
+                                                        {post.status || 'published'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-4">
+                                                    <div className="flex items-center justify-end gap-2 text-gray-700">
+                                                        {isOwner && (
+                                                            <button
+                                                                onClick={() => setSharePost(post)}
+                                                                className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white text-[10px] font-black rounded-xl hover:bg-black transition shadow-md shadow-gray-200 active:scale-95"
+                                                            >
+                                                                <Share2 className="w-3.5 h-3.5" /> DISTRIBUTE
+                                                            </button>
+                                                        )}
+                                                        <Link
+                                                            href={`/admin/posts/edit/${post.id}`}
+                                                            className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition-all active:scale-90"
+                                                            title="Edit Post"
                                                         >
-                                                            <Share2 className="w-3 h-3" /> DISTRIBUTE
+                                                            <Pencil className="w-4 h-4" />
+                                                        </Link>
+                                                        <button
+                                                            onClick={() => setConfirmDelete({ id: post.id!, title: post.title })}
+                                                            className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all active:scale-90"
+                                                            title="Delete Khabar"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
-                                                    )}
-                                                    <Link href={`/admin/posts/edit/${post.id}`} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Pencil className="w-4 h-4" /></Link>
-                                                    <button onClick={() => handleDelete(post.id!, post.title)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                             </tbody>
                         </table>
                     </div>
