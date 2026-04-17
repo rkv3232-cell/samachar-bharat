@@ -193,16 +193,23 @@ export default function Navbar() {
 
             {/* ── Brand + Auth Controls ───────────────────────────────── */}
             <div className="bg-white border-b-2 border-red-600 px-4 py-3 flex items-center justify-between border-primary">
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center transform group-hover:rotate-6 transition-transform bg-primary">
-                        <Newspaper className="w-6 h-6 text-white" />
+                <Link href="/" className="flex items-center gap-3 group">
+                    <div className="relative">
+                        <img
+                            src="/logo.png"
+                            alt="Samachar Bharat"
+                            className="w-14 h-14 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
+                        />
+                        <div className="absolute inset-0 bg-red-600/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-extrabold text-gray-900 leading-none tracking-tight">
-                            <span className="text-red-600 text-primary">{siteName.toUpperCase().split(' ')[0]}</span>
-                            {siteName.toUpperCase().split(' ').slice(1).join(' ')}
+                        <h1 className="text-2xl font-black text-gray-900 leading-none tracking-tighter flex items-center gap-1">
+                            <span className="text-red-600">SAMACHAR</span>
+                            <span className="text-gray-900">BHARAT</span>
                         </h1>
-                        <p className="text-xs text-gray-500 font-medium mt-0.5">{settings?.language === 'hi' ? "हिंदी समाचार" : "LATEST HINDI NEWS"}</p>
+                        <p className="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase mt-1 opacity-90">
+                            {settings?.language === 'hi' ? "सत्य • सटीक • सबसे पहले" : "TRUTH • ACCURACY • FIRST"}
+                        </p>
                     </div>
                 </Link>
 

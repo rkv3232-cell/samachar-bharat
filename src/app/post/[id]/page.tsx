@@ -92,7 +92,9 @@ export default async function PostPage({ params }: Props) {
         console.error('Error fetching categories for post page label');
     }
 
-    const plainContent = post.content?.replace(/<[^>]+>/g, '') || '';
+    // Clean content from &nbsp; and other artifacts that break layout
+    const cleanContent = (post.content || '').replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ');
+    const plainContent = cleanContent.replace(/<[^>]+>/g, '') || '';
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -182,8 +184,8 @@ export default async function PostPage({ params }: Props) {
 
                         {/* Content */}
                         <div
-                            className="news-content prose prose-red max-w-none prose-p:leading-relaxed prose-headings:font-extrabold prose-p:text-gray-700 prose-p:text-lg mb-10"
-                            dangerouslySetInnerHTML={{ __html: post.content || plainContent }}
+                            className="news-content prose prose-red max-w-2xl mx-auto prose-p:leading-relaxed prose-headings:font-extrabold prose-p:text-gray-800 prose-p:text-xl mb-10"
+                            dangerouslySetInnerHTML={{ __html: cleanContent || plainContent }}
                         />
 
                         {/* Comments Section */}

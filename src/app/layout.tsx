@@ -38,6 +38,7 @@ import AIAssistant from '@/components/AIAssistant';
 import { SettingsProvider } from '@/context/SettingsContext';
 import { AdminOnly } from '@/components/auth/AdminOnly';
 import NotificationManager from '@/components/NotificationManager';
+import PWAInstall from '@/components/PWAInstall';
 
 export default function RootLayout({
   children,
@@ -50,6 +51,7 @@ export default function RootLayout({
         <AuthProvider>
           <SettingsProvider>
             <NotificationManager />
+            <PWAInstall />
             {children}
             <AdminOnly>
               <AIAssistant />

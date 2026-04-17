@@ -23,5 +23,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Samachar Bharat"
-include(":app")
+include(":android_app")
  
