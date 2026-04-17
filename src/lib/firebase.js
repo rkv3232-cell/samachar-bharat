@@ -193,34 +193,86 @@ const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dtm7hhsys/auto/upload";
 const CLOUDINARY_UPLOAD_PRESET = "news_upload";
 
 /**
- * uploadToCloudinary — Unsigned upload of files to Cloudinary.
+ * uploadToCloudinary — Robust upload (Chunked for large files) to Cloudinary.
  * 
  * @param {File} file - The image or video file to upload.
+ * @param {Function} [onProgress] - Optional callback for progress: (percent) => void
  * @returns {Promise<string>} Secure URL of the uploaded resource.
  */
-export async function uploadToCloudinary(file) {
+export async function uploadToCloudinary(file, onProgress) {
     if (!file) return null;
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    const fileSize = file.size;
+    const chunkSize = 5 * 1024 * 1024; // 5MB chunks
+    const isLargeFile = fileSize > chunkSize;
+    const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+    const uploadUrl = `https://api.cloudinary.com/v1_1/dtm7hhsys/${resourceType}/upload`;
 
-    try {
-        const response = await fetch(CLOUDINARY_URL, {
-            method: 'POST',
-            body: formData,
-        });
+    if (!isLargeFile) {
+        // Small file: Single upload
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || 'Cloudinary upload failed');
+        try {
+            // fetch doesn't support progress for single request directly without XHR
+            // but for small files we can just call it once.
+            if (onProgress) onProgress(50);
+            const response = await fetch(uploadUrl, { method: 'POST', body: formData });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'Cloudinary upload failed');
+            }
+            const data = await response.json();
+            if (onProgress) onProgress(100);
+            return data.secure_url;
+        } catch (error) {
+            console.error("Cloudinary Error:", error);
+            throw error;
         }
+    } else {
+        // Large file: Chunked upload for stability
+        const uniqueUploadId = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        let secureUrl = "";
 
-        const data = await response.json();
-        return data.secure_url;
-    } catch (error) {
-        console.error("Cloudinary Error:", error);
-        throw error;
+        for (let start = 0; start < fileSize; start += chunkSize) {
+            const end = Math.min(start + chunkSize, fileSize);
+            const chunk = file.slice(start, end);
+
+            const formData = new FormData();
+            formData.append('file', chunk);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const contentRange = `bytes ${start}-${end - 1}/${fileSize}`;
+
+            try {
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Unique-Upload-Id': uniqueUploadId,
+                        'Content-Range': contentRange
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`Chunk upload failed (${start}-${end}): ${error.error?.message || 'Unknown'}`);
+                }
+
+                const data = await response.json();
+                if (data.secure_url) secureUrl = data.secure_url;
+
+                if (onProgress) {
+                    const percent = Math.round((end / fileSize) * 100);
+                    onProgress(percent);
+                }
+            } catch (error) {
+                console.error("Cloudinary Chunk Error:", error);
+                throw error;
+            }
+        }
+        return secureUrl;
     }
 }
 

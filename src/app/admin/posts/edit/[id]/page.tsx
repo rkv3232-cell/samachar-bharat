@@ -106,8 +106,8 @@ export default function EditPostPage() {
         const isVideo = file.type.startsWith('video/');
         setIsSliderVideo(isVideo);
 
-        if (file.size > 50 * 1024 * 1024) {
-            setError('File size 50MB से छोटी होनी चाहिए।');
+        if (file.size > 500 * 1024 * 1024) {
+            setError('File size 500MB से छोटी होनी चाहिए।');
             return;
         }
 
@@ -122,6 +122,8 @@ export default function EditPostPage() {
         setTagInput('');
     };
 
+    const [uploadProgress, setUploadProgress] = useState(0);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(''); setSuccess('');
@@ -134,7 +136,10 @@ export default function EditPostPage() {
             let mediaUrl = form.image;
             if (mediaFile) {
                 setUploading(true);
-                mediaUrl = await uploadToCloudinary(mediaFile);
+                setUploadProgress(0);
+                mediaUrl = await uploadToCloudinary(mediaFile, (percent: number) => {
+                    setUploadProgress(percent);
+                });
                 setUploading(false);
             }
             await updatePost(id, {
@@ -491,7 +496,7 @@ export default function EditPostPage() {
                             className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2 text-sm">
                             {saving || uploading ? (
                                 <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    {uploading ? 'Media Upload हो रहा है...' : 'Update हो रहा है...'}</>
+                                    {uploading ? `अपलोड हो रहा है: ${uploadProgress}%` : 'Update हो रहा है...'}</>
                             ) : (
                                 <><Save className="w-4 h-4" /> Update करें</>
                             )}

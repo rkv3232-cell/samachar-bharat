@@ -92,8 +92,8 @@ export default function NewPostPage() {
         const isVideo = file.type.startsWith('video/');
         setIsSliderVideo(isVideo);
 
-        if (file.size > 50 * 1024 * 1024) {
-            setError('File size 50MB से छोटी होनी चाहिए।');
+        if (file.size > 500 * 1024 * 1024) {
+            setError('File size 500MB से छोटी होनी चाहिए।');
             return;
         }
 
@@ -108,6 +108,8 @@ export default function NewPostPage() {
         setTagInput('');
     };
 
+    const [uploadProgress, setUploadProgress] = useState(0);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
@@ -120,7 +122,7 @@ export default function NewPostPage() {
         }
         if (!form.content.trim() || form.content === '<p><br></p>') {
             setSaving(false);
-            return setError('खबर की सामग्री (Content) खाली है। कृपया लिखें।');
+            return setError('खबर की सामग्री (Content) खाली hai। कृपया लिखें।');
         }
         if (!form.category) {
             setSaving(false);
@@ -132,7 +134,10 @@ export default function NewPostPage() {
 
             if (mediaFile) {
                 setUploading(true);
-                mediaUrl = await uploadToCloudinary(mediaFile);
+                setUploadProgress(0);
+                mediaUrl = await uploadToCloudinary(mediaFile, (percent: number) => {
+                    setUploadProgress(percent);
+                });
                 setUploading(false);
             }
 
@@ -675,7 +680,7 @@ export default function NewPostPage() {
                             {saving || uploading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    <span>{uploading ? 'Cloudinary पर अपलोड हो रहा है...' : 'Publish हो रहा है...'}</span>
+                                    <span>{uploading ? `अपलोड हो रहा है: ${uploadProgress}%` : 'Publish हो रहा है...'}</span>
                                 </>
                             ) : (
                                 <>
