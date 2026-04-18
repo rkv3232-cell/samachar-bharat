@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { addPost, uploadToCloudinary } from '@/lib/posts';
 import { useAuth } from '@/lib/auth-context';
 import { PostStatus } from '@/types/admin';
-import { ImageIcon, Save, X, ChevronLeft, AlertCircle, CheckCircle, Video, FileText, Sparkles, Loader2, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ImageIcon, Save, X, ChevronLeft, AlertCircle, CheckCircle, Video as VideoIcon, Sparkles, Loader2, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -24,22 +24,23 @@ const DEFAULT_CATEGORIES = [
 
 export default function NewPostPage() {
     const router = useRouter();
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
     const { user } = useAuth();
 
     const [form, setForm] = useState({
         title: '',
         content: '',
         category: '',
-        image: '',
         status: 'published' as PostStatus,
         tags: [] as string[]
     });
-    const [mediaFile, setMediaFile] = useState<File | null>(null);
-    const [mediaPreview, setMediaPreview] = useState('');
-    const [isSliderVideo, setIsSliderVideo] = useState(false);
+
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [videoPreview, setVideoPreview] = useState('');
+
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [saving, setSaving] = useState(false);
     const [generatingAI, setGeneratingAI] = useState(false);
     const [translatingAI, setTranslatingAI] = useState(false);
@@ -47,36 +48,15 @@ export default function NewPostPage() {
     const [success, setSuccess] = useState('');
 
     const [dbCategories, setDbCategories] = useState<{ name: string; slug: string }[]>([]);
-    const [dbTags, setDbTags] = useState<{ name: string }[]>([]);
-    const [tagInput, setTagInput] = useState('');
-
-    // SEO fields
-    const [seo, setSeo] = useState({ metaTitle: '', metaDescription: '', slug: '' });
-
-    // Content quality/validation state
-    const [validationResult, setValidationResult] = useState<{
-        isValid: boolean;
-        score: number;
-        status: 'verified' | 'unverified' | 'ai-generated';
-        issues: string[];
-        suggestions: string[];
-    } | null>(null);
-    const [validating, setValidating] = useState(false);
 
     useEffect(() => {
         const fetchTaxonomies = async () => {
             try {
                 const catSnap = await getDocs(collection(db, "categories"));
                 const firestoreCats = catSnap.docs.map(doc => doc.data() as { name: string; slug: string });
-
-                // Merge defaults with firestore categories (avoiding duplicates by slug)
                 const defaultSlugs = new Set(DEFAULT_CATEGORIES.map(c => c.slug));
                 const extraCats = firestoreCats.filter(c => !defaultSlugs.has(c.slug));
-
                 setDbCategories([...DEFAULT_CATEGORIES, ...extraCats]);
-
-                const tagSnap = await getDocs(collection(db, "tags"));
-                setDbTags(tagSnap.docs.map(doc => doc.data() as { name: string }));
             } catch (err) {
                 console.error("Failed to fetch taxonomies", err);
             }
@@ -84,73 +64,108 @@ export default function NewPostPage() {
         fetchTaxonomies();
     }, []);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files) return;
+        const files = Array.from(e.target.files);
+
+        let validFiles: File[] = [];
+        let validPreviews: string[] = [];
+        let errorMessage = '';
+
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) {
+                errorMessage = 'कुछ चुनी गई फाइल्स Image नहीं हैं।';
+                continue;
+            }
+            if (file.size > 50 * 1024 * 1024) {
+                errorMessage = 'Image size 50MB से छोटी होनी चाहिए।';
+                continue;
+            }
+            validFiles.push(file);
+            validPreviews.push(URL.createObjectURL(file));
+        }
+
+        if (errorMessage) setError(errorMessage);
+        else setError('');
+
+        const newTotalFiles = [...imageFiles, ...validFiles];
+        const newTotalPreviews = [...imagePreviews, ...validPreviews];
+
+        if (newTotalFiles.length > 5) {
+            setError('आप अधिकतम 5 तस्वीरें ही चुन सकते हैं।');
+            setImageFiles(newTotalFiles.slice(0, 5));
+            setImagePreviews(newTotalPreviews.slice(0, 5));
+        } else {
+            setImageFiles(newTotalFiles);
+            setImagePreviews(newTotalPreviews);
+        }
+    };
+
+    const removeImage = (index: number) => {
+        const newFiles = [...imageFiles];
+        const newPreviews = [...imagePreviews];
+        newFiles.splice(index, 1);
+        newPreviews.splice(index, 1);
+        setImageFiles(newFiles);
+        setImagePreviews(newPreviews);
+    };
+
+    const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
-        setError('');
-        const isVideo = file.type.startsWith('video/');
-        setIsSliderVideo(isVideo);
-
-        if (file.size > 500 * 1024 * 1024) {
-            setError('File size 500MB से छोटी होनी चाहिए।');
+        if (!file.type.startsWith('video/')) {
+            setError('कृपया सिर्फ Video फ़ाइल चुनें।');
             return;
         }
-
-        setMediaFile(file);
-        setMediaPreview(URL.createObjectURL(file));
+        if (file.size > 700 * 1024 * 1024) return setError('Video size 700MB से छोटी होनी चाहिए।');
+        setVideoFile(file);
+        setVideoPreview(URL.createObjectURL(file));
+        setError('');
     };
-
-    const handleAddCustomTag = () => {
-        if (tagInput.trim() && !form.tags.includes(tagInput.trim())) {
-            setForm({ ...form, tags: [...form.tags, tagInput.trim()] });
-        }
-        setTagInput('');
-    };
-
-    const [uploadProgress, setUploadProgress] = useState(0);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSaving(true);
-        setError('');
-        setSuccess('');
+        setSaving(true); setError(''); setSuccess('');
 
-        if (!form.title.trim()) {
-            setSaving(false);
-            return setError('शीर्षक (Title) खाली है। कृपया लिखें।');
-        }
-        if (!form.content.trim() || form.content === '<p><br></p>') {
-            setSaving(false);
-            return setError('खबर की सामग्री (Content) खाली hai। कृपया लिखें।');
-        }
-        if (!form.category) {
-            setSaving(false);
-            return setError('कृपया एक श्रेणी (Category) चुनें।');
-        }
+        if (!form.title.trim()) return (setSaving(false), setError('शीर्षक (Title) खाली है।'));
+        if (!form.content.trim() || form.content === '<p><br></p>') return (setSaving(false), setError('कंटेंट खाली है।'));
+        if (!form.category) return (setSaving(false), setError('कैटेगरी चुनें।'));
 
         try {
-            let mediaUrl = form.image;
+            let finalImageUrls: string[] = [];
+            let finalVideoUrl = "";
 
-            if (mediaFile) {
+            if (imageFiles.length > 0) {
                 setUploading(true);
-                setUploadProgress(0);
-                mediaUrl = await uploadToCloudinary(mediaFile, (percent: number) => {
-                    setUploadProgress(percent);
-                });
-                setUploading(false);
+                for (let i = 0; i < imageFiles.length; i++) {
+                    setUploadProgress(Math.round((i / imageFiles.length) * 50)); // First 50% for images
+                    const url = await uploadToCloudinary(imageFiles[i], () => { });
+                    finalImageUrls.push(url);
+                }
             }
 
-            if (!mediaUrl && !form.image) {
+            if (videoFile) {
+                setUploading(true);
+                setUploadProgress(50);
+                finalVideoUrl = await uploadToCloudinary(videoFile, (p: number) => {
+                    setUploadProgress(50 + Math.round(p / 2)); // Last 50% for video
+                });
+            }
+
+            setUploading(false);
+
+            if (finalImageUrls.length === 0 && !finalVideoUrl) {
                 setSaving(false);
-                return setError('Image या Video अपलोड करना जरूरी है।');
+                return setError('कम से कम एक फ़ोटो या वीडियो अपलोड करें।');
             }
 
             await addPost({
                 title: form.title.trim(),
                 content: form.content.trim(),
                 category: form.category,
-                image: mediaUrl,
+                image: finalImageUrls.length > 0 ? finalImageUrls[0] : "",
+                images: finalImageUrls,
+                video: finalVideoUrl,
                 status: form.status,
                 authorId: user?.uid || '',
                 authorName: user?.email?.split('@')[0] || 'Admin',
@@ -159,142 +174,17 @@ export default function NewPostPage() {
 
             setSuccess('खबर सफलतापूर्वक publish हो गई!');
             setTimeout(() => router.push('/admin/posts'), 1500);
-        } catch (err: unknown) {
-            setError('Error: ' + (err instanceof Error ? err.message : String(err)));
+        } catch (err: any) {
+            setError('Error: ' + err.message);
             setUploading(false);
         } finally {
             setSaving(false);
         }
     };
 
-    const isVideoUrl = (url: string): boolean => {
-        if (!url) return false;
-        return !!(url.match(/\.(mp4|webm|ogg|mov)$/) || url.includes('/video/upload/'));
-    };
-
-    const getUserRole = () => {
-        const email = user?.email || '';
-        if (email.includes('admin') || email.includes('owner')) return 'admin';
-        if (email.includes('editor')) return 'editor';
-        return 'reporter';
-    };
-
-    const suggestCategory = async () => {
-        if (!form.title.trim() && !form.content.trim()) {
-            setError('Category suggest करने के लिए Title या Content लिखें।');
-            return;
-        }
-        setGeneratingAI(true);
-        setError('');
-        try {
-            const res = await fetch('/api/ai/post-assistant', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: form.title, content: form.content, type: 'suggest-category' })
-            });
-            const data = await res.json();
-            if (data.category && dbCategories.some(c => c.slug === data.category)) {
-                setForm(prev => ({ ...prev, category: data.category }));
-                setSuccess(`AI ने सुझाव दिया: "${data.category}" — कारण: ${data.reason || ''}`);
-            } else if (data.category) {
-                setSuccess(`AI का सुझाव: "${data.category}" (सूची में नहीं है, मैन्युअल चुनें) — ${data.reason || ''}`);
-            }
-        } catch {
-            setError('Category suggest नहीं हो पाई।');
-        } finally {
-            setGeneratingAI(false);
-        }
-    };
-
-    const validateContent = async () => {
-        if (!form.title.trim() || !form.content.trim()) {
-            setError('Validate करने के लिए Title और Content जरूरी है।');
-            return;
-        }
-        setValidating(true);
-        setError('');
-        setValidationResult(null);
-        try {
-            const res = await fetch('/api/ai/post-assistant', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: form.title, content: form.content, type: 'validate' })
-            });
-            const data = await res.json();
-            if (data.score !== undefined) {
-                setValidationResult(data);
-            } else {
-                setError('Validation result नहीं मिला।');
-            }
-        } catch {
-            setError('Validation failed।');
-        } finally {
-            setValidating(false);
-        }
-    };
-
-    const generateAITags = async () => {
-        if (!form.title.trim() || !form.content.trim()) {
-            setError('पहले टाइटल और कंटेंट लिखें फिर AI का इस्तेमाल करें।');
-            return;
-        }
-        setGeneratingAI(true);
-        setError('');
-        try {
-            const res = await fetch('/api/ai/post-assistant', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: form.title, content: form.content, type: 'seo-tags' })
-            });
-            const data = await res.json();
-            if (data.tags) {
-                setForm(prev => ({ ...prev, tags: Array.from(new Set([...prev.tags, ...data.tags])) }));
-            }
-            if (data.seoDescription) setSeo(prev => ({ ...prev, metaDescription: data.seoDescription }));
-            if (data.slug) setSeo(prev => ({ ...prev, slug: data.slug }));
-            if (data.suggestedCategory && !form.category) {
-                setForm(prev => ({ ...prev, category: data.suggestedCategory }));
-            }
-            setSuccess('AI ने Tags, SEO Description और Slug तैयार कर दिए हैं!');
-        } catch {
-            setError('AI Failed to generate tags.');
-        } finally {
-            setGeneratingAI(false);
-        }
-    };
-
-    const translateToEnglish = async () => {
-        if (!form.title.trim() || !form.content.trim()) {
-            setError('ट्रांसलेट करने के लिए टाइटल और कंटेंट जरूरी है।');
-            return;
-        }
-        setTranslatingAI(true);
-        setSuccess('');
-        try {
-            const res = await fetch('/api/ai/post-assistant', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: form.title, content: form.content, type: 'translate' })
-            });
-            const data = await res.json();
-            if (data.translatedTitle) {
-                setForm(prev => ({ ...prev, title: data.translatedTitle, content: data.translatedContent }));
-                setSuccess('AI ने इसे इंग्लिश में ट्रांसलेट कर दिया है!');
-            }
-        } catch {
-            setError('Translation failed.');
-        } finally {
-            setTranslatingAI(false);
-        }
-    };
-
     const generateAIHeadline = async () => {
-        if (!form.content.trim()) {
-            setError('Content लिखें तभी हेडलाइन जनरेट हो पाएगी।');
-            return;
-        }
+        if (!form.content.trim()) return setError('Content लिखें।');
         setGeneratingAI(true);
-        setError('');
         try {
             const res = await fetch('/api/ai/post-assistant', {
                 method: 'POST',
@@ -302,390 +192,201 @@ export default function NewPostPage() {
                 body: JSON.stringify({ content: form.content, type: 'headline' })
             });
             const data = await res.json();
-            if (data.headline) {
-                setForm(prev => ({ ...prev, title: data.headline }));
-                setSuccess('AI ने शानदार हेडलाइन जनरेट कर दी है!');
-            }
-        } catch {
-            setError('AI Failed to generate headline.');
-        } finally {
-            setGeneratingAI(false);
-        }
+            if (data.headline) setForm(prev => ({ ...prev, title: data.headline }));
+        } finally { setGeneratingAI(false); }
     };
 
-    const generateAIContent = async () => {
-        if (!form.title.trim()) {
-            setError('पहले टाइटल लिखें तभी कंटेंट जनरेट हो पाएगा।');
-            return;
-        }
-        const userRole = getUserRole();
-        setGeneratingAI(true);
-        setError('');
+    const translateToEnglish = async () => {
+        if (!form.content.trim()) return setError('पहिले Content लिखें।');
+        setTranslatingAI(true);
         try {
             const res = await fetch('/api/ai/post-assistant', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: form.title, type: 'content', role: userRole })
+                body: JSON.stringify({ content: form.content, type: 'translate' })
             });
             const data = await res.json();
-            if (data.content) {
-                setForm(prev => ({ ...prev, content: data.content }));
-                if (userRole === 'reporter') {
-                    setForm(prev => ({ ...prev, status: 'draft' as PostStatus }));
-                    setSuccess('AI ने Draft तैयार किया। Reporter के रूप में यह Editor की समीक्षा के बाद publish होगा।');
-                } else {
-                    setSuccess('AI ने खबर की सामग्री लिख दी है! कृपया प्रकाशन से पहले तथ्यों की जाँच करें।');
-                }
-                setValidationResult({ isValid: true, score: 5, status: 'ai-generated', issues: [], suggestions: ['प्रकाशन से पहले तथ्यों की जाँच करें।'] });
-            }
-        } catch {
-            setError('AI Failed to generate content.');
-        } finally {
-            setGeneratingAI(false);
-        }
+            if (data.content) setForm(prev => ({ ...prev, content: data.content }));
+        } finally { setTranslatingAI(false); }
+    };
+
+    const generateAIContent = async () => {
+        if (!form.title.trim()) return setError('पहिले Title लिखें।');
+        setGeneratingAI(true);
+        try {
+            const res = await fetch('/api/ai/post-assistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: form.title, type: 'rewrite' })
+            });
+            const data = await res.json();
+            if (data.content) setForm(prev => ({ ...prev, content: data.content }));
+        } finally { setGeneratingAI(false); }
+    };
+
+    const suggestCategory = async () => {
+        if (!form.title.trim()) return setError('Title लिखें।');
+        setGeneratingAI(true);
+        try {
+            const res = await fetch('/api/ai/post-assistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: form.title, content: form.content, type: 'suggest-category' })
+            });
+            const data = await res.json();
+            if (data.category) setForm(prev => ({ ...prev, category: data.category }));
+        } finally { setGeneratingAI(false); }
     };
 
     return (
-        <div>
+        <div className="max-w-6xl mx-auto pb-10">
             <div className="flex items-center gap-3 mb-6">
                 <Link href="/admin/posts" className="text-gray-500 hover:text-gray-700 transition">
                     <ChevronLeft className="w-5 h-5" />
                 </Link>
                 <div>
                     <h1 className="text-2xl font-extrabold text-gray-800">नई खबर जोड़ें</h1>
-                    <p className="text-gray-500 text-sm">Cloudinary के साथ Image/Video अपलोड करें</p>
+                    <p className="text-gray-500 text-sm">Image (Max 5) और Video एक साथ अपलोड करें</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-                {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-                        <p className="text-red-700 text-sm">{error}</p>
-                    </div>
-                )}
-                {success && (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-                        <p className="text-green-700 text-sm">{success}</p>
-                    </div>
-                )}
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm flex gap-2"><AlertCircle className="w-5 h-5 shrink-0" /> {error}</div>}
+                {success && <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-green-700 text-sm flex gap-2"><CheckCircle className="w-5 h-5 shrink-0" /> {success}</div>}
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    {/* ── LEFT COLUMN (main content) ── */}
-                    <div className="lg:col-span-2 space-y-5">
-                        {/* Title */}
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-semibold text-gray-700">
-                                    खबर का शीर्षक <span className="text-red-500">*</span>
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={generateAIHeadline}
-                                        disabled={generatingAI}
-                                        className="text-[10px] font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1"
-                                    >
-                                        {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                        AI Headline
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={translateToEnglish}
-                                        disabled={translatingAI}
-                                        className="text-[10px] font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-blue-200 transition-colors flex items-center gap-1"
-                                    >
-                                        {translatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                        Translate English
-                                    </button>
-                                </div>
-                            </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2 flex justify-between items-center">
+                                शीर्षक (Title) *
+                                <button type="button" onClick={generateAIHeadline} disabled={generatingAI} className="text-[10px] bg-purple-50 text-purple-600 px-2 py-1 rounded-md uppercase font-bold hover:bg-purple-100 transition">
+                                    {generatingAI ? '...' : 'AI Headline'}
+                                </button>
+                            </label>
                             <input
                                 type="text"
                                 value={form.title}
                                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 text-lg"
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-red-500 outline-none bg-gray-50"
                                 placeholder="खबर का शीर्षक लिखें..."
                             />
                         </div>
 
-                        {/* Content */}
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-semibold text-gray-700">
-                                    खबर की सामग्री <span className="text-red-500">*</span>
-                                </label>
-                                <button
-                                    type="button"
-                                    onClick={generateAIContent}
-                                    disabled={generatingAI}
-                                    className="text-[10px] font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-blue-200 transition-colors flex items-center gap-1"
-                                >
-                                    {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                    AI Write Full News
-                                </button>
-                            </div>
+                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2 flex justify-between items-center">
+                                खबर की सामग्री (Content) *
+                                <div className="flex items-center gap-2">
+                                    <button type="button" onClick={generateAIContent} disabled={generatingAI} className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md uppercase font-bold flex items-center gap-1 hover:bg-indigo-100 transition">
+                                        <Sparkles className="w-3 h-3" />
+                                        {generatingAI ? '...' : 'AI Rewrite'}
+                                    </button>
+                                    <button type="button" onClick={translateToEnglish} disabled={translatingAI} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md uppercase font-bold hover:bg-emerald-100 transition">
+                                        {translatingAI ? '...' : 'Translate to English'}
+                                    </button>
+                                </div>
+                            </label>
                             <RichTextEditor
                                 value={form.content}
                                 onChange={(content) => setForm({ ...form, content })}
                                 placeholder="खबर का विस्तृत विवरण लिखें..."
                             />
                         </div>
-                    </div>
 
-                    {/* ── RIGHT SIDEBAR ── */}
-                    <div className="space-y-5">
-                        {/* Category & Tags */}
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-red-100 ring-1 ring-red-50">
-                            <label className="block text-sm font-bold text-red-700 mb-2 flex items-center justify-between">
-                                <span>श्रेणी चुनें <span className="text-red-500">*</span></span>
-                                <button
-                                    type="button"
-                                    onClick={suggestCategory}
-                                    disabled={generatingAI}
-                                    className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase tracking-widest hover:bg-amber-200 transition-colors flex items-center gap-1"
-                                >
-                                    {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                    AI Suggest
-                                </button>
-                            </label>
-                            <select
-                                required
-                                value={form.category}
-                                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                                className="w-full border-2 border-red-100 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-50/30 mb-5 font-semibold transition-all hover:bg-white"
-                            >
-                                <option value="">-- श्रेणी चुनें (अनिवार्य) --</option>
-                                {dbCategories.map((cat) => (
-                                    <option key={cat.slug} value={cat.slug}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-semibold text-gray-700">टैग्स (Tags)</label>
-                                <button
-                                    type="button"
-                                    onClick={generateAITags}
-                                    disabled={generatingAI}
-                                    className="text-[10px] font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1"
-                                >
-                                    {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                    AI Auto-Fill
-                                </button>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                {form.tags.map(tag => (
-                                    <span key={tag} className="bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm flex items-center gap-1 border border-red-200">
-                                        {tag}
-                                        <button type="button" onClick={() => setForm({ ...form, tags: form.tags.filter(t => t !== tag) })} className="hover:text-red-900 rounded-full">
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className="flex gap-2 mb-3">
-                                <input
-                                    type="text"
-                                    value={tagInput}
-                                    onChange={(e) => setTagInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleAddCustomTag();
-                                        }
-                                    }}
-                                    className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"
-                                    placeholder="Add tag & press Enter"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleAddCustomTag}
-                                    className="bg-gray-200 px-3 rounded-xl hover:bg-gray-300 font-medium text-sm transition"
-                                >
-                                    Add
-                                </button>
-                            </div>
-
-                            {dbTags.length > 0 && (
-                                <div className="mt-2 mb-5">
-                                    <p className="text-xs text-gray-500 mb-2">Available Tags:</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {dbTags.map(t => (
-                                            <button
-                                                key={t.name}
-                                                type="button"
-                                                onClick={() => {
-                                                    if (!form.tags.includes(t.name)) {
-                                                        setForm({ ...form, tags: [...form.tags, t.name] });
-                                                    }
-                                                }}
-                                                className={`text-xs px-2 py-1 rounded-md border transition ${form.tags.includes(t.name) ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                                            >
-                                                {t.name}
-                                            </button>
-                                        ))}
+                        {/* Media Section */}
+                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Photos Upload */}
+                                <div className="space-y-3">
+                                    <label className="text-sm font-bold text-gray-700 flex items-center justify-between">
+                                        <span className="flex items-center gap-2"><ImageIcon className="w-4 h-4 text-red-600" /> Photos ({imageFiles.length}/5)</span>
+                                    </label>
+                                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50">
+                                        <div className="grid grid-cols-2 gap-2 mb-4">
+                                            {imagePreviews.map((preview, idx) => (
+                                                <div key={idx} className="relative">
+                                                    <img src={preview} className="h-24 w-full object-cover rounded-lg" alt={`Preview ${idx + 1}`} />
+                                                    <button type="button" onClick={() => removeImage(idx)} className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 shadow-md"><X className="w-3 h-3" /></button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {imageFiles.length < 5 && (
+                                            <label className="cursor-pointer block py-4 text-center border border-gray-300 border-dashed rounded-lg hover:bg-gray-100 transition">
+                                                <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                                                <span className="text-xs text-gray-500">Pick Images (Max 50MB)</span>
+                                                <input type="file" className="hidden" accept="image/*" multiple onChange={handleImageChange} />
+                                            </label>
+                                        )}
                                     </div>
                                 </div>
-                            )}
 
-                            <label className="block text-sm font-semibold text-gray-700 mb-2 mt-4">
-                                स्टेटस (Status) <span className="text-red-500">*</span>
-                            </label>
+                                {/* Video Upload */}
+                                <div className="space-y-3">
+                                    <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                        <VideoIcon className="w-4 h-4 text-blue-600" /> Video (Optional)
+                                    </label>
+                                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 text-center relative h-full flex items-center justify-center">
+                                        {videoPreview ? (
+                                            <div className="relative w-full">
+                                                <video src={videoPreview} className="h-40 w-full object-cover rounded-lg" controls />
+                                                <button type="button" onClick={() => { setVideoFile(null); setVideoPreview(''); }} className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1"><X className="w-4 h-4" /></button>
+                                            </div>
+                                        ) : (
+                                            <label className="cursor-pointer block w-full">
+                                                <Upload className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                                <span className="text-xs text-gray-500">MP4/MOV (Max 700MB)</span>
+                                                <input type="file" className="hidden" accept="video/*" onChange={handleVideoChange} />
+                                            </label>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                            <label className="block text-sm font-bold text-gray-700 mb-3">श्रेणी (Category) *</label>
+                            <select
+                                value={form.category}
+                                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 outline-none focus:ring-2 focus:ring-red-500 mb-4"
+                            >
+                                <option value="">-- श्रेणी चुनें --</option>
+                                {dbCategories.map(cat => <option key={cat.slug} value={cat.slug}>{cat.name}</option>)}
+                            </select>
+
+                            <button type="button" onClick={suggestCategory} disabled={generatingAI} className="w-full text-xs font-bold py-2 px-4 rounded-lg bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center gap-2">
+                                {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                AI Suggest Category
+                            </button>
+                        </div>
+
+                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                            <label className="block text-sm font-bold text-gray-700 mb-3">Status</label>
                             <select
                                 value={form.status}
                                 onChange={(e) => setForm({ ...form, status: e.target.value as PostStatus })}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 outline-none focus:ring-2 focus:ring-red-500"
                             >
-                                <option value="published">Published</option>
-                                <option value="draft">Draft</option>
-                                <option value="in_review">In Review</option>
-                                <option value="scheduled">Scheduled</option>
-                                <option value="archived">Archived</option>
+                                <option value="published">Publish Now</option>
+                                <option value="draft">Save as Draft</option>
                             </select>
                         </div>
 
-                        {/* Media Upload */}
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                मीडिया (Image or Video) <span className="text-red-500">*</span>
-                            </label>
-
-                            {mediaPreview || form.image ? (
-                                <div className="relative">
-                                    <div className="relative h-44 rounded-xl overflow-hidden bg-black flex items-center justify-center">
-                                        {isSliderVideo || isVideoUrl(mediaPreview || form.image) ? (
-                                            <video src={mediaPreview || form.image} controls className="max-h-full" />
-                                        ) : (
-                                            <img src={mediaPreview || form.image} alt="Preview" className="object-cover w-full h-full" />
-                                        )}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => { setMediaFile(null); setMediaPreview(''); setForm({ ...form, image: '' }); }}
-                                        className="absolute top-2 right-2 w-7 h-7 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 shadow-lg"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="w-full h-44 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-red-400 hover:bg-red-50/50 transition group"
-                                >
-                                    <div className="flex gap-2">
-                                        <ImageIcon className="w-8 h-8 text-gray-300 group-hover:text-red-400" />
-                                        <Video className="w-8 h-8 text-gray-300 group-hover:text-red-400" />
-                                    </div>
-                                    <span className="text-sm text-gray-400 group-hover:text-red-500 font-medium">
-                                        Image/Video अपलोड करें
-                                    </span>
-                                    <span className="text-xs text-gray-300">Unsigned Cloudinary Upload</span>
-                                </button>
-                            )}
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*,video/*"
-                                onChange={handleFileChange}
-                                className="hidden"
-                            />
-                        </div>
-
-                        {/* SEO Fields */}
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-blue-100">
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="block text-sm font-bold text-blue-700">SEO Settings</label>
-                                <span className="text-[10px] bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Auto-filled by AI</span>
-                            </div>
-                            <div className="space-y-3">
-                                <input
-                                    type="text"
-                                    value={seo.metaTitle || form.title}
-                                    onChange={(e) => setSeo(prev => ({ ...prev, metaTitle: e.target.value }))}
-                                    placeholder="Meta Title (SEO)"
-                                    className="w-full border border-blue-100 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50/30"
-                                />
-                                <textarea
-                                    value={seo.metaDescription}
-                                    onChange={(e) => setSeo(prev => ({ ...prev, metaDescription: e.target.value }))}
-                                    placeholder="Meta Description (max 155 chars)"
-                                    rows={2}
-                                    maxLength={155}
-                                    className="w-full border border-blue-100 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50/30 resize-none"
-                                />
-                                <input
-                                    type="text"
-                                    value={seo.slug}
-                                    onChange={(e) => setSeo(prev => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
-                                    placeholder="url-slug (auto)"
-                                    className="w-full border border-blue-100 rounded-xl px-3 py-2 text-sm text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50/30"
-                                />
-                            </div>
-                        </div>
-
-                        {/* AI Quality Validation */}
-                        <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-bold text-gray-700">Content Quality Check</span>
-                                <button
-                                    type="button"
-                                    onClick={validateContent}
-                                    disabled={validating}
-                                    className="text-[10px] font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-green-200 transition-colors flex items-center gap-1"
-                                >
-                                    {validating ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3 h-3" />}
-                                    AI Validate
-                                </button>
-                            </div>
-                            {validationResult && (
-                                <div className={`rounded-xl p-3 text-xs space-y-1.5 ${validationResult.status === 'ai-generated' ? 'bg-amber-50 border border-amber-200' :
-                                    validationResult.isValid ? 'bg-green-50 border border-green-200' :
-                                        'bg-red-50 border border-red-200'
-                                    }`}>
-                                    <div className="flex items-center gap-2 font-bold">
-                                        {validationResult.status === 'ai-generated' ? (
-                                            <><ShieldAlert className="w-4 h-4 text-amber-600" /><span className="text-amber-700">AI Generated — सत्यापन आवश्यक</span></>
-                                        ) : validationResult.isValid ? (
-                                            <><ShieldCheck className="w-4 h-4 text-green-600" /><span className="text-green-700">Quality Score: {validationResult.score}/10</span></>
-                                        ) : (
-                                            <><ShieldAlert className="w-4 h-4 text-red-600" /><span className="text-red-700">Issues Found ({validationResult.issues.length})</span></>
-                                        )}
-                                    </div>
-                                    {validationResult.issues.length > 0 && (
-                                        <ul className="list-disc list-inside text-red-600 space-y-0.5">
-                                            {validationResult.issues.map((issue, i) => <li key={i}>{issue}</li>)}
-                                        </ul>
-                                    )}
-                                    {validationResult.suggestions.length > 0 && (
-                                        <ul className="list-disc list-inside text-gray-500 space-y-0.5">
-                                            {validationResult.suggestions.map((s, i) => <li key={i}>{s}</li>)}
-                                        </ul>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={saving || uploading}
-                            className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                            className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                         >
                             {saving || uploading ? (
                                 <>
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <Loader2 className="w-5 h-5 animate-spin" />
                                     <span>{uploading ? `अपलोड हो रहा है: ${uploadProgress}%` : 'Publish हो रहा है...'}</span>
                                 </>
                             ) : (
                                 <>
-                                    {form.status === 'draft' ? <FileText className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                                    {form.status === 'draft' ? 'Save as Draft' : 'Publish करें'}
+                                    <Save className="w-5 h-5" />
+                                    <span>Publish News</span>
                                 </>
                             )}
                         </button>

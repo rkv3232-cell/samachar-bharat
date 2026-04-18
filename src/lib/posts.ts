@@ -22,7 +22,9 @@ export interface Post {
     id?: string;
     title: string;
     content: string;
-    image: string; // This can be an image or video URL now
+    image: string; // Primary image URL (legacy fallback)
+    images?: string[]; // Array of up to 5 image URLs
+    video?: string; // Optional video URL
     category: string;
     createdAt?: Timestamp | Date | null;
     slug?: string;

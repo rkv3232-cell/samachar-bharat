@@ -161,26 +161,39 @@ export default async function PostPage({ params }: Props) {
                             </div>
                         </div>
 
-                        {/* Media Section (Image or Video) */}
-                        {post.image && (
-                            <div className="relative w-full rounded-2xl overflow-hidden mb-8 shadow-2xl border border-gray-100 bg-gray-900 flex items-center justify-center">
-                                {post.image.match(/\.(mp4|webm|ogg|mov)$/) || post.image.includes('/video/upload/') ? (
+                        {/* Media Section (Image and/or Video) */}
+                        <div className="space-y-6 mb-8">
+                            {(post.images && post.images.length > 0 ? post.images : (post.image ? [post.image] : [])).map((imgUrl, idx) => (
+                                <div key={idx} className="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-gray-900 flex items-center justify-center">
+                                    {imgUrl.match(/\.(mp4|webm|ogg|mov)$/) || imgUrl.includes('/video/upload/') ? (
+                                        <video
+                                            src={imgUrl}
+                                            controls
+                                            className="w-full h-auto max-h-[700px] object-contain rounded-2xl"
+                                            poster={imgUrl.replace(/\/video\/upload\/(v\d+\/)?/, '/video/upload/so_0/')}
+                                        />
+                                    ) : (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                        <img
+                                            src={imgUrl}
+                                            alt={`${post.title} - Photo ${idx + 1}`}
+                                            className="w-full h-auto max-h-[1200px] object-contain rounded-2xl"
+                                        />
+                                    )}
+                                </div>
+                            ))}
+
+                            {post.video && (
+                                <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-gray-900 flex items-center justify-center mt-6">
                                     <video
-                                        src={post.image}
+                                        src={post.video}
                                         controls
                                         className="w-full h-auto max-h-[700px] object-contain rounded-2xl"
-                                        poster={post.image.replace(/\/video\/upload\/(v\d+\/)?/, '/video/upload/so_0/')}
+                                        poster={post.video.replace(/\/video\/upload\/(v\d+\/)?/, '/video/upload/so_0/')}
                                     />
-                                ) : (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img
-                                        src={post.image}
-                                        alt={post.title}
-                                        className="w-full h-auto max-h-[1200px] object-contain rounded-2xl"
-                                    />
-                                )}
-                            </div>
-                        )}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Content */}
                         <div
