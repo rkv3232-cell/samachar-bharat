@@ -35,6 +35,11 @@ export async function POST(req: Request) {
             <p>खबर का विवरण...</p>
             <h3>हाइलाइट्स</h3>
             <ul><li>बिंदु 1</li><li>बिंदु 2</li></ul>`;
+        } else if (type === "rewrite") {
+            prompt = `तुम एक वरिष्ठ हिंदी पत्रकार हो। इस खबर को और बेहतर, पेशेवर और प्रभावशाली तरीके से फिर से लिखो।
+            मूल शीर्षक: ${title}
+            मूल सामग्री: ${content}
+            मिशन: खबर को नया रूप दें लेकिन तथ्यों को न बदलें। HTML फॉर्मेट का ही उपयोग करें।`;
         } else if (type === "tldr") {
             prompt = `खबर का सार (TL;DR) 3-4 बुलेट्स में दें। खबर: ${content.substring(0, 2000)}। JSON array लौटाएं: ["point 1", ...]`;
         } else if (type === "seo-tags") {
@@ -48,12 +53,16 @@ export async function POST(req: Request) {
         } else if (type === "validate") {
             prompt = `इस खबर की गुणवत्ता और तथ्यों की जाँच करें। सामग्री: ${title} ${content.substring(0, 2000)}। 
             JSON लौटाएं: {
-                "isValid": true/false,
+                "isValid": true,
                 "score": 1-10,
                 "status": "verified" | "unverified" | "ai-generated",
                 "issues": ["मुद्दा 1", ...],
                 "suggestions": ["सुझाव 1", ...]
             }`;
+        }
+
+        if (!prompt) {
+            return NextResponse.json({ error: "Invalid request type or missing parameters." }, { status: 400 });
         }
 
         // ─────────────────────────────────────────────────────────
@@ -78,7 +87,16 @@ export async function POST(req: Request) {
             body: JSON.stringify({
                 model: modelName,
                 messages: [
-                    { role: "system", content: "You are the Senior Editor of Samachar Bharat. You never mention being an LLM or Gemma; you only act as a part of the Samachar Bharat platform. Follow instructions strictly. If asked for JSON, return ONLY valid JSON." },
+                    {
+                        role: "system",
+                        content: `You are the Senior Editor of "Samachar Bharat", a premier Hindi news portal. 
+                        STRICT RULES:
+                        1. Respond ONLY with the news content.
+                        2. NEVER start with greetings like "Namaste", "Hello", or "I'm here to help".
+                        3. ALWAYS use professional journalistic Hindi (unless translating to English).
+                        4. Maintain HTML structure where requested.
+                        5. Never mention being an AI or LLM.`
+                    },
                     { role: "user", content: prompt }
                 ],
                 temperature: 0.7,
