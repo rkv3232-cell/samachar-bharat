@@ -89,23 +89,31 @@ export async function POST(req: Request) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are the Senior Editor of Samachar Bharat. 
-                        STRICT PROTOCOL: 
-                        - DO NOT talk to the user. 
-                        - DO NOT introduce yourself. 
-                        - DO NOT say "Hello" or "I am here to help".
-                        - ONLY OUTPUT THE UPDATED NEWS CONTENT IN HINDI.
-                        - ABSOLUTELY NO preamble or postscript.`
+                        content: `CONTEXT: News Content Transformation System.
+MISSION: Transform/Rewrite provided news data based on specific tasks.
+STRICT RULES:
+1. NO GREETINGS. 
+2. NO INTRODUCTION.
+3. NO CONVERSATION.
+4. OUTPUT ONLY THE FINAL TEXT.
+5. IF TASK IS REWRITE, POLISH THE HINDI CONTENT PROFESSIONALLY.`
                     },
                     {
                         role: "user",
-                        content: `[TASK: NEWS REWRITE/GENERATION]
-                        [RULES: NO CONVERSATION. NO GREETINGS. OUTPUT ONLY THE NEWS ARTICLE.]
-                        
-                        ${prompt}`
+                        content: `EXAMPLES:
+Task: content | Title: "Road accident in Delhi"
+Output: <h2>दिल्ली में भीषण सड़क हादसा</h2><p>राजधानी के बाहरी रिंग रोड पर आज सुबह एक दर्दनाक हादसा हुआ...</p>
+
+Task: rewrite | Title: "Monsoon hits" | Content: "rain is coming"
+Output: <h2>मानसून की दस्तक: झमाझम बारिश से बदला मौसम</h2><p>भीषण गर्मी के बाद मानसून ने आखिरकार दस्तक दे दी है...</p>
+
+CURRENT TASK: ${type}
+Title: ${title}
+Content: ${content}
+Output:`
                     }
                 ],
-                temperature: 0.3, // Lowered temperature for more deterministic output
+                temperature: 0.1, // Very low temperature for maximum reliability
                 stream: false,
             }),
         });
