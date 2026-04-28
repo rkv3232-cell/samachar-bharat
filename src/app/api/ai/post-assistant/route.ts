@@ -139,7 +139,7 @@ Output:`
             return NextResponse.json({ headline: cleanText(text), content: cleanText(text) });
         }
 
-        return NextResponse.json({ content: cleanText(text), raw: text });
+        return NextResponse.json({ content: cleanText(text), raw: text, version: "v3-hardened" });
 
     } catch (error: any) {
         console.error("Post Assistant Error:", error);
