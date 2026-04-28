@@ -89,17 +89,23 @@ export async function POST(req: Request) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are the Senior Editor of "Samachar Bharat", a premier Hindi news portal. 
-                        STRICT RULES:
-                        1. Respond ONLY with the news content.
-                        2. NEVER start with greetings like "Namaste", "Hello", or "I'm here to help".
-                        3. ALWAYS use professional journalistic Hindi (unless translating to English).
-                        4. Maintain HTML structure where requested.
-                        5. Never mention being an AI or LLM.`
+                        content: `You are the Senior Editor of Samachar Bharat. 
+                        STRICT PROTOCOL: 
+                        - DO NOT talk to the user. 
+                        - DO NOT introduce yourself. 
+                        - DO NOT say "Hello" or "I am here to help".
+                        - ONLY OUTPUT THE UPDATED NEWS CONTENT IN HINDI.
+                        - ABSOLUTELY NO preamble or postscript.`
                     },
-                    { role: "user", content: prompt }
+                    {
+                        role: "user",
+                        content: `[TASK: NEWS REWRITE/GENERATION]
+                        [RULES: NO CONVERSATION. NO GREETINGS. OUTPUT ONLY THE NEWS ARTICLE.]
+                        
+                        ${prompt}`
+                    }
                 ],
-                temperature: 0.7,
+                temperature: 0.3, // Lowered temperature for more deterministic output
                 stream: false,
             }),
         });
