@@ -356,7 +356,7 @@ export default function EditPostPage() {
                                         className="text-[10px] font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1"
                                     >
                                         {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                        AI REWRITE
+                                        AI REWRITE V4
                                     </button>
                                     <button
                                         type="button"
