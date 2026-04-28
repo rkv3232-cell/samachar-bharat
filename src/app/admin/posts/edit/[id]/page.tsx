@@ -140,7 +140,7 @@ export default function EditPostPage() {
         setSaving(true);
         try {
             let mediaUrl = form.image;
-            let uploadedImages = (form as any).images || [];
+            let uploadedImages: string[] = (form as any).images || [];
 
             if (mediaFiles.length > 0) {
                 setUploading(true);
@@ -356,7 +356,7 @@ export default function EditPostPage() {
                                         className="text-[10px] font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1"
                                     >
                                         {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                        AI REWRITE V4
+                                        AI REWRITE
                                     </button>
                                     <button
                                         type="button"

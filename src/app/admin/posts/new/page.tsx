@@ -115,7 +115,7 @@ export default function NewPostPage() {
 
         try {
             let mediaUrl = form.image;
-            let uploadedImages = [];
+            let uploadedImages: string[] = [];
 
             if (mediaFiles.length > 0) {
                 setUploading(true);
