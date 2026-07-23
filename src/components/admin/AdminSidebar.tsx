@@ -16,6 +16,7 @@ import {
     LogOut,
     Radio,
     Bell,
+    IdCard,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -25,6 +26,7 @@ const menuItems = [
     { href: "/admin/posts", icon: <FileText size={20} />, label: "Posts" },
     { href: "/admin/notifications", icon: <Bell size={20} />, label: "Notifications" },
     { href: "/admin/live", icon: <Radio size={20} />, label: "Live Telecast" },
+    { href: "/admin/press-id", icon: <IdCard size={20} />, label: "Press ID / DPIVS" },
     { href: "/menu", icon: <LayoutDashboard size={20} className="text-red-500" />, label: "Explore Hub (Public)" },
     { href: "/admin/categories", icon: <Tags size={20} />, label: "Categories" },
     { href: "/admin/comments", icon: <MessageSquare size={20} />, label: "Comments" },

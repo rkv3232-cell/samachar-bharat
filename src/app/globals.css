@@ -200,3 +200,31 @@ body {
 .card-media:hover video {
   transform: scale(1.05);
 }
+
+/* ── DPIVS Press ID print support ──────────────────────── */
+/* When printing, show ONLY the marked print area (the ID cards). */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .dpivs-print-area,
+  .dpivs-print-area * {
+    visibility: visible;
+  }
+
+  .dpivs-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px;
+    background: #fff;
+  }
+
+  .dpivs-card {
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
