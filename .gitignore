@@ -42,3 +42,11 @@ next-env.d.ts
 
 # firebase
 .firebase
+
+.vercel
+
+# build artifacts & binaries
+.gradle
+*.apk
+playwright-report/
+temp_env_val.txt

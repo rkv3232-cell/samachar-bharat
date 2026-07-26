@@ -229,6 +229,25 @@ service cloud.firestore {
     }
 
     // ══════════════════════════════════════════════════════════════════════
+    // DPIVS: REPORTERS COLLECTION & AUDIT LOGS
+    // ══════════════════════════════════════════════════════════════════════
+    match /reporters/{reporterId} {
+      allow read: if isAtLeastEditor();
+      allow create, update: if isAdminOrOwner();
+      allow delete: if isOwner();
+
+      match /auditLogs/{logEntryId} {
+        allow read: if isAdminOrOwner();
+        allow create: if isAdminOrOwner();
+        allow update, delete: if false; // Immutable audit logs
+      }
+
+      match /generatedCards/{cardId} {
+        allow read, write: if isAdminOrOwner();
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
     // DENY ALL (catch-all — must be last)
     // ══════════════════════════════════════════════════════════════════════
     match /{document=**} {

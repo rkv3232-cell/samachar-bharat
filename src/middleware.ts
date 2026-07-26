@@ -40,13 +40,10 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         const verifyResult = await verifySession(request);
 
         if (!verifyResult.authenticated) {
-            const response = NextResponse.redirect(new URL("/login", request.url));
-            response.cookies.set(SESSION_COOKIE_NAME, "", { maxAge: 0, path: "/" });
-            return response;
+            return NextResponse.redirect(new URL("/login", request.url));
         }
 
         if (!ADMIN_ROLES.has(verifyResult.role ?? "")) {
-            // Authenticated but insufficient role — check if they have editor access
             if (EDITOR_ROLES.has(verifyResult.role ?? "")) {
                 return NextResponse.redirect(new URL("/editor", request.url));
             }

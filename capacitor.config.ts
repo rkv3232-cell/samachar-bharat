@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Samachar Bharat',
   webDir: 'public',
   server: {
-    url: 'http://192.168.1.3:3000',
+    url: 'https://samachar-bharat-liard.vercel.app',
     cleartext: true
   }
 };

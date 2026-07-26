@@ -16,12 +16,14 @@ import {
     LogOut,
     Radio,
     Bell,
+    BadgeCheck,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const menuItems = [
     { href: "/admin", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { href: "/admin/analytics", icon: <BarChart3 size={20} />, label: "Analytics" },
+    { href: "/admin/dpivs", icon: <BadgeCheck size={20} className="text-amber-500" />, label: "Press Credentials (DPIVS)" },
     { href: "/admin/posts", icon: <FileText size={20} />, label: "Posts" },
     { href: "/admin/notifications", icon: <Bell size={20} />, label: "Notifications" },
     { href: "/admin/live", icon: <Radio size={20} />, label: "Live Telecast" },
@@ -45,7 +47,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
     const handleSignOut = async () => {
         try {
             await logout();
-            router.replace("/admin/login");
+            router.replace("/login");
         } catch (error) {
             console.error("[AdminSidebar] Sign out failed:", error);
         }

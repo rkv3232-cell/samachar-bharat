@@ -45,13 +45,13 @@ const EDITOR_PANEL_ROLES: UserRole[] = [UserRole.OWNER, UserRole.ADMIN, UserRole
 
 // ─── Panel button config ──────────────────────────────────────────────────────
 
-function getPanelLink(role: UserRole | null): { href: string; label: string; icon: React.ReactNode } | null {
-    if (!role) return null;
-    if (ADMIN_PANEL_ROLES.includes(role)) {
+function getPanelLink(role: UserRole | null, userEmail?: string | null): { href: string; label: string; icon: React.ReactNode } | null {
+    const isOwnerEmail = userEmail === 'rkv3232@gmail.com' || userEmail === 'ckv3232@gmail.com';
+    if (isOwnerEmail || (role && ADMIN_PANEL_ROLES.includes(role))) {
         return {
             href: '/admin',
             label: 'Admin Panel',
-            icon: role === UserRole.OWNER
+            icon: isOwnerEmail || role === UserRole.OWNER
                 ? <Crown className="w-4 h-4" />
                 : <ShieldCheck className="w-4 h-4" />,
         };
@@ -63,7 +63,7 @@ function getPanelLink(role: UserRole | null): { href: string; label: string; ico
             icon: <PenTool className="w-4 h-4" />,
         };
     }
-    if (EDITOR_PANEL_ROLES.includes(role)) {
+    if (role && EDITOR_PANEL_ROLES.includes(role)) {
         return {
             href: '/editor',
             label: 'Editor Panel',
@@ -171,10 +171,10 @@ export default function Navbar() {
         router.replace('/');
     };
 
-    // Panel link calculated from role
-    const panelLink = getPanelLink(role);
+    // Panel link calculated from role or owner email
+    const panelLink = getPanelLink(role, user?.email);
 
-    // Only show panel button if role is one of the privileged roles
+    // Only show panel button if role/email is one of the privileged roles
     const showPanelButton = !loading && !!user && !!panelLink;
     const displayName = firestoreUser?.name ?? user?.email?.split('@')[0] ?? 'User';
 
@@ -216,19 +216,19 @@ export default function Navbar() {
                 <div className="flex items-center gap-3">
                     {/* ── NOT logged in: show Login + Signup ── */}
                     {!loading && !user && (
-                        <div className="hidden md:flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <Link
                                 href="/login"
                                 id="navbar-login-btn"
-                                className="flex items-center gap-1.5 border border-gray-300 text-gray-700 hover:border-red-500 hover:text-red-600 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                                className="flex items-center gap-1.5 border border-gray-300 text-gray-700 hover:border-red-500 hover:text-red-600 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors"
                             >
-                                <LogIn className="w-4 h-4" />
+                                <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 Login
                             </Link>
                             <Link
                                 href="/login?tab=signup"
                                 id="navbar-signup-btn"
-                                className="flex items-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-red-600/20 hover:bg-red-700 transition"
+                                className="hidden sm:flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg shadow-red-600/20 hover:bg-red-700 transition"
                             >
                                 <UserPlus className="w-4 h-4" />
                                 Signup
@@ -238,16 +238,17 @@ export default function Navbar() {
 
                     {/* ── Logged in: Panel button + User dropdown ── */}
                     {!loading && user && (
-                        <div className="hidden md:flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             {/* Panel button — only for admin/editor-capable roles */}
                             {showPanelButton && (
                                 <Link
                                     href={panelLink!.href}
                                     id="navbar-panel-btn"
-                                    className="flex items-center gap-1.5 bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm"
+                                    className="flex items-center gap-1.5 bg-gray-900 hover:bg-black text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-colors shadow-sm"
                                 >
                                     {panelLink!.icon}
-                                    {panelLink!.label}
+                                    <span className="hidden sm:inline">{panelLink!.label}</span>
+                                    <span className="sm:hidden">Admin</span>
                                 </Link>
                             )}
 

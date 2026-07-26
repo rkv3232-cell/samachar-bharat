@@ -28,7 +28,7 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
     const [isUploading, setIsUploading] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
-    const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://samachar-bharat.netlify.app';
+    const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://samachar-bharat.web.app';
     const postUrl = `${siteUrl}/post/${post.id}`;
     const tags = Array.isArray(post.tags) ? post.tags : [];
     const hashTags = tags.map(t => `#${t}`).join(' ');

@@ -69,7 +69,8 @@ export default function MenuPage() {
     };
 
     const displayName = firestoreUser?.name ?? user?.email?.split('@')[0] ?? 'Guest User';
-    const isAdmin = role && ADMIN_PANEL_ROLES.includes(role);
+    const isOwnerEmail = user?.email === 'rkv3232@gmail.com' || user?.email === 'ckv3232@gmail.com';
+    const isAdmin = isOwnerEmail || (role && ADMIN_PANEL_ROLES.includes(role));
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-white selection:bg-red-500/30">

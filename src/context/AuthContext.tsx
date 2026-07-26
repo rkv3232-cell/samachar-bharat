@@ -21,12 +21,15 @@ import {
 } from "react";
 import {
     onAuthStateChanged,
+    onIdTokenChanged,
     signInWithEmailAndPassword,
     signOut as firebaseSignOut,
     createUserWithEmailAndPassword,
     GoogleAuthProvider,
     signInWithPopup,
     updateProfile,
+    setPersistence,
+    browserLocalPersistence,
     type User,
 } from "firebase/auth";
 import {
@@ -88,10 +91,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : data.updatedAt,
                     };
                     setFirestoreUser(plainData);
-                    setRole(toUserRole(data.role as string));
+                    const userRoleParsed = toUserRole(data.role as string);
+                    setRole(userRoleParsed);
                 } else {
                     setFirestoreUser(null);
-                    setRole(UserRole.USER);
+                    if (user?.email === "rkv3232@gmail.com" || user?.email === "ckv3232@gmail.com") {
+                        setRole(UserRole.OWNER);
+                    } else {
+                        setRole(UserRole.USER);
+                    }
                 }
                 setLoading(false);
             },
@@ -103,10 +111,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
 
         firestoreUnsubRef.current = unsubscribe;
-    }, []);
+    }, [user?.email]);
 
     // ── Auth State Listener ─────────────────────────────────────────────────────
     useEffect(() => {
+        setPersistence(auth, browserLocalPersistence).catch((err) => {
+            console.warn("[AuthContext] setPersistence warning:", err);
+        });
+
+        const syncSessionCookie = async (currentUser: User | null) => {
+            if (!currentUser) return;
+            try {
+                const idToken = await currentUser.getIdToken();
+                await fetch("/api/auth/session", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ idToken }),
+                });
+            } catch (sessionErr) {
+                console.error("[AuthContext] Session cookie sync failed:", sessionErr);
+            }
+        };
+
+        const unsubscribeToken = onIdTokenChanged(auth, async (currentUser) => {
+            if (currentUser) {
+                syncSessionCookie(currentUser);
+            }
+        });
+
         const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser ? {
                 uid: currentUser.uid,
@@ -118,8 +150,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setError(null);
 
             if (currentUser) {
+                const isOwnerEmail = currentUser.email === "rkv3232@gmail.com" || currentUser.email === "ckv3232@gmail.com";
+                if (isOwnerEmail) {
+                    setRole(UserRole.OWNER);
+                }
+
                 try {
                     console.log("[AuthContext] Auth Sync started for:", currentUser.email);
+                    await syncSessionCookie(currentUser);
 
                     const existingDoc = await getUserDocument(currentUser.uid);
                     if (!existingDoc) {
@@ -133,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 } catch (err) {
                     console.error("[AuthContext] Critical sync error:", err);
                     setError(err as Error);
-                    setLoading(false); // Task 6 failsafe
+                    setLoading(false);
                 }
             } else {
                 console.log("[AuthContext] No user session.");
@@ -148,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         return () => {
+            unsubscribeToken();
             unsubscribeAuth();
             if (firestoreUnsubRef.current) firestoreUnsubRef.current();
         };
@@ -191,11 +230,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // ── Computed Helpers ────────────────────────────────────────────────────────
     // IMPORTANT: isAdmin and isEditor are INCLUSIVE — owner satisfies them too.
-    // This prevents breaking existing guards that check `isAdmin`.
-    const isOwner = role === UserRole.OWNER;
-    const isAdmin = (role !== null && hasMinimumRole(role, UserRole.ADMIN)) || (user?.email === 'admin@test.com');   // owner OR admin
-    const isEditor = role !== null && hasMinimumRole(role, UserRole.EDITOR);  // owner, admin, OR editor
-    const isReporter = role !== null && hasMinimumRole(role, UserRole.REPORTER);
+    const isOwnerEmail = user?.email === 'rkv3232@gmail.com' || user?.email === 'ckv3232@gmail.com';
+    const isOwner = role === UserRole.OWNER || isOwnerEmail;
+    const isAdmin = isOwner || (role !== null && hasMinimumRole(role, UserRole.ADMIN)) || (user?.email === 'admin@test.com');
+    const isEditor = isOwner || (role !== null && hasMinimumRole(role, UserRole.EDITOR));
+    const isReporter = isOwner || (role !== null && hasMinimumRole(role, UserRole.REPORTER));
 
     const checkPermission = useCallback(
         (permission: Permission): boolean => hasPermission(role, permission),

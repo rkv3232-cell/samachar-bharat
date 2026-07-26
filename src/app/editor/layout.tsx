@@ -42,7 +42,7 @@ function EditorSidebar() {
 
     const handleSignOut = async () => {
         await signOut();
-        router.replace("/admin/login");
+        router.replace("/login");
     };
 
     return (

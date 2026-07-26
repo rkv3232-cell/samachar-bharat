@@ -93,6 +93,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         if (isMobile) setIsSidebarOpen(false);
     }, [pathname, isMobile]);
 
+    useEffect(() => {
+        if (!loading) {
+            if (!user) {
+                router.replace("/login");
+            } else if (!isAdmin) {
+                router.replace("/");
+            }
+        }
+    }, [loading, user, isAdmin, router]);
+
     if (isLoginPage) return <>{children}</>;
     if (loading || !isAdmin) return <AdminLoadingScreen />;
 

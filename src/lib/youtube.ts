@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const CLIENT_ID = process.env.YOUTUBE_CLIENT_ID;
 const CLIENT_SECRET = process.env.YOUTUBE_CLIENT_SECRET;
-const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI || 'https://samachar-bharat.netlify.app/api/auth/youtube/callback';
+const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI || 'https://samachar-bharat.web.app/api/auth/youtube/callback';
 
 export const youtubeOAuthClient = new google.auth.OAuth2(
     CLIENT_ID,

@@ -24,7 +24,7 @@ export function useRequireAuth(requiredRole?: UserRole): UseRequireAuthReturn {
         if (loading) return;
 
         if (!user) {
-            router.replace("/admin/login");
+            router.replace("/login");
             return;
         }
 

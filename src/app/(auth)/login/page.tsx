@@ -11,7 +11,7 @@ import { Newspaper, Lock, Mail, Eye, EyeOff, AlertCircle, User } from "lucide-re
 import { useAuth } from "@/context/AuthContext";
 
 function LoginSignupForm() {
-    const { signIn, signUp, signInWithGoogle } = useAuth();
+    const { signIn, signUp, signInWithGoogle, user, isAdmin, loading: authLoading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -22,6 +22,43 @@ function LoginSignupForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [isNative, setIsNative] = useState(false);
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!authLoading && user) {
+            const syncAndRedirect = async () => {
+                try {
+                    const authInstance = getAuth();
+                    if (authInstance.currentUser) {
+                        const idToken = await authInstance.currentUser.getIdToken();
+                        await fetch("/api/auth/session", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ idToken }),
+                        });
+                    }
+                } catch (e) {
+                    // Non-critical
+                }
+                if (isAdmin) {
+                    router.replace("/admin");
+                } else {
+                    router.replace("/");
+                }
+            };
+            syncAndRedirect();
+        }
+    }, [user, isAdmin, authLoading, router]);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const win = window as any;
+            if (win.Capacitor && win.Capacitor.isNative) {
+                setIsNative(true);
+            }
+        }
+    }, []);
 
     // ... handleLogin, handleSignup ...
 
@@ -309,28 +346,32 @@ function LoginSignupForm() {
                             </form>
                         )}
 
-                        {/* Google Login Separator */}
-                        <div className="my-6 flex items-center gap-4">
-                            <div className="h-[1px] flex-1 bg-gray-100" />
-                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">या फिर</span>
-                            <div className="h-[1px] flex-1 bg-gray-100" />
-                        </div>
+                        {!isNative && (
+                            <>
+                                {/* Google Login Separator */}
+                                <div className="my-6 flex items-center gap-4">
+                                    <div className="h-[1px] flex-1 bg-gray-100" />
+                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">या फिर</span>
+                                    <div className="h-[1px] flex-1 bg-gray-100" />
+                                </div>
 
-                        {/* Google Login Button */}
-                        <button
-                            type="button"
-                            onClick={handleGoogleSignIn}
-                            disabled={loading}
-                            className="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-3.5 rounded-2xl border border-gray-200 shadow-sm transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
-                        >
-                            <svg className="w-5 h-5" viewBox="0 0 24 24">
-                                <path fill="#EA4335" d="M12 5.04c1.94 0 3.68.67 5.05 1.97l3.77-3.77C18.54 1.15 15.48 0 12 0 7.31 0 3.25 2.69 1.24 6.6l4.41 3.42C6.7 7.12 9.1 5.04 12 5.04z" />
-                                <path fill="#4285F4" d="M23.49 12.27c0-.8-.07-1.56-.19-2.27H12v4.3h6.44c-.28 1.47-1.11 2.71-2.36 3.55l3.66 2.84c2.14-1.98 3.39-4.9 3.39-8.42z" />
-                                <path fill="#FBBC05" d="M5.65 14.18c-.28-.84-.44-1.74-.44-2.68s.16-1.84.44-2.68L1.24 5.4C.45 7.31 0 9.49 0 11.75s.45 4.44 1.24 6.35l4.41-3.92z" />
-                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.94-2.91l-3.66-2.84c-1.1.74-2.51 1.17-4.28 1.17-3.29 0-6.08-2.22-7.07-5.2l-4.41 3.42C3.25 21.31 7.31 24 12 24z" />
-                            </svg>
-                            <span>Google के साथ जारी रखें</span>
-                        </button>
+                                {/* Google Login Button */}
+                                <button
+                                    type="button"
+                                    onClick={handleGoogleSignIn}
+                                    disabled={loading}
+                                    className="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-3.5 rounded-2xl border border-gray-200 shadow-sm transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                        <path fill="#EA4335" d="M12 5.04c1.94 0 3.68.67 5.05 1.97l3.77-3.77C18.54 1.15 15.48 0 12 0 7.31 0 3.25 2.69 1.24 6.6l4.41 3.42C6.7 7.12 9.1 5.04 12 5.04z" />
+                                        <path fill="#4285F4" d="M23.49 12.27c0-.8-.07-1.56-.19-2.27H12v4.3h6.44c-.28 1.47-1.11 2.71-2.36 3.55l3.66 2.84c2.14-1.98 3.39-4.9 3.39-8.42z" />
+                                        <path fill="#FBBC05" d="M5.65 14.18c-.28-.84-.44-1.74-.44-2.68s.16-1.84.44-2.68L1.24 5.4C.45 7.31 0 9.49 0 11.75s.45 4.44 1.24 6.35l4.41-3.92z" />
+                                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.94-2.91l-3.66-2.84c-1.1.74-2.51 1.17-4.28 1.17-3.29 0-6.08-2.22-7.07-5.2l-4.41 3.42C3.25 21.31 7.31 24 12 24z" />
+                                    </svg>
+                                    <span>Google के साथ जारी रखें</span>
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
