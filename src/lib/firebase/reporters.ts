@@ -159,6 +159,7 @@ export async function createReporterInFirestore(
   input: CreateReporterInput,
   createdByUid: string
 ): Promise<ReporterProfile> {
+  invalidateReporterCache();
   const docId = `rep_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const pressIdNumber = generateClientPressId();
   const validityMonths = input.validityMonths || 12;
@@ -260,32 +261,50 @@ export async function createReporterInFirestore(
   return reporterProfile;
 }
 
+// ── In-Memory Firestore Query Cache ──────────────────────────────────────────
+
+let cachedReportersList: ReporterProfile[] | null = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 10000; // 10s cache TTL
+
+export function invalidateReporterCache(): void {
+  cachedReportersList = null;
+  lastCacheTime = 0;
+}
+
 // ── Fetch Reporters from Firestore ──────────────────────────────────────────
 
 export async function fetchReportersFromFirestore(
   selectedStatus?: string,
   searchQuery?: string
 ): Promise<ReporterProfile[]> {
-  const reportersRef = collection(db, "reporters");
-  const snap = await getDocs(reportersRef);
+  const now = Date.now();
 
-  let list: ReporterProfile[] = [];
-  snap.forEach((docSnap) => {
-    const data = docSnap.data();
-    const normalized = normalizeReporter(data, docSnap.id);
-    list.push(normalized);
-  });
+  if (!cachedReportersList || now - lastCacheTime > CACHE_TTL_MS) {
+    const reportersRef = collection(db, "reporters");
+    const snap = await getDocs(reportersRef);
 
-  // Sort descending by createdAt
-  list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const list: ReporterProfile[] = [];
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      const normalized = normalizeReporter(data, docSnap.id);
+      list.push(normalized);
+    });
+
+    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    cachedReportersList = list;
+    lastCacheTime = now;
+  }
+
+  let filtered = [...cachedReportersList];
 
   if (selectedStatus && selectedStatus !== "ALL") {
-    list = list.filter((r) => r.status === selectedStatus);
+    filtered = filtered.filter((r) => r.status === selectedStatus);
   }
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase().trim();
-    list = list.filter(
+    filtered = filtered.filter(
       (r) =>
         r.fullName?.toLowerCase().includes(q) ||
         r.pressIdNumber?.toLowerCase().includes(q) ||
@@ -295,7 +314,7 @@ export async function fetchReportersFromFirestore(
     );
   }
 
-  return list;
+  return filtered;
 }
 
 // ── Update Reporter in Firestore ──────────────────────────────────────────────
@@ -305,6 +324,7 @@ export async function updateReporterInFirestore(
   updates: Partial<ReporterProfile>,
   updatedByUid: string
 ): Promise<void> {
+  invalidateReporterCache();
   const docRef = doc(db, "reporters", id);
   const nowIso = new Date().toISOString();
 
@@ -330,6 +350,7 @@ export async function deleteReporterInFirestore(
   id: string,
   revokedByUid: string
 ): Promise<void> {
+  invalidateReporterCache();
   const docRef = doc(db, "reporters", id);
   const nowIso = new Date().toISOString();
 

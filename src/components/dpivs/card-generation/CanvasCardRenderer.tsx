@@ -22,11 +22,21 @@ const FIXED_ASSETS = {
   directorSignature: "/director-signature.png",
 };
 
+// Global in-memory image cache to avoid re-fetching assets on canvas re-renders
+const assetImageCache = new Map<string, HTMLImageElement>();
+
 function loadImage(src: string): Promise<HTMLImageElement | null> {
+  if (assetImageCache.has(src)) {
+    return Promise.resolve(assetImageCache.get(src)!);
+  }
+
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
+    img.onload = () => {
+      assetImageCache.set(src, img);
+      resolve(img);
+    };
     img.onerror = () => {
       console.warn(`[CanvasCardRenderer] Could not load asset: ${src}`);
       resolve(null);
@@ -38,7 +48,7 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
 // Render Scale multiplier (4x Ultra High-Res: 2800px x 4460px per card = ~1317 DPI)
 const RENDER_SCALE = 4;
 
-export default function CanvasCardRenderer({
+function CanvasCardRendererComponent({
   reporter,
   side,
   scale = 1,
@@ -95,6 +105,9 @@ export default function CanvasCardRenderer({
     />
   );
 }
+
+const CanvasCardRenderer = React.memo(CanvasCardRendererComponent);
+export default CanvasCardRenderer;
 
 // ─── MASTER FRONT CARD RECREATION ──────────────────────────────────────────────
 

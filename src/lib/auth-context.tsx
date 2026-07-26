@@ -18,13 +18,18 @@ interface LegacyAuthContextType {
     logout: () => Promise<void>;
 }
 
+import { useMemo } from "react";
+
 export function useAuth(): AuthContextType & { login: any; logout: any; userRole: any; firestoreUser: any } {
     const ctx = useNewAuth();
-    return {
-        ...ctx,
-        firestoreUser: ctx.firestoreUser,
-        login: ctx.signIn,
-        logout: ctx.signOut,
-        userRole: ctx.role,
-    };
+    return useMemo(
+        () => ({
+            ...ctx,
+            firestoreUser: ctx.firestoreUser,
+            login: ctx.signIn,
+            logout: ctx.signOut,
+            userRole: ctx.role,
+        }),
+        [ctx]
+    );
 }

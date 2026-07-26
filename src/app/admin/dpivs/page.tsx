@@ -35,7 +35,16 @@ export default function DPIVSAdminPage() {
   const [reporters, setReporters] = useState<ReporterProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
+
+  // 300ms Search Debounce to eliminate excessive Firestore calls on typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   // Modals
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -52,14 +61,14 @@ export default function DPIVSAdminPage() {
     try {
       setLoading(true);
       // Primary: Direct Firestore Fetch
-      const fsList = await fetchReportersFromFirestore(selectedStatus, searchQuery);
+      const fsList = await fetchReportersFromFirestore(selectedStatus, debouncedSearchQuery);
       setReporters(fsList);
     } catch (err: any) {
       console.warn("[DPIVS Page] Firestore direct fetch error, trying API fallback:", err);
       try {
         const params = new URLSearchParams();
         if (selectedStatus !== "ALL") params.append("status", selectedStatus);
-        if (searchQuery) params.append("search", searchQuery);
+        if (debouncedSearchQuery) params.append("search", debouncedSearchQuery);
 
         const res = await fetch(`/api/dpivs/reporters?${params.toString()}`);
         const data = await res.json();
@@ -72,20 +81,34 @@ export default function DPIVSAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedStatus, searchQuery]);
+  }, [selectedStatus, debouncedSearchQuery]);
 
   useEffect(() => {
     fetchReporters();
   }, [fetchReporters]);
 
+  // Memoized Action Handlers for Table & Modals
+  const handleViewCard = useCallback((reporter: ReporterProfile) => {
+    setPreviewReporter(reporter);
+    setIsPreviewModalOpen(true);
+  }, []);
+
+  const handleEdit = useCallback((reporter: ReporterProfile) => {
+    setEditingReporter(reporter);
+    setIsFormOpen(true);
+  }, []);
+
+  const handleChangeStatusClick = useCallback((reporter: ReporterProfile) => {
+    setStatusReporter(reporter);
+    setIsStatusModalOpen(true);
+  }, []);
+
   // Create or Edit Submit
   const handleFormSubmit = async (formData: any) => {
     try {
       if (editingReporter) {
-        // 1. Save to Firestore
         await updateReporterInFirestore(editingReporter.id, formData, user?.uid || "admin");
         
-        // 2. Trigger API in background (optional)
         fetch(`/api/dpivs/reporters/${editingReporter.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -95,10 +118,8 @@ export default function DPIVSAdminPage() {
         toast.success(`Profile for ${formData.fullName} updated successfully!`);
         await fetchReporters();
       } else {
-        // 1. Create in Firestore
         const newReporter = await createReporterInFirestore(formData, user?.uid || "admin");
 
-        // 2. Trigger API in background (optional)
         fetch("/api/dpivs/reporters", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -139,7 +160,7 @@ export default function DPIVSAdminPage() {
   };
 
   // Soft Delete / Archive
-  const handleDeleteReporter = async (reporter: ReporterProfile) => {
+  const handleDeleteReporter = useCallback(async (reporter: ReporterProfile) => {
     if (!isOwner) {
       toast.error("Only the Organization Owner can archive or revoke credentials.");
       return;
@@ -161,10 +182,10 @@ export default function DPIVSAdminPage() {
     } catch (err: any) {
       toast.error(err.message || "Archiving error");
     }
-  };
+  }, [isOwner, user?.uid, fetchReporters]);
 
   // CSV Export
-  const handleExportCSV = () => {
+  const handleExportCSV = useCallback(() => {
     if (reporters.length === 0) {
       toast.error("No reporter records to export.");
       return;
@@ -207,17 +228,20 @@ export default function DPIVSAdminPage() {
     document.body.removeChild(link);
 
     toast.success("Reporter records exported to CSV!");
-  };
+  }, [reporters]);
 
-  // Compute Summary Statistics
-  const totalCount = reporters.length;
-  const activeCount = reporters.filter(
-    (r) => r.status === ReporterStatus.ACTIVE || r.status === ReporterStatus.RENEWED_ACTIVE
-  ).length;
-  const pendingCount = reporters.filter((r) => r.status === ReporterStatus.PENDING).length;
-  const suspendedCount = reporters.filter(
-    (r) => r.status === ReporterStatus.SUSPENDED || r.status === ReporterStatus.REVOKED
-  ).length;
+  // Compute Summary Statistics (Memoized)
+  const { totalCount, activeCount, pendingCount, suspendedCount } = React.useMemo(() => {
+    const total = reporters.length;
+    const active = reporters.filter(
+      (r) => r.status === ReporterStatus.ACTIVE || r.status === ReporterStatus.RENEWED_ACTIVE
+    ).length;
+    const pending = reporters.filter((r) => r.status === ReporterStatus.PENDING).length;
+    const suspended = reporters.filter(
+      (r) => r.status === ReporterStatus.SUSPENDED || r.status === ReporterStatus.REVOKED
+    ).length;
+    return { totalCount: total, activeCount: active, pendingCount: pending, suspendedCount: suspended };
+  }, [reporters]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6 lg:p-8 space-y-8">
@@ -346,18 +370,9 @@ export default function DPIVSAdminPage() {
       <ReporterTable
         reporters={reporters}
         loading={loading}
-        onViewCard={(reporter) => {
-          setPreviewReporter(reporter);
-          setIsPreviewModalOpen(true);
-        }}
-        onEdit={(reporter) => {
-          setEditingReporter(reporter);
-          setIsFormOpen(true);
-        }}
-        onChangeStatus={(reporter) => {
-          setStatusReporter(reporter);
-          setIsStatusModalOpen(true);
-        }}
+        onViewCard={handleViewCard}
+        onEdit={handleEdit}
+        onChangeStatus={handleChangeStatusClick}
         onDelete={handleDeleteReporter}
       />
 

@@ -79,7 +79,7 @@ export function StatusBadge({ status }: { status: ReporterStatus }) {
   );
 }
 
-export default function ReporterTable({
+function ReporterTableComponent({
   reporters,
   loading,
   onViewCard,
@@ -142,6 +142,7 @@ export default function ReporterTable({
                       <img
                         src={reporter.photoURL}
                         alt={reporter.fullName}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -241,3 +242,6 @@ export default function ReporterTable({
     </div>
   );
 }
+
+const ReporterTable = React.memo(ReporterTableComponent);
+export default ReporterTable;

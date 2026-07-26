@@ -15,6 +15,7 @@ import {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
     type ReactNode,
@@ -67,6 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, [user, role, loading, firestoreUser]);
 
+    const userEmailRef = useRef(user?.email);
+    useEffect(() => {
+        userEmailRef.current = user?.email;
+    }, [user?.email]);
+
     const firestoreUnsubRef = useRef<(() => void) | null>(null);
 
     // ── Real-time Firestore listener ───────────────────────────────────────────
@@ -90,16 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
                         updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : data.updatedAt,
                     };
-                    setFirestoreUser(plainData);
+                    setFirestoreUser((prev) => (JSON.stringify(prev) === JSON.stringify(plainData) ? prev : plainData));
                     const userRoleParsed = toUserRole(data.role as string);
-                    setRole(userRoleParsed);
+                    setRole((prev) => (prev === userRoleParsed ? prev : userRoleParsed));
                 } else {
                     setFirestoreUser(null);
-                    if (user?.email === "rkv3232@gmail.com" || user?.email === "ckv3232@gmail.com") {
-                        setRole(UserRole.OWNER);
-                    } else {
-                        setRole(UserRole.USER);
-                    }
+                    const email = userEmailRef.current;
+                    const defaultRole = (email === "rkv3232@gmail.com" || email === "ckv3232@gmail.com") ? UserRole.OWNER : UserRole.USER;
+                    setRole((prev) => (prev === defaultRole ? prev : defaultRole));
                 }
                 setLoading(false);
             },
@@ -111,9 +115,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
 
         firestoreUnsubRef.current = unsubscribe;
-    }, [user?.email]);
+    }, []);
 
     // ── Auth State Listener ─────────────────────────────────────────────────────
+    const activeUidRef = useRef<string | null>(null);
+
     useEffect(() => {
         setPersistence(auth, browserLocalPersistence).catch((err) => {
             console.warn("[AuthContext] setPersistence warning:", err);
@@ -133,13 +139,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         };
 
-        const unsubscribeToken = onIdTokenChanged(auth, async (currentUser) => {
+        const unsubscribeToken = onIdTokenChanged(auth, (currentUser) => {
             if (currentUser) {
                 syncSessionCookie(currentUser);
             }
         });
 
         const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+            if (currentUser?.uid === activeUidRef.current && currentUser) {
+                // User already initialized, avoid re-fetching user doc
+                return;
+            }
+
+            activeUidRef.current = currentUser?.uid || null;
+
             setUser(currentUser ? {
                 uid: currentUser.uid,
                 email: currentUser.email,
@@ -156,12 +169,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
 
                 try {
-                    console.log("[AuthContext] Auth Sync started for:", currentUser.email);
                     await syncSessionCookie(currentUser);
 
                     const existingDoc = await getUserDocument(currentUser.uid);
                     if (!existingDoc) {
-                        console.log("[AuthContext] No Firestore doc, creating...");
                         await createUserDocument(currentUser);
                     } else {
                         updateLastLogin(currentUser.uid).catch(console.error);
@@ -174,7 +185,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setLoading(false);
                 }
             } else {
-                console.log("[AuthContext] No user session.");
                 if (firestoreUnsubRef.current) {
                     firestoreUnsubRef.current();
                     firestoreUnsubRef.current = null;
@@ -220,6 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signOut = useCallback(async (): Promise<void> => {
         setError(null);
+        activeUidRef.current = null;
         try {
             await fetch("/api/auth/session", { method: "DELETE" });
         } catch {
@@ -229,7 +240,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // ── Computed Helpers ────────────────────────────────────────────────────────
-    // IMPORTANT: isAdmin and isEditor are INCLUSIVE — owner satisfies them too.
     const isOwnerEmail = user?.email === 'rkv3232@gmail.com' || user?.email === 'ckv3232@gmail.com';
     const isOwner = role === UserRole.OWNER || isOwnerEmail;
     const isAdmin = isOwner || (role !== null && hasMinimumRole(role, UserRole.ADMIN)) || (user?.email === 'admin@test.com');
@@ -241,22 +251,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         [role]
     );
 
-    const value: AuthContextType = {
-        user,
-        firestoreUser,
-        role,
-        loading,
-        error,
-        signIn,
-        signInWithGoogle,
-        signUp,
-        signOut,
-        isOwner,
-        isAdmin,
-        isEditor,
-        isReporter,
-        hasPermission: checkPermission,
-    };
+    const value: AuthContextType = useMemo(
+        () => ({
+            user,
+            firestoreUser,
+            role,
+            loading,
+            error,
+            signIn,
+            signInWithGoogle,
+            signUp,
+            signOut,
+            isOwner,
+            isAdmin,
+            isEditor,
+            isReporter,
+            hasPermission: checkPermission,
+        }),
+        [
+            user,
+            firestoreUser,
+            role,
+            loading,
+            error,
+            signIn,
+            signInWithGoogle,
+            signUp,
+            signOut,
+            isOwner,
+            isAdmin,
+            isEditor,
+            isReporter,
+            checkPermission,
+        ]
+    );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
