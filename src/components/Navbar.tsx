@@ -25,6 +25,8 @@ import {
     Globe,
 } from 'lucide-react';
 
+import ThemeToggle from '@/components/ThemeToggle';
+
 // ─── Default/Fallback Categories (shown until Firestore loads) ───────────────
 const DEFAULT_CATEGORIES: Category[] = [
     { id: 'uttar-pradesh', name: 'उत्तर प्रदेश', slug: 'uttar-pradesh' },
@@ -214,6 +216,7 @@ export default function Navbar() {
                 </Link>
 
                 <div className="flex items-center gap-3">
+                    <ThemeToggle />
                     {/* ── NOT logged in: show Login + Signup ── */}
                     {!loading && !user && (
                         <div className="flex items-center gap-2">

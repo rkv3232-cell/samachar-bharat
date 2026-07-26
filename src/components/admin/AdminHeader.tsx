@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Bell, Search, UserCircle, Crown, ShieldCheck, Menu } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types/auth.types";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface AdminHeaderProps {
     onMenuClick: () => void;
@@ -57,6 +58,9 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
                         className="h-10 w-64 rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     />
                 </div>
+
+                {/* Theme Toggle (Light / Dark Mode) */}
+                <ThemeToggle />
 
                 {/* Notifications */}
                 <button

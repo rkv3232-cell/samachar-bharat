@@ -39,6 +39,7 @@ import { SettingsProvider } from '@/context/SettingsContext';
 import { AdminOnly } from '@/components/auth/AdminOnly';
 import NotificationManager from '@/components/NotificationManager';
 import PWAInstall from '@/components/PWAInstall';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export default function RootLayout({
   children,
@@ -52,15 +53,17 @@ export default function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
-          <SettingsProvider>
-            <NotificationManager />
-            <PWAInstall />
-            {children}
-            <AdminOnly>
-              <AIAssistant />
-            </AdminOnly>
-            <Toaster richColors position="top-right" duration={2500} />
-          </SettingsProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+            <SettingsProvider>
+              <NotificationManager />
+              <PWAInstall />
+              {children}
+              <AdminOnly>
+                <AIAssistant />
+              </AdminOnly>
+              <Toaster richColors position="top-right" duration={2500} />
+            </SettingsProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
