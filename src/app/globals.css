@@ -1,17 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --foreground-rgb: 17, 17, 17;
-  --background-rgb: 245, 245, 248;
-}
-
-.dark {
-  --foreground-rgb: 243, 244, 246;
-  --background-rgb: 10, 10, 12;
+  --foreground-rgb: 17, 24, 39;
+  --background-rgb: 249, 250, 252;
+  color-scheme: light;
 }
 
 html {
   scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  color-scheme: light;
 }
 
 body {
@@ -19,8 +18,15 @@ body {
   background: rgb(var(--background-rgb));
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
+
+/* GPU Hardware Acceleration for smooth scrolling & micro-animations */
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -51,25 +57,27 @@ body {
   scrollbar-width: none;
 }
 
-/* Breaking news ticker */
-@keyframes ticker {
+/* Breaking news ticker - instant start at 0, seamless loop to -50% */
+@keyframes ticker-seamless {
   0% {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
 
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-50%);
   }
 }
 
 .ticker-track {
   display: inline-flex;
   white-space: nowrap;
-  animation: ticker 30s linear infinite;
+  animation: ticker-seamless var(--ticker-duration, 35s) linear infinite;
+  will-change: transform;
 }
 
-.ticker-track:hover {
-  animation-play-state: paused;
+.ticker-track:hover,
+.ticker-track.paused {
+  animation-play-state: paused !important;
 }
 
 /* Skeleton shimmer */
@@ -199,4 +207,14 @@ body {
 .card-media:hover img,
 .card-media:hover video {
   transform: scale(1.05);
+}
+
+/* Accessibility: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

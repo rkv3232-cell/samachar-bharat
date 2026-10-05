@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { PlusCircle, Pencil, Trash2, FileText, Eye, AlertCircle } from "lucide-react";
 import { getAllPosts, deletePost, type Post, formatDate } from "@/lib/posts";
@@ -32,12 +32,7 @@ export default function EditorDashboard() {
     const [error, setError] = useState("");
     const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
 
-    useEffect(() => {
-        loadPosts();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user?.uid, isAdmin]);
-
-    const loadPosts = async () => {
+    const loadPosts = useCallback(async () => {
         setLoading(true);
         try {
             const [all, fetchedCats] = await Promise.all([
@@ -61,7 +56,11 @@ export default function EditorDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAdmin, user?.uid]);
+
+    useEffect(() => {
+        loadPosts();
+    }, [loadPosts]);
 
     const handleDelete = async (id: string, title: string) => {
         if (!confirm(`"${title}" को delete करना चाहते हैं?`)) return;

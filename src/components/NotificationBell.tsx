@@ -39,9 +39,9 @@ export default function NotificationBell() {
             <button
                 onClick={() => permission === "default" ? setShowPrompt(true) : null}
                 className={`fixed bottom-24 right-6 z-50 p-3 rounded-full shadow-2xl transition-all duration-300 ${permission === "granted"
-                    ? "bg-green-500 text-white"
-                    : "bg-red-600 text-white animate-bounce"
-                    }`}
+ ? "bg-green-500 text-white"
+ : "bg-red-600 text-white animate-bounce"
+ }`}
                 title={permission === "granted" ? "Notifications Active" : "Enable Notifications"}
             >
                 {permission === "granted" ? <Bell size={24} /> : <BellOff size={24} />}
@@ -49,22 +49,22 @@ export default function NotificationBell() {
 
             {showPrompt && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-in fade-in zoom-in duration-300">
+                    <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-in fade-in zoom-in duration-300">
                         <button
                             onClick={() => setShowPrompt(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
                         >
                             <X size={20} />
                         </button>
 
                         <div className="text-center">
-                            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                <Bell className="text-red-600 dark:text-red-400" size={32} />
+                            <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <Bell className="text-red-600" size={32} />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">
                                 Stay Updated!
                             </h3>
-                            <p className="text-gray-500 dark:text-gray-400 mb-6">
+                            <p className="text-gray-500 mb-6">
                                 Get real-time alerts for breaking news, live match scores, and daily updates directly on your device.
                             </p>
 
@@ -77,7 +77,7 @@ export default function NotificationBell() {
                                 </button>
                                 <button
                                     onClick={() => setShowPrompt(false)}
-                                    className="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-3 rounded-xl transition-colors"
+                                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition-colors"
                                 >
                                     Maybe Later
                                 </button>

@@ -1,8 +1,0 @@
-{
-    "java.configuration.updateBuildConfiguration": "disabled",
-    "java.import.gradle.enabled": false,
-    "gradle.autoDetect": "off",
-    "java.server.launchMode": "LightWeight",
-    "java.project.importOnFirstTimeStartup": "disabled",
-    "java.jdt.ls.java.home": null
-}

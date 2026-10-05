@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { Bell, Search, UserCircle, Crown, ShieldCheck, Menu } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types/auth.types";
-import ThemeToggle from "@/components/ThemeToggle";
 
 interface AdminHeaderProps {
     onMenuClick: () => void;
@@ -29,71 +28,65 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
     const displayName = firestoreUser?.name ?? "Admin";
 
     return (
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6 dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex items-center gap-2 md:gap-4">
+        <header className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 md:px-5 shadow-2xs">
+            <div className="flex items-center gap-2 md:gap-3">
                 <button
-                    onPointerDown={(e) => {
-                        e.preventDefault(); // Prevent focus/click flickering
-                        onMenuClick();
-                    }}
-                    className="group flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition-all hover:bg-gray-100 hover:text-blue-600 active:scale-90 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 md:h-10 md:w-10"
+                    onClick={onMenuClick}
+                    className="group flex h-8 w-8 items-center justify-center rounded-lg bg-gray-50 text-gray-600 transition-all hover:bg-gray-100 hover:text-red-600 active:scale-95"
                     aria-label="Toggle sidebar"
                 >
-                    <Menu size={24} className="transition-transform group-hover:scale-110 md:size-5" />
+                    <Menu size={16} className="transition-transform group-hover:scale-105" />
                 </button>
-                <h2 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white truncate">{title}</h2>
+                <h2 className="text-sm font-bold text-gray-900 truncate">{title}</h2>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-3">
                 {/* Search */}
                 <div className="relative hidden sm:block">
                     <Search
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={14}
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
                     />
                     <input
                         type="text"
                         placeholder="Search..."
                         aria-label="Search admin panel"
-                        className="h-10 w-64 rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        className="h-8 w-48 rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 text-xs text-gray-900 outline-none transition-colors focus:border-red-500 focus:bg-white focus:ring-1 focus:ring-red-100"
                     />
                 </div>
 
-                {/* Theme Toggle (Light / Dark Mode) */}
-                <ThemeToggle />
-
                 {/* Notifications */}
                 <button
-                    className="relative rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    className="relative rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:scale-95"
                     aria-label="Notifications"
                 >
-                    <Bell size={20} />
-                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900" />
+                    <Bell size={16} />
+                    <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500 ring-1 ring-white" />
                 </button>
 
                 {/* Profile with role badge */}
-                <div className="flex items-center gap-2 rounded-full border border-gray-100 bg-gray-50 py-1 pl-1 pr-3 dark:border-gray-700 dark:bg-gray-800">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 text-white">
-                        <UserCircle size={20} />
+                <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 py-0.5 pl-1 pr-2.5">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-tr from-red-500 to-rose-600 text-white font-medium shadow-xs">
+                        <UserCircle size={15} />
                     </div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="text-xs font-semibold text-gray-800 max-w-[100px] truncate">
                         {displayName}
                     </span>
                     {role === UserRole.OWNER && (
                         <span
-                            className="flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                            className="flex items-center gap-0.5 rounded-md bg-amber-100 px-1.5 py-0.2 text-[9px] font-bold uppercase text-amber-800"
                             aria-label="Owner role"
                         >
-                            <Crown size={10} />
+                            <Crown size={9} />
                             Owner
                         </span>
                     )}
                     {role === UserRole.ADMIN && (
                         <span
-                            className="flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            className="flex items-center gap-0.5 rounded-md bg-red-100 px-1.5 py-0.2 text-[9px] font-bold uppercase text-red-700"
                             aria-label="Admin role"
                         >
-                            <ShieldCheck size={10} />
+                            <ShieldCheck size={9} />
                             Admin
                         </span>
                     )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllPosts, deletePost, Post, formatDate } from '@/lib/posts';
@@ -23,11 +23,6 @@ const DEFAULT_CATEGORIES = [
 
 // ── Social Share Modal ──────────────────────────────────────────────────────
 function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post: Post; onClose: () => void; userUid: string; isYouTubeConnected: boolean }) {
-    const [copied, setCopied] = useState(false);
-    const [youtubeText, setYoutubeText] = useState('');
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-
     const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://samachar-bharat.web.app';
     const postUrl = `${siteUrl}/post/${post.id}`;
     const tags = Array.isArray(post.tags) ? post.tags : [];
@@ -36,9 +31,10 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
 
     const youtubeDescription = `${post.title}\n\n${safeContent}${safeContent.length >= 300 ? '...' : ''}\n\n${hashTags}\n\n🔗 Puri khabar padhen: ${postUrl}\n\n© Samachar Bharat`;
 
-    useEffect(() => {
-        setYoutubeText(youtubeDescription);
-    }, []);
+    const [copied, setCopied] = useState(false);
+    const [youtubeText, setYoutubeText] = useState(youtubeDescription);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
     const handleFacebook = () => {
         const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}&quote=${encodeURIComponent(post.title)}`;
@@ -92,54 +88,54 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
     const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/) || post.image?.includes('/video/upload/');
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 text-gray-900" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 text-gray-900" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-150" onClick={e => e.stopPropagation()}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-100 bg-gray-50/50">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <Share2 className="w-5 h-5 text-red-600" />
+                        <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                            <Share2 className="w-4 h-4 text-red-600" />
                             Social Hub
                         </h2>
-                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{post.title}</p>
+                        <p className="text-[11px] text-gray-500 line-clamp-1">{post.title}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-xl transition">
-                        <X className="w-5 h-5 text-gray-500" />
+                    <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition text-gray-400 hover:text-gray-700">
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
 
                 <div className="max-h-[80vh] overflow-y-auto">
                     {/* Share Grid */}
-                    <div className="p-5 space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
-                            <button onClick={handleFacebook} className="flex items-center justify-center gap-3 p-4 bg-[#1877F2] text-white rounded-xl hover:opacity-90 transition font-bold shadow-md">
-                                <Share2 className="w-5 h-5" /> Facebook
+                    <div className="p-3.5 space-y-3">
+                        <div className="grid grid-cols-2 gap-2">
+                            <button onClick={handleFacebook} className="h-8 flex items-center justify-center gap-1.5 bg-[#1877F2] text-white rounded-lg hover:opacity-90 transition text-xs font-bold shadow-xs active:scale-95">
+                                <Share2 className="w-3.5 h-3.5" /> Facebook
                             </button>
-                            <button onClick={handleWhatsApp} className="flex items-center justify-center gap-3 p-4 bg-[#25D366] text-white rounded-xl hover:opacity-90 transition font-bold shadow-md">
-                                <MessageCircle className="w-5 h-5" /> WhatsApp
+                            <button onClick={handleWhatsApp} className="h-8 flex items-center justify-center gap-1.5 bg-[#25D366] text-white rounded-lg hover:opacity-90 transition text-xs font-bold shadow-xs active:scale-95">
+                                <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                             </button>
                         </div>
 
                         {/* YouTube Section */}
-                        <div className={`p-4 rounded-2xl border-2 transition ${isYouTubeConnected ? 'border-red-100 bg-red-50/30' : 'border-gray-100 bg-gray-50'}`}>
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isYouTubeConnected ? 'bg-red-600 shadow-red-200' : 'bg-gray-400'}`}>
-                                        <Video className="w-4 h-4 text-white" />
+                        <div className={`p-3 rounded-lg border transition ${isYouTubeConnected ? 'border-red-100 bg-red-50/30' : 'border-gray-100 bg-gray-50/50'}`}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-1.5">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isYouTubeConnected ? 'bg-red-600 text-white' : 'bg-gray-400 text-white'}`}>
+                                        <Video className="w-3 h-3" />
                                     </div>
-                                    <span className="text-sm font-bold text-gray-800">YouTube Channel</span>
+                                    <span className="text-xs font-bold text-gray-800">YouTube Channel</span>
                                 </div>
                                 {isYouTubeConnected && (
-                                    <span className="flex items-center gap-1 text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                    <span className="flex items-center gap-1 text-[9px] bg-green-100 text-green-700 px-1.5 py-0.2 rounded-full font-bold uppercase tracking-wider">
                                         Connected
                                     </span>
                                 )}
                             </div>
 
                             {uploadSuccess ? (
-                                <div className="bg-green-100 border border-green-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 flex items-center justify-between gap-2">
                                     <span className="text-xs font-bold text-green-800">Video Uploaded!</span>
-                                    <a href={uploadSuccess} target="_blank" className="flex items-center gap-1 text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-bold">
+                                    <a href={uploadSuccess} target="_blank" className="flex items-center gap-1 text-xs bg-green-600 text-white px-2.5 py-1 rounded-md hover:bg-green-700 transition font-bold active:scale-95">
                                         Watch <ExternalLink className="w-3 h-3" />
                                     </a>
                                 </div>
@@ -147,14 +143,14 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
                                 <button
                                     disabled={isUploading || (isYouTubeConnected && !isVideo)}
                                     onClick={handleYouTubeAction}
-                                    className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-sm ${!isYouTubeConnected
+                                    className={`h-8 w-full rounded-lg font-bold flex items-center justify-center gap-1.5 transition text-xs shadow-xs active:scale-95 ${!isYouTubeConnected
                                         ? 'bg-gray-800 text-white hover:bg-black'
                                         : isVideo
                                             ? 'bg-red-600 text-white hover:bg-red-700'
-                                            : 'bg-red-100 text-red-300 cursor-not-allowed'
+                                            : 'bg-red-50 text-red-300 cursor-not-allowed border border-red-100'
                                         }`}
                                 >
-                                    {isUploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Video className="w-5 h-5" />}
+                                    {isUploading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Video className="w-3.5 h-3.5" />}
                                     {!isYouTubeConnected
                                         ? 'Connect YouTube Channel'
                                         : isVideo
@@ -162,22 +158,22 @@ function SocialShareModal({ post, onClose, userUid, isYouTubeConnected }: { post
                                             : 'No Video found to Upload'}
                                 </button>
                             )}
-                            {!isYouTubeConnected && <p className="text-[10px] text-gray-400 text-center mt-2 italic">OAuth setup required from Google Console first.</p>}
+                            {!isYouTubeConnected && <p className="text-[10px] text-gray-400 text-center mt-1.5 italic">OAuth setup required from Google Console first.</p>}
                         </div>
 
                         {/* Description Copy */}
-                        <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Post Copy-Template</span>
-                                <button onClick={handleCopy} className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition ${copied ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
-                                    {copied ? <CheckCircle className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                                    {copied ? 'Copied' : 'Copy Template'}
+                        <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Post Copy-Template</span>
+                                <button onClick={handleCopy} className={`flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md transition active:scale-95 ${copied ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                                    {copied ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                    {copied ? 'Copied' : 'Copy'}
                                 </button>
                             </div>
                             <textarea
                                 value={youtubeText}
                                 readOnly
-                                className="w-full h-32 text-xs bg-transparent border-none p-0 focus:ring-0 text-gray-600 font-mono resize-none"
+                                className="w-full h-24 text-[11px] bg-transparent border-none p-0 focus:ring-0 text-gray-600 font-mono resize-none"
                             />
                         </div>
                     </div>
@@ -201,11 +197,20 @@ export default function AdminPostsPage() {
 
     const isYouTubeConnected = !!(firestoreUser as any)?.youtubeTokens;
 
-    useEffect(() => {
-        loadData();
+    const loadPosts = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await getAllPosts(true);
+            setPosts(data);
+        } catch (e: any) {
+            setError('Data load nahi ho saka');
+            toast.error('Khabrein load nahi ho saki');
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const fetchedCats = await fetchCategories();
@@ -220,20 +225,11 @@ export default function AdminPostsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [loadPosts]);
 
-    const loadPosts = async () => {
-        setLoading(true);
-        try {
-            const data = await getAllPosts(true);
-            setPosts(data);
-        } catch (e: any) {
-            setError('Posts load nahi ho sake');
-            toast.error('Khabrein load nahi ho saki');
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleDelete = async () => {
         if (!confirmDelete) return;
@@ -274,136 +270,138 @@ export default function AdminPostsPage() {
 
             {/* Robust Delete Confirmation Modal */}
             {confirmDelete && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => !deletingId && setConfirmDelete(null)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
-                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-100">
-                            <Trash2 className="w-8 h-8 text-red-600 animate-pulse" />
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-[100] flex items-center justify-center p-3 animate-in fade-in duration-150" onClick={() => !deletingId && setConfirmDelete(null)}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-xs overflow-hidden p-4 animate-in zoom-in duration-150 border border-gray-100" onClick={e => e.stopPropagation()}>
+                        <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-2 border border-red-100">
+                            <Trash2 className="w-5 h-5 text-red-600" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 text-center mb-2">खबर डिलीट करें?</h3>
-                        <p className="text-gray-500 text-sm text-center mb-6 px-2">क्या आप वाकई इस खबर को डिलीट करना चाहते हैं? यह एक्शन वापस नहीं लिया जा सकता।</p>
-                        <div className="flex flex-col gap-3">
-                            <button
-                                disabled={!!deletingId}
-                                onClick={handleDelete}
-                                className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-red-200 disabled:opacity-50"
-                            >
-                                {deletingId ? <RefreshCw className="w-5 h-5 animate-spin" /> : "हां, डिलीट करें"}
-                            </button>
+                        <h3 className="text-sm font-bold text-gray-900 text-center mb-1">खबर डिलीट करें?</h3>
+                        <p className="text-gray-500 text-xs text-center mb-3.5 px-1 leading-relaxed">क्या आप वाकई इस खबर को डिलीट करना चाहते हैं? यह एक्शन वापस नहीं लिया जा सकता।</p>
+                        <div className="flex gap-2">
                             <button
                                 disabled={!!deletingId}
                                 onClick={() => setConfirmDelete(null)}
-                                className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold transition"
+                                className="flex-1 h-8 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition active:scale-95"
                             >
                                 कैंसिल
+                            </button>
+                            <button
+                                disabled={!!deletingId}
+                                onClick={handleDelete}
+                                className="flex-1 h-8 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50 active:scale-95"
+                            >
+                                {deletingId ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : "डिलीट करें"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-3.5">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-gray-800">Admin Dashboard v2</h1>
-                    <p className="text-gray-500 text-sm mt-1">{posts.length} कुल खबरें</p>
+                    <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">Khabar Management</h1>
+                    <p className="text-gray-500 text-xs">{posts.length} कुल खबरें</p>
                 </div>
                 <Link
                     href="/admin/posts/new"
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg"
+                    prefetch={true}
+                    className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
                 >
-                    <PlusCircle className="w-4 h-4" /> नई खबर
+                    <PlusCircle className="w-3.5 h-3.5" /> नई खबर
                 </Link>
             </div>
 
-            <div className="relative mb-5">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div className="relative mb-3">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                 <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search keywords..."
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-white text-sm"
+                    className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 bg-white text-xs"
                 />
             </div>
 
             {loading ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-gray-100 shadow-2xs">
                     <LoadingSpinner />
-                    <p className="text-gray-400 text-sm mt-4 font-medium animate-pulse">खबरें लोड हो रही हैं...</p>
+                    <p className="text-gray-400 text-xs mt-3 font-medium animate-pulse">खबरें लोड हो रही हैं...</p>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-2xs border border-gray-200/90 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                        <table className="w-full text-xs">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100 text-gray-600">
-                                    <th className="text-left px-4 py-4 font-extrabold tracking-wider uppercase text-[10px]">Media</th>
-                                    <th className="text-left px-4 py-4 font-extrabold tracking-wider uppercase text-[10px]">Khabar Title</th>
-                                    <th className="text-left px-4 py-4 font-extrabold tracking-wider uppercase text-[10px] hidden md:table-cell">Status</th>
-                                    <th className="text-right px-4 py-4 font-extrabold tracking-wider uppercase text-[10px]">Actions</th>
+                                <tr className="bg-gray-50/80 border-b border-gray-200/80 text-gray-600">
+                                    <th className="text-left px-3 py-2 font-bold tracking-wider uppercase text-[10px]">Media</th>
+                                    <th className="text-left px-3 py-2 font-bold tracking-wider uppercase text-[10px]">Khabar Title</th>
+                                    <th className="text-left px-3 py-2 font-bold tracking-wider uppercase text-[10px] hidden md:table-cell">Status</th>
+                                    <th className="text-right px-3 py-2 font-bold tracking-wider uppercase text-[10px]">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-gray-100">
                                 {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="text-center py-20 text-gray-400 italic">कोई खबर नहीं मिली</td>
+                                        <td colSpan={4} className="text-center py-12 text-gray-400 italic text-xs">कोई खबर नहीं मिली</td>
                                     </tr>
                                 ) : (
                                     filtered.map((post) => {
                                         const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/) || post.image?.includes('/video/upload/');
                                         return (
-                                            <tr key={post.id} className="hover:bg-gray-50/80 transition-colors group">
-                                                <td className="px-4 py-4">
-                                                    <div className="relative w-14 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
+                                            <tr key={post.id} className="hover:bg-red-50/20 transition-colors group">
+                                                <td className="px-3 py-1.5">
+                                                    <div className="relative w-11 h-9 rounded-md overflow-hidden bg-gray-100 border border-gray-200/70 shadow-2xs">
                                                         {post.image ? (
                                                             isVideo ? (
-                                                                <div className="w-full h-full flex items-center justify-center bg-gray-900 border-2 border-gray-800">
-                                                                    <Video className="w-5 h-5 text-gray-400" />
+                                                                <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                                                                    <Video className="w-4 h-4 text-gray-400" />
                                                                 </div>
                                                             ) : (
-                                                                <Image src={post.image} alt="" fill className="object-cover group-hover:scale-110 transition duration-500" />
+                                                                <Image src={post.image} alt="" fill className="object-cover group-hover:scale-105 transition duration-300" />
                                                             )
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-lg bg-gray-50 text-gray-300"></div>
+                                                            <div className="w-full h-full flex items-center justify-center text-xs bg-gray-50 text-gray-400">📰</div>
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-4">
-                                                    <p className="font-bold text-gray-900 line-clamp-1 group-hover:text-red-600 transition tracking-tight">{post.title}</p>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-[10px] font-black text-white bg-red-600 px-2 py-0.5 rounded-md uppercase tracking-tighter">
+                                                <td className="px-3 py-1.5">
+                                                    <p className="font-bold text-gray-900 line-clamp-1 group-hover:text-red-600 transition tracking-tight text-xs">{post.title}</p>
+                                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                                        <span className="text-[9px] font-black text-white bg-red-600 px-1.5 py-0.2 rounded uppercase">
                                                             {categoryMap[post.category] || post.category}
                                                         </span>
-                                                        <span className="text-[10px] text-gray-400 font-medium">#{post.id?.substring(0, 8)}</span>
+                                                        <span className="text-[9px] text-gray-400 font-medium">#{post.id?.substring(0, 8)}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-4 hidden md:table-cell">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100 uppercase">
+                                                <td className="px-3 py-1.5 hidden md:table-cell">
+                                                    <span className="inline-flex items-center px-2 py-0.2 rounded-full text-[9px] font-bold bg-green-50 text-green-700 border border-green-200 uppercase">
                                                         {post.status || 'published'}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-4">
-                                                    <div className="flex items-center justify-end gap-2 text-gray-700">
+                                                <td className="px-3 py-1.5">
+                                                    <div className="flex items-center justify-end gap-1.5 text-gray-700">
                                                         {isOwner && (
                                                             <button
                                                                 onClick={() => setSharePost(post)}
-                                                                className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white text-[10px] font-black rounded-xl hover:bg-black transition shadow-md shadow-gray-200 active:scale-95"
+                                                                className="flex items-center gap-1 px-2 py-1 bg-gray-900 text-white text-[9px] font-black rounded-md hover:bg-black transition shadow-xs active:scale-95"
                                                             >
-                                                                <Share2 className="w-3.5 h-3.5" /> DISTRIBUTE
+                                                                <Share2 className="w-3 h-3" /> Share
                                                             </button>
                                                         )}
                                                         <Link
                                                             href={`/admin/posts/edit/${post.id}`}
-                                                            className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition-all active:scale-90"
+                                                            prefetch={true}
+                                                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-all active:scale-95"
                                                             title="Edit Post"
                                                         >
-                                                            <Pencil className="w-4 h-4" />
+                                                            <Pencil className="w-3.5 h-3.5" />
                                                         </Link>
                                                         <button
                                                             onClick={() => setConfirmDelete({ id: post.id!, title: post.title })}
-                                                            className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all active:scale-90"
+                                                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-all active:scale-95"
                                                             title="Delete Khabar"
                                                         >
-                                                            <Trash2 className="w-4 h-4" />
+                                                            <Trash2 className="w-3.5 h-3.5" />
                                                         </button>
                                                     </div>
                                                 </td>

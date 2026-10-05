@@ -55,86 +55,80 @@ export default function AdminUsersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="space-y-4">
             <Toaster
                 position="top-right"
                 toastOptions={{
                     style: {
-                        borderRadius: "12px",
+                        borderRadius: "8px",
                         background: "#1f2937",
                         color: "#f9fafb",
-                        fontSize: "14px",
+                        fontSize: "12px",
                     },
                 }}
             />
 
-            <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-                {/* ── Page Header ── */}
-                <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-                            <div className="rounded-xl bg-blue-100 p-2.5 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
-                                <Users size={28} />
-                            </div>
-                            User Management
-                        </h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Create, manage, and delete users for your news platform
-                        </p>
-                    </div>
+            {/* ── Page Header ── */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-lg font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                        <Users size={18} className="text-red-600" />
+                        User Management
+                    </h1>
+                    <p className="text-xs text-gray-500">
+                        Create, manage, and assign roles for newsroom staff and users
+                    </p>
+                </div>
 
+                <button
+                    onClick={fetchUsers}
+                    disabled={loading}
+                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white h-8 px-3 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 shadow-2xs active:scale-95"
+                >
+                    <RefreshCw
+                        size={13}
+                        className={loading ? "animate-spin" : ""}
+                    />
+                    Refresh
+                </button>
+            </div>
+
+            {/* ── Error Banner ── */}
+            {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs flex items-center justify-between">
+                    <p className="font-medium text-red-600">Error: {error}</p>
                     <button
                         onClick={fetchUsers}
-                        disabled={loading}
-                        className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        className="font-bold text-red-700 underline"
                     >
-                        <RefreshCw
-                            size={16}
-                            className={loading ? "animate-spin" : ""}
-                        />
-                        Refresh
+                        Try again
                     </button>
                 </div>
+            )}
 
-                {/* ── Error Banner ── */}
-                {error && (
-                    <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-                        <p className="text-sm font-medium text-red-600 dark:text-red-400">
-                            Error: {error}
-                        </p>
-                        <button
-                            onClick={fetchUsers}
-                            className="mt-1 text-sm font-medium text-red-700 underline dark:text-red-300"
-                        >
-                            Try again
-                        </button>
-                    </div>
+            {/* ── Content ── */}
+            <div className="space-y-4">
+                {/* Create User Form */}
+                {loading ? (
+                    <FormSkeleton />
+                ) : (
+                    <CreateUserForm onUserCreated={handleUserCreated} />
                 )}
 
-                {/* ── Content ── */}
-                <div className="space-y-6">
-                    {/* Create User Form */}
-                    {loading ? (
-                        <FormSkeleton />
-                    ) : (
-                        <CreateUserForm onUserCreated={handleUserCreated} />
-                    )}
-
-                    {/* User List */}
-                    {loading ? (
-                        <TableSkeleton rows={5} />
-                    ) : (
-                        <UserList
-                            users={users}
-                            onUserDeleted={handleUserDeleted}
-                            onUserUpdated={(updatedUser) => {
-                                setUsers((prev) =>
-                                    prev.map((u) => (u.uid === updatedUser.uid ? updatedUser : u))
-                                );
-                            }}
-                        />
-                    )}
-                </div>
+                {/* User List */}
+                {loading ? (
+                    <TableSkeleton rows={5} />
+                ) : (
+                    <UserList
+                        users={users}
+                        onUserDeleted={handleUserDeleted}
+                        onUserUpdated={(updatedUser) => {
+                            setUsers((prev) =>
+                                prev.map((u) => (u.uid === updatedUser.uid ? updatedUser : u))
+                            );
+                        }}
+                    />
+                )}
             </div>
         </div>
     );

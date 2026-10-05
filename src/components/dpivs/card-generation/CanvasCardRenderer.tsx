@@ -97,7 +97,7 @@ function CanvasCardRendererComponent({
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-auto rounded-2xl shadow-2xl border border-gray-300 dark:border-gray-800 bg-white"
+      className="w-full h-auto rounded-2xl shadow-2xl border border-gray-300 bg-white"
       style={{
         maxWidth: `${(CARD_WIDTH / 2) * scale}px`,
         aspectRatio: "54 / 86",
@@ -119,15 +119,15 @@ async function drawMasterFrontCard(
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-  // 2. Left Vertical PRESS Strip (Flush to Left Outer Edge)
+  // 2. Left Vertical PRESS Strip (Flush to Left Outer Edge - Shortened height)
   const stripW = 54;
-  const stripH = 355;
+  const stripH = 260;
   drawCustomCornerRect(ctx, 0, 0, stripW, stripH, 0, 0, 16, 0, "#0B192C");
-  drawVerticalText(ctx, "P  R  E  S  S", 27, 180, "bold 28px sans-serif", "#FFFFFF");
+  drawVerticalText(ctx, "P  R  E  S  S", 27, 135, "bold 28px sans-serif", "#FFFFFF");
 
-  // 3. Right Vertical PRESS Strip (Flush to Right Outer Edge)
+  // 3. Right Vertical PRESS Strip (Flush to Right Outer Edge - Shortened height)
   drawCustomCornerRect(ctx, CARD_WIDTH - stripW, 0, stripW, stripH, 0, 0, 0, 16, "#DC2626");
-  drawVerticalText(ctx, "P  R  E  S  S", CARD_WIDTH - 27, 180, "bold 28px sans-serif", "#FFFFFF");
+  drawVerticalText(ctx, "P  R  E  S  S", CARD_WIDTH - 27, 135, "bold 28px sans-serif", "#FFFFFF");
 
   // 4. Header Logo (Fuller & Prominent between edge strips)
   const logoImg = await loadImage(FIXED_ASSETS.logo);
@@ -162,17 +162,17 @@ async function drawMasterFrontCard(
   const stateName = reporter.address?.state || "Uttar Pradesh";
   ctx.fillText(`= जनपद - ${districtName} (${stateName}) =`, CARD_WIDTH / 2, 236);
 
-  // Subtitle Line 3: RN No. Pill Box (Thicker & Larger)
-  const pillW = 330;
-  const pillH = 50;
+  // Subtitle Line 3: RN No. Pill Box
+  const pillW = 300;
+  const pillH = 42;
   const pillX = (CARD_WIDTH - pillW) / 2;
   const pillY = 260;
   drawPillBox(ctx, pillX, pillY, pillW, pillH, "#E6F4F1", "#0D9488");
 
   ctx.fillStyle = "#0F172A";
-  ctx.font = "bold 21px sans-serif";
+  ctx.font = "bold 18px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("RN No.: UP_30_0062085", CARD_WIDTH / 2, pillY + 32);
+  ctx.fillText("RN No.: UP_30_0062085", CARD_WIDTH / 2, pillY + 27);
 
   // 5. Middle Section: Photo & Reporter Info (y: 325 to 615)
   // Left: Reporter Photo Frame Box
@@ -264,15 +264,15 @@ async function drawMasterFrontCard(
   ctx.stroke();
 
   // 7. Bottom Section (y: 680 to 967)
-  // Left Side Credentials (Larger 28px Fonts)
-  let botY = 680;
-  drawInfoLine(ctx, 35, botY, "💳", "कार्ड नंबर", reporter.pressIdNumber, 28);
+  // Left Side Credentials (Slightly reduced font & shifted down)
+  let botY = 695;
+  drawInfoLine(ctx, 35, botY, "💳", "कार्ड नंबर", reporter.pressIdNumber, 23);
 
-  botY += 62;
-  drawInfoLine(ctx, 35, botY, "👤", "डायरेक्टर", "RAMESH PRASAD SONI", 28);
+  botY += 56;
+  drawInfoLine(ctx, 35, botY, "👤", "डायरेक्टर", "RAMESH PRASAD SONI", 23);
 
-  botY += 62;
-  drawInfoLine(ctx, 35, botY, "🆔", "RN No.", "UP_30_0062085", 28);
+  botY += 56;
+  drawInfoLine(ctx, 35, botY, "🆔", "RN No.", "UP_30_0062085", 23);
 
   // Fixed Director Signature Block
   const dirSigImg = await loadImage(FIXED_ASSETS.directorSignature);
@@ -354,7 +354,7 @@ async function drawMasterFrontCard(
   ctx.stroke();
 
   ctx.fillStyle = "#0F172A";
-  ctx.font = "bold 13px sans-serif";
+  ctx.font = "bold 15.5px sans-serif";
 
   // Left: Mobile
   ctx.textAlign = "left";
@@ -392,15 +392,15 @@ async function drawMasterBackCard(
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-  // 1. Top Centered Logo (Enlarged -> 560px width)
+  // 1. Top Centered Logo (560px width)
   const logoImg = await loadImage(FIXED_ASSETS.logo);
   if (logoImg) {
     ctx.drawImage(logoImg, (CARD_WIDTH - 560) / 2, 8, 560, 146);
   }
 
-  // 2. Red Banner Strip below logo (Bigger 21px font)
+  // 2. Red Banner Strip below logo
   const bannerY = 162;
-  const bannerH = 55;
+  const bannerH = 52;
   ctx.fillStyle = "#991B1B";
   ctx.fillRect(0, bannerY, CARD_WIDTH, bannerH);
 
@@ -408,25 +408,25 @@ async function drawMasterBackCard(
   ctx.fillRect(0, bannerY + bannerH, CARD_WIDTH, 4);
 
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 21px sans-serif";
+  ctx.font = "bold 20px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("आधिकारिक प्रेस गाइडलाइन्स एवं नीतियां / OFFICIAL PRESS POLICIES", CARD_WIDTH / 2, bannerY + 35);
+  ctx.fillText("आधिकारिक प्रेस गाइडलाइन्स एवं नीतियां / OFFICIAL PRESS POLICIES", CARD_WIDTH / 2, bannerY + 33);
 
-  // 3. Two-Column Guidelines Section (y: 240 to 520)
-  const colY = 240;
+  // 3. Two-Column Guidelines Section (Balanced columns with 12px center gap)
+  const colY = 232;
 
   // ── LEFT COLUMN: HINDI GUIDELINES ──
-  const leftX = 25;
+  const leftX = 30;
   ctx.fillStyle = "#991B1B";
-  ctx.font = "bold 18px sans-serif";
+  ctx.font = "bold 17px sans-serif";
   ctx.textAlign = "left";
   ctx.fillText("समाचार भारत - न्यूज़ गाइडलाइन्स एवं नीतियां", leftX, colY);
 
   ctx.strokeStyle = "#991B1B";
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 1.8;
   ctx.beginPath();
   ctx.moveTo(leftX, colY + 7);
-  ctx.lineTo(330, colY + 7);
+  ctx.lineTo(335, colY + 7);
   ctx.stroke();
 
   const hindiRules = [
@@ -440,34 +440,34 @@ async function drawMasterBackCard(
     "8. यह कार्ड समाचार भारत डिजिटल मीडिया की संपत्ति है।",
   ];
 
-  let lineY = colY + 38;
+  let lineY = colY + 36;
   ctx.fillStyle = "#0F172A";
-  ctx.font = "15px sans-serif";
+  ctx.font = "13.5px sans-serif";
   hindiRules.forEach((rule) => {
     ctx.fillText(rule, leftX, lineY);
-    lineY += 32;
+    lineY += 28.5;
   });
 
-  // Vertical Center Divider Line
+  // Vertical Center Divider Line with 12px gap on both sides
   ctx.strokeStyle = "#CBD5E1";
-  ctx.lineWidth = 1.6;
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(345, colY - 5);
-  ctx.lineTo(345, colY + 285);
+  ctx.moveTo(346, colY - 5);
+  ctx.lineTo(346, colY + 248);
   ctx.stroke();
 
   // ── RIGHT COLUMN: ENGLISH GUIDELINES ──
-  const rightX = 360;
+  const rightX = 358;
   ctx.fillStyle = "#991B1B";
-  ctx.font = "bold 18px sans-serif";
+  ctx.font = "bold 17px sans-serif";
   ctx.textAlign = "left";
   ctx.fillText("News Guidelines & Ethics Policies", rightX, colY);
 
   ctx.strokeStyle = "#991B1B";
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 1.8;
   ctx.beginPath();
   ctx.moveTo(rightX, colY + 7);
-  ctx.lineTo(675, colY + 7);
+  ctx.lineTo(670, colY + 7);
   ctx.stroke();
 
   const englishRules = [
@@ -481,119 +481,118 @@ async function drawMasterBackCard(
     "8. Property of Samachar Bharat Digital Media House.",
   ];
 
-  lineY = colY + 38;
+  lineY = colY + 36;
   ctx.fillStyle = "#0F172A";
-  ctx.font = "15px sans-serif";
+  ctx.font = "13.5px sans-serif";
   englishRules.forEach((rule) => {
     ctx.fillText(rule, rightX, lineY);
-    lineY += 32;
+    lineY += 28.5;
   });
 
   // 4. "If Found Please Return To" Return & Address Section
-  const retY = 540;
-  const retH = 220;
+  const retY = 495;
+  const retH = 205;
   const retW = CARD_WIDTH - 50; // 650px
 
   ctx.fillStyle = "#F8FAFC";
   ctx.strokeStyle = "#DC2626";
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 1.8;
   ctx.fillRect(25, retY, retW, retH);
   ctx.strokeRect(25, retY, retW, retH);
 
   ctx.fillStyle = "#DC2626";
-  ctx.font = "bold 18.5px sans-serif";
-  ctx.fillText("यदि यह कार्ड मिले तो कृपया वापस लौटाएं / IF FOUND PLEASE RETURN TO:", 40, retY + 34);
+  ctx.font = "bold 17.5px sans-serif";
+  ctx.fillText("यदि यह कार्ड मिले तो कृपया वापस लौटाएं / IF FOUND PLEASE RETURN TO:", 40, retY + 30);
 
   ctx.strokeStyle = "#FECACA";
-  ctx.lineWidth = 1.4;
+  ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.moveTo(40, retY + 46);
-  ctx.lineTo(660, retY + 46);
+  ctx.moveTo(40, retY + 40);
+  ctx.lineTo(660, retY + 40);
   ctx.stroke();
 
-  let addY = retY + 76;
+  let addY = retY + 67;
   ctx.fillStyle = "#0F172A";
-  ctx.font = "bold 16.5px sans-serif";
+  ctx.font = "bold 15.5px sans-serif";
   ctx.fillText("🏢 समाचार भारत मीडिया हाउस / SAMACHAR BHARAT MEDIA HOUSE", 40, addY);
 
-  addY += 30;
+  addY += 27;
   ctx.fillStyle = "#334155";
-  ctx.font = "16px sans-serif";
+  ctx.font = "15px sans-serif";
   ctx.fillText("📍 पता / Address: सिविल लाइन्स, गाज़ीपुर (उत्तर प्रदेश) - 233001", 40, addY);
 
-  addY += 28;
+  addY += 26;
   ctx.fillText("📞 हेल्प लाइन / Helpline: +91 734 771 8098  |  +91 860 134 3232", 40, addY);
 
-  addY += 28;
+  addY += 26;
   ctx.fillText("✉️ ईमेल / Email: samacharbharatgzp@gmail.com", 40, addY);
 
-  addY += 28;
+  addY += 26;
   ctx.fillText("🌐 वेबसाइट / Website: https://samacharbharat.in", 40, addY);
 
-  // Official Stamp overlaid & Vertically Centered on Return Box (Right side)
+  // Official Stamp (Right side of Return box with clear margin)
   const stampImg = await loadImage(FIXED_ASSETS.officialStamp);
   if (stampImg) {
     ctx.globalAlpha = 0.88;
-    const stampSize = 150;
-    const stampY = retY + (retH - stampSize) / 2;
-    ctx.drawImage(stampImg, 510, stampY, stampSize, stampSize);
+    const stampSize = 135;
+    const stampY = retY + (retH - stampSize) / 2 + 5;
+    ctx.drawImage(stampImg, 515, stampY, stampSize, stampSize);
     ctx.globalAlpha = 1.0;
   }
 
-  // 5. Verification Notice Section
-  const verY = 780;
+  // 5. Verification Notice Section (Properly centered & spaced)
+  const verY = 720;
   ctx.fillStyle = "#1E3A5F";
-  ctx.font = "bold 15px sans-serif";
+  ctx.font = "bold 14.5px sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("ऑनलाइन प्रेस कार्ड सत्यापन हेतु वेबसाइट पर जाएँ या QR कोड स्कैन करें:", CARD_WIDTH / 2, verY);
 
   ctx.fillStyle = "#DC2626";
-  ctx.font = "bold 16px monospace";
+  ctx.font = "bold 15px monospace";
   ctx.fillText(
     `https://samacharbharat.in/verify-press-id/${reporter.pressIdNumber}`,
     CARD_WIDTH / 2,
-    verY + 25
+    verY + 24
   );
 
-  // 6. Emergency Medical Information Section Box
-  const emgY = 840;
-  const emgH = 135;
+  // 6. Emergency Medical Information Section Box (Proper inner padding & spacing)
+  const emgY = 780;
+  const emgH = 130;
   ctx.fillStyle = "#FEF2F2";
   ctx.strokeStyle = "#FECACA";
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 1.8;
   ctx.fillRect(25, emgY, CARD_WIDTH - 50, emgH);
   ctx.strokeRect(25, emgY, CARD_WIDTH - 50, emgH);
 
   ctx.fillStyle = "#DC2626";
-  ctx.font = "bold 18.5px sans-serif";
+  ctx.font = "bold 17.5px sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText("आपातकालीन जानकारी / EMERGENCY MEDICAL INFORMATION", 40, emgY + 34);
+  ctx.fillText("आपातकालीन जानकारी / EMERGENCY MEDICAL INFORMATION", 40, emgY + 30);
 
   const aadhaarVal = reporter.aadhaarNumber
     ? `XXXX-XXXX-${reporter.aadhaarNumber.slice(-4)}`
     : "N/A";
   ctx.fillStyle = "#1E293B";
-  ctx.font = "bold 17px sans-serif";
-  ctx.fillText(`रक्त समूह / Blood: ${reporter.bloodGroup || "O+"}   |   आधार / Aadhaar: ${aadhaarVal}`, 40, emgY + 70);
+  ctx.font = "bold 16px sans-serif";
+  ctx.fillText(`रक्त समूह / Blood: ${reporter.bloodGroup || "O+"}   |   आधार / Aadhaar: ${aadhaarVal}`, 40, emgY + 66);
 
   const contactName = reporter.emergencyContact?.name || reporter.fatherName;
   const contactPhone = reporter.emergencyContact?.phone || reporter.mobile;
-  ctx.font = "16px sans-serif";
-  ctx.fillText(`आपातकालीन संपर्क / Emergency Contact: ${contactName} (${contactPhone})`, 40, emgY + 104);
+  ctx.font = "15.5px sans-serif";
+  ctx.fillText(`आपातकालीन संपर्क / Emergency Contact: ${contactName} (${contactPhone})`, 40, emgY + 98);
 
-  // 7. Bottom Location Bar (Very Bottom - Navy #0B192C)
-  const locH = 58;
-  const locY = CARD_HEIGHT - locH;
-  ctx.fillStyle = "#0B192C";
-  ctx.fillRect(0, locY, CARD_WIDTH, locH);
+  // 7. Bottom Location Bar (Slightly offset from bottom corner rounded clip)
+  const locH = 54;
+  const locY = CARD_HEIGHT - locH - 12; // 1049px
+  drawCustomCornerRect(ctx, 0, locY, CARD_WIDTH, locH, 0, 0, 16, 16, "#0B192C");
 
   ctx.fillStyle = "#F59E0B"; // Gold Accent
-  ctx.font = "bold 22px sans-serif";
+  ctx.font = "bold 21px sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(
     `📍 ${reporter.address?.district || "Ghazipur"} लखनऊ उत्तर प्रदेश`,
     CARD_WIDTH / 2,
-    locY + 37
+    locY + 35
   );
 }
 

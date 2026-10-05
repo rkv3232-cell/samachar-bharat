@@ -11,48 +11,48 @@ interface Props {
 
 export default function AdvancedTab({ settings, onChange, onReset }: Props) {
     return (
-        <div className="space-y-8">
+        <div className="space-y-4">
             {/* Auto-save toggle */}
-            <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
+            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50/50 p-3">
                 <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <p className="text-xs font-bold text-gray-900">
                         Auto-save Settings
                     </p>
-                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-0.5 text-[11px] text-gray-500">
                         Automatically save changes when you modify any setting
                     </p>
                 </div>
                 <button
                     onClick={() => onChange({ autoSave: !settings.autoSave })}
-                    className="text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400"
+                    className="text-blue-600 transition-colors hover:text-blue-700"
                 >
                     {settings.autoSave ? (
-                        <ToggleRight size={36} />
+                        <ToggleRight size={28} />
                     ) : (
-                        <ToggleLeft size={36} className="text-gray-400" />
+                        <ToggleLeft size={28} className="text-gray-400" />
                     )}
                 </button>
             </div>
 
             {/* Cloudinary Info */}
             <div>
-                <h4 className="mb-3 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <Cloud size={16} />
+                <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                    <Cloud size={14} />
                     Cloudinary Configuration
                 </h4>
-                <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">
+                <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50/50 p-3">
+                    <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">
                             Cloud Name
                         </span>
-                        <code className="rounded bg-gray-200 px-2 py-0.5 text-xs dark:bg-gray-700">
+                        <code className="rounded bg-gray-200 px-1.5 py-0.5 text-[11px]">
                             {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "Not set"}
                         </code>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Status</span>
-                        <span className="flex items-center gap-1 text-xs text-emerald-600">
-                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">Status</span>
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             Connected
                         </span>
                     </div>
@@ -61,23 +61,23 @@ export default function AdvancedTab({ settings, onChange, onReset }: Props) {
 
             {/* Firebase Info */}
             <div>
-                <h4 className="mb-3 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <Database size={16} />
+                <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                    <Database size={14} />
                     Firebase Configuration
                 </h4>
-                <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">
+                <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50/50 p-3">
+                    <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">
                             Project ID
                         </span>
-                        <code className="rounded bg-gray-200 px-2 py-0.5 text-xs dark:bg-gray-700">
+                        <code className="rounded bg-gray-200 px-1.5 py-0.5 text-[11px]">
                             {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "Not set"}
                         </code>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Status</span>
-                        <span className="flex items-center gap-1 text-xs text-emerald-600">
-                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">Status</span>
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             Connected
                         </span>
                     </div>
@@ -85,16 +85,16 @@ export default function AdvancedTab({ settings, onChange, onReset }: Props) {
             </div>
 
             {/* Reset */}
-            <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-red-600 dark:text-red-400">
+            <div className="border-t border-gray-200 pt-3">
+                <h4 className="text-xs font-bold text-red-600">
                     Danger Zone
                 </h4>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-0.5 text-[11px] text-gray-500">
                     This will reset all settings to their default values.
                 </p>
                 <button
                     onClick={onReset}
-                    className="mt-3 rounded-xl border-2 border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition-all hover:border-red-300 hover:bg-red-100 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+                    className="mt-2 h-8 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-600 transition-all hover:bg-red-100 active:scale-95"
                 >
                     Reset All Settings
                 </button>

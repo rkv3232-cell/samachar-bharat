@@ -287,60 +287,60 @@ export default function NewPostPage() {
     };
 
     return (
-        <div>
-            <div className="flex items-center gap-3 mb-6">
-                <Link href="/admin/posts" className="text-gray-500 hover:text-gray-700 transition">
-                    <ChevronLeft className="w-5 h-5" />
+        <div className="space-y-3.5">
+            <div className="flex items-center gap-2 mb-2">
+                <Link href="/admin/posts" className="p-1 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition">
+                    <ChevronLeft className="w-4 h-4" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-extrabold text-gray-800">नई खबर जोड़ें</h1>
-                    <p className="text-gray-500 text-sm">Cloudinary के साथ upload करें</p>
+                    <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">नई खबर जोड़ें</h1>
+                    <p className="text-gray-500 text-xs">Cloudinary के साथ upload करें</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
                 {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-                        <p className="text-red-700 text-sm">{error}</p>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 flex items-start gap-2 text-xs">
+                        <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
+                        <p className="text-red-700 font-medium">{error}</p>
                     </div>
                 )}
                 {success && (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-                        <p className="text-green-700 text-sm">{success}</p>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 flex items-start gap-2 text-xs">
+                        <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
+                        <p className="text-green-700 font-medium">{success}</p>
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    <div className="lg:col-span-2 space-y-5">
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-semibold text-gray-700">खबर का शीर्षक <span className="text-red-500">*</span></label>
-                                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+                    <div className="lg:col-span-2 space-y-3.5">
+                        <div className="bg-white rounded-xl shadow-2xs p-3.5 border border-gray-200/90">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-gray-700">खबर का शीर्षक <span className="text-red-500">*</span></label>
+                                <div className="flex items-center gap-1.5">
                                     <button type="button" onClick={generateAIHeadline} disabled={generatingAI}
-                                        className="text-[10px] font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1">
-                                        {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                        className="text-[9px] font-bold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-md uppercase tracking-wider hover:bg-purple-100 transition-colors flex items-center gap-1 border border-purple-200/60 active:scale-95">
+                                        {generatingAI ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
                                         AI Headline
                                     </button>
                                 </div>
                             </div>
                             <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 text-lg" placeholder="खबर का शीर्षक लिखें..." />
+                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-gray-900 focus:outline-none focus:ring-1 focus:ring-red-500 bg-white text-xs font-semibold" placeholder="खबर का शीर्षक लिखें..." />
                         </div>
 
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-semibold text-gray-700">खबर की सामग्री <span className="text-red-500">*</span></label>
-                                <div className="flex items-center gap-2">
+                        <div className="bg-white rounded-xl shadow-2xs p-3.5 border border-gray-200/90">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-gray-700">खबर की सामग्री <span className="text-red-500">*</span></label>
+                                <div className="flex items-center gap-1.5">
                                     <button type="button" onClick={generateAIContent} disabled={generatingAI}
-                                        className="text-[10px] font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1">
-                                        {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                        className="text-[9px] font-bold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-md uppercase tracking-wider hover:bg-purple-100 transition-colors flex items-center gap-1 border border-purple-200/60 active:scale-95">
+                                        {generatingAI ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
                                         AI WRITE
                                     </button>
                                     <button type="button" onClick={translateToEnglish} disabled={translatingAI}
-                                        className="text-[10px] font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-green-200 transition-colors flex items-center gap-1">
-                                        {translatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                        className="text-[9px] font-bold bg-green-50 text-green-700 px-2 py-0.5 rounded-md uppercase tracking-wider hover:bg-green-100 transition-colors flex items-center gap-1 border border-green-200/60 active:scale-95">
+                                        {translatingAI ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
                                         Translate English
                                     </button>
                                 </div>
@@ -349,81 +349,81 @@ export default function NewPostPage() {
                         </div>
                     </div>
 
-                    <div className="space-y-5">
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-red-100 ring-1 ring-red-50">
-                            <label className="block text-sm font-bold text-red-700 mb-2 flex items-center justify-between">
+                    <div className="space-y-3.5">
+                        <div className="bg-white rounded-xl shadow-2xs p-3.5 border border-gray-200/90">
+                            <label className="block text-xs font-bold text-gray-800 mb-1.5 flex items-center justify-between">
                                 <span>श्रेणी चुनें <span className="text-red-500">*</span></span>
                                 <button type="button" onClick={suggestCategory} disabled={generatingAI}
-                                    className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase tracking-widest hover:bg-amber-200 transition-colors flex items-center gap-1">
-                                    {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                    className="text-[9px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md uppercase tracking-wider hover:bg-amber-100 transition-colors flex items-center gap-1 border border-amber-200/60 active:scale-95">
+                                    {generatingAI ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
                                     AI Suggest
                                 </button>
                             </label>
                             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                                className="w-full border-2 border-red-100 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-50/30 mb-5 font-semibold transition-all hover:bg-white">
+                                className="h-8 w-full border border-gray-200 rounded-lg px-2.5 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-red-500 bg-white mb-3 font-semibold transition-all">
                                 <option value="">-- श्रेणी चुनें --</option>
                                 {dbCategories.map((cat) => <option key={cat.slug} value={cat.slug}>{cat.name}</option>)}
                             </select>
 
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-semibold text-gray-700">टैग्स (Tags)</label>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-gray-700">टैग्स (Tags)</label>
                                 <button type="button" onClick={generateAITags} disabled={generatingAI}
-                                    className="text-[10px] font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1">
-                                    {generatingAI ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                    className="text-[9px] font-bold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-md uppercase tracking-wider hover:bg-purple-100 transition-colors flex items-center gap-1 border border-purple-200/60 active:scale-95">
+                                    {generatingAI ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
                                     AI Auto-Fill
                                 </button>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 mb-3">
+                            <div className="flex flex-wrap gap-1.5 mb-2">
                                 {form.tags.map(tag => (
-                                    <span key={tag} className="bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm flex items-center gap-1 border border-red-200">
+                                    <span key={tag} className="bg-red-50 text-red-700 px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1 border border-red-200/80">
                                         {tag}
-                                        <button type="button" onClick={() => setForm({ ...form, tags: form.tags.filter(t => t !== tag) })} className="hover:text-red-900 rounded-full"><X className="w-3 h-3" /></button>
+                                        <button type="button" onClick={() => setForm({ ...form, tags: form.tags.filter(t => t !== tag) })} className="hover:text-red-900 rounded-full"><X className="w-2.5 h-2.5" /></button>
                                     </span>
                                 ))}
                             </div>
 
-                            <div className="flex gap-2 mb-3">
+                            <div className="flex gap-1.5 mb-3">
                                 <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomTag(); } }}
-                                    className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50" placeholder="Add tag & press Enter" />
-                                <button type="button" onClick={handleAddCustomTag} className="bg-gray-200 px-3 rounded-xl hover:bg-gray-300 font-medium text-sm transition">Add</button>
+                                    className="h-7 flex-1 border border-gray-200 rounded-lg px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-red-500 bg-white" placeholder="Add tag & press Enter" />
+                                <button type="button" onClick={handleAddCustomTag} className="h-7 bg-gray-100 hover:bg-gray-200 px-2.5 rounded-lg font-bold text-xs transition active:scale-95">Add</button>
                             </div>
 
-                            <label className="block text-sm font-semibold text-gray-700 mb-2 mt-4">स्टेटस (Status) <span className="text-red-500">*</span></label>
+                            <label className="block text-xs font-bold text-gray-700 mb-1 mt-3">स्टेटस (Status) <span className="text-red-500">*</span></label>
                             <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as PostStatus })}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50">
+                                className="h-8 w-full border border-gray-200 rounded-lg px-2.5 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-red-500 bg-white">
                                 <option value="published">Published</option>
                                 <option value="draft">Draft</option>
                             </select>
                         </div>
 
-                        <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">मीडिया (Max 5 Photos + 1 Video)</label>
+                        <div className="bg-white rounded-xl shadow-2xs p-3.5 border border-gray-200/90">
+                            <label className="block text-xs font-bold text-gray-700 mb-1.5">मीडिया (Max 5 Photos + 1 Video)</label>
                             {mediaPreviews.length > 0 || form.image ? (
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div className="space-y-2.5">
+                                    <div className="grid grid-cols-2 gap-2">
                                         {(mediaPreviews.length > 0 ? mediaPreviews : [form.image]).map((url, i) => (
-                                            <div key={i} className="relative h-24 md:h-32 rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                                            <div key={i} className="relative h-20 rounded-lg overflow-hidden bg-black flex items-center justify-center">
                                                 {isVideoUrl(url) ? <video src={url} className="object-cover w-full h-full" /> : <img src={url} alt="Preview" className="object-cover w-full h-full" />}
                                             </div>
                                         ))}
                                     </div>
                                     <button type="button" onClick={() => { setMediaFiles([]); setMediaPreviews([]); setForm({ ...form, image: '' }); }}
-                                        className="w-full bg-red-100 text-red-600 hover:bg-red-200 py-2 rounded-xl font-semibold flex flex-row justify-center items-center gap-2"><X className="w-4 h-4" /> मीडिया हटाएं</button>
+                                        className="h-7 w-full bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-bold text-xs flex justify-center items-center gap-1.5 transition active:scale-95"><X className="w-3.5 h-3.5" /> मीडिया हटाएं</button>
                                 </div>
                             ) : (
                                 <button type="button" onClick={() => fileInputRef.current?.click()}
-                                    className="w-full h-44 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-red-400 transition group">
-                                    <ImageIcon className="w-8 h-8 text-gray-300 group-hover:text-red-400" />
-                                    <span className="text-sm text-gray-400 group-hover:text-red-500 font-medium">Image/Video Upload करें</span>
+                                    className="w-full h-24 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-red-400 hover:bg-red-50/20 transition group active:scale-[0.99]">
+                                    <ImageIcon className="w-6 h-6 text-gray-300 group-hover:text-red-400" />
+                                    <span className="text-xs text-gray-400 group-hover:text-red-500 font-medium">Image/Video Upload करें</span>
                                 </button>
                             )}
                             <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" onChange={handleFileChange} className="hidden" />
                         </div>
 
                         <button type="submit" disabled={saving || uploading}
-                            className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2 text-sm">
-                            {saving || uploading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {uploading ? `अपलोड: ${uploadProgress}%` : 'Publish हो रहा है...'}</> : <><Save className="w-4 h-4" /> Publish करें</>}
+                            className="h-9 w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold rounded-lg transition shadow-xs flex items-center justify-center gap-1.5 text-xs active:scale-[0.99]">
+                            {saving || uploading ? <><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {uploading ? `अपलोड: ${uploadProgress}%` : 'Publish हो रहा है...'}</> : <><Save className="w-3.5 h-3.5" /> Publish करें</>}
                         </button>
                     </div>
                 </div>

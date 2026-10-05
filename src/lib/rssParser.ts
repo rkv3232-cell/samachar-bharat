@@ -26,10 +26,10 @@ export async function fetchRssFeeds(): Promise<RSSArticle[]> {
     const feeds = [
         { url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi', source: 'Google News' },
         { url: 'https://feeds.feedburner.com/ndtvnews-top-stories', source: 'NDTV' },
-        { url: 'https://aajtak.intoday.in/rssfeeds/topstories.xml', source: 'AajTak' }
+        { url: 'https://feeds.bbci.co.uk/hindi/rss.xml', source: 'BBC Hindi' }
     ];
 
-    let allNews: RSSArticle[] = [];
+    const allNews: RSSArticle[] = [];
 
     for (const feed of feeds) {
         try {

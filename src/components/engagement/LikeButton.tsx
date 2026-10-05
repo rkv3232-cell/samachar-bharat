@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
-import { toggleLikeStatus, fetchUserHasLiked } from '@/lib/engagement';
+import { toggleLikeStatus, isPostLikedLocally } from '@/lib/engagement';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-// Optional: If you had an Auth context, use it here. We'll simulate its absence to fallback to anonymous
 import { useAuth } from '@/lib/auth-context';
 
 interface LikeButtonProps {
@@ -17,29 +16,17 @@ interface LikeButtonProps {
 export default function LikeButton({ postId, initialLikes = 0, showCount = true }: LikeButtonProps) {
     const { user } = useAuth();
     const [likes, setLikes] = useState(initialLikes);
-    const [hasLiked, setHasLiked] = useState(false);
+    const [hasLiked, setHasLiked] = useState(() => isPostLikedLocally(postId, user?.uid || null));
     const [isLiking, setIsLiking] = useState(false);
 
-    // Initial load: Check if they've already liked it
+    // Sync if user auth changes (0 network requests, purely local check)
     useEffect(() => {
         if (!postId) return;
-
-        const checkLikeStatus = async () => {
-            if (user) {
-                const liked = await fetchUserHasLiked(postId, user.uid);
-                setHasLiked(liked);
-            } else {
-                // Anonymous Flow
-                const localLikes = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                setHasLiked(localLikes.includes(postId));
-            }
-        };
-
-        checkLikeStatus();
+        setHasLiked(isPostLikedLocally(postId, user?.uid || null));
     }, [postId, user]);
 
     const handleLikeToggle = async (e: React.MouseEvent) => {
-        e.preventDefault(); // In case it's in a <Link> tag boundary
+        e.preventDefault();
         e.stopPropagation();
 
         if (isLiking || !postId) return;
@@ -47,7 +34,7 @@ export default function LikeButton({ postId, initialLikes = 0, showCount = true 
 
         const newLikedState = !hasLiked;
 
-        // Optimistic Update
+        // Instant Optimistic Update (< 1ms perceived response)
         setHasLiked(newLikedState);
         setLikes(prev => newLikedState ? prev + 1 : Math.max(0, prev - 1));
 
@@ -56,14 +43,6 @@ export default function LikeButton({ postId, initialLikes = 0, showCount = true 
 
         try {
             await toggleLikeStatus(postId, user?.uid || null, newLikedState);
-
-            // Persist locally for anonymous
-            if (!user) {
-                const localLikes = new Set<string>(JSON.parse(localStorage.getItem('liked_posts') || '[]'));
-                if (newLikedState) localLikes.add(postId);
-                else localLikes.delete(postId);
-                localStorage.setItem('liked_posts', JSON.stringify(Array.from(localLikes)));
-            }
         } catch (error) {
             // Revert Optimistic Update
             setHasLiked(!newLikedState);

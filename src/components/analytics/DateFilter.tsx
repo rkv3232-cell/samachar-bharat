@@ -17,14 +17,14 @@ const filters: { key: DateFilterType; label: string; icon: React.ReactNode }[] =
 
 export default function DateFilter({ active, onChange }: Props) {
     return (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
             {filters.map((f) => (
                 <button
                     key={f.key}
                     onClick={() => onChange(f.key)}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${active === f.key
-                            ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
-                            : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
+                    className={`h-8 flex items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition-all active:scale-95 ${active === f.key
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                         }`}
                 >
                     {f.icon}

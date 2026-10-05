@@ -14,10 +14,11 @@ export default function AIAssistant() {
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'model', parts: [{ text: "नमस्ते! मैं न्यूज़पोर्टल का एडवांस AI एनालिस्ट हूँ। मैं आपको ताज़ा खबरें, विश्लेषण और किसी भी विषय पर सटीक जानकारी दे सकता हूँ। आप क्या जानना चाहते हैं?" }] }
+        { role: 'model', parts: [{ text: "नमस्ते! मैं समाचार भारत का AI सहायक हूँ। मैं आपको देश-दुनिया की ताज़ा खबरें, विश्लेषण और किसी भी विषय पर सटीक जानकारी दे सकता हूँ। आप क्या जानना चाहते हैं?" }] }
     ]);
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -25,83 +26,128 @@ export default function AIAssistant() {
         }
     }, [messages]);
 
+    // Clean up active request on unmount
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
+
     const handleSend = async (messageText?: string) => {
         const textToSend = messageText || input;
         if (!textToSend.trim() || isLoading) return;
+
+        // Cancel any pending request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        abortControllerRef.current = new AbortController();
 
         const userMessage: Message = { role: 'user', parts: [{ text: textToSend }] };
         setMessages((prev) => [...prev, userMessage]);
         if (!messageText) setInput('');
         setIsLoading(true);
 
-        // Add a placeholder for the model response
+        // Add a placeholder for the streaming model response
         setMessages((prev) => [...prev, { role: 'model', parts: [{ text: "" }] }]);
 
         try {
             const chatHistory = messages
-                .filter(m => m.parts[0].text !== "नमस्ते! मैं न्यूज़पोर्टल का एडवांस AI एनालिस्ट हूँ। मैं आपको ताज़ा खबरें, विश्लेषण और किसी भी विषय पर सटीक जानकारी दे सकता हूँ। आप क्या जानना चाहते हैं?")
+                .filter(m => !m.parts[0].text.startsWith("नमस्ते! मैं समाचार भारत का AI"))
                 .slice(-6);
 
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream, application/json'
+                },
                 body: JSON.stringify({
                     message: textToSend,
-                    history: chatHistory
+                    history: chatHistory,
+                    stream: true,
                 }),
+                signal: abortControllerRef.current.signal,
             });
 
-            if (!response.ok || !response.body) throw new Error("Connection failed");
+            if (!response.ok) throw new Error("Connection failed");
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullText = "";
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                const data = await response.json();
+                const replyText = data.text || data.reply || "माफ़ कीजिए, उत्तर प्राप्त नहीं हो सका।";
+                setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const lastIndex = newMessages.length - 1;
+                    if (newMessages[lastIndex]?.role === 'model') {
+                        newMessages[lastIndex] = {
+                            role: 'model',
+                            parts: [{ text: replyText }]
+                        };
+                    }
+                    return newMessages;
+                });
+            } else if (response.body) {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let accumulatedText = "";
+                let buffer = "";
 
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
 
-                const chunk = decoder.decode(value, { stream: true });
-                // Handle Event-Stream format (data: {...}\n\n)
-                const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
 
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const dataStr = line.replace('data: ', '').trim();
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed || !trimmed.startsWith('data: ')) continue;
+                        const dataStr = trimmed.slice(6).trim();
                         if (dataStr === '[DONE]') continue;
+
                         try {
                             const json = JSON.parse(dataStr);
-                            const content = json.choices[0]?.delta?.content || "";
+                            const content = json.choices?.[0]?.delta?.content || "";
                             if (content) {
-                                fullText += content;
-                                // Update only the last message (the AI's response)
+                                accumulatedText += content;
+                                const nextText = accumulatedText;
                                 setMessages((prev) => {
                                     const newMessages = [...prev];
-                                    const lastMessage = newMessages[newMessages.length - 1];
-                                    if (lastMessage && lastMessage.role === 'model') {
-                                        lastMessage.parts = [{ text: fullText }];
+                                    const lastIndex = newMessages.length - 1;
+                                    if (newMessages[lastIndex]?.role === 'model') {
+                                        newMessages[lastIndex] = {
+                                            role: 'model',
+                                            parts: [{ text: nextText }]
+                                        };
                                     }
                                     return newMessages;
                                 });
                             }
-                        } catch (e) {
-                            // Skip non-json or malformed lines
+                        } catch {
+                            // Non-json chunk fragment, safely skip
                         }
                     }
                 }
             }
-
-        } catch (error) {
+        } catch (error: any) {
+            if (error?.name === 'AbortError') {
+                return; // User aborted navigation or closed window
+            }
             setMessages((prev) => {
                 const newMsgs = [...prev];
                 const last = newMsgs[newMsgs.length - 1];
                 if (last && last.role === 'model' && last.parts[0].text === "") {
-                    last.parts = [{ text: "क्षमा करें, सर्वर से कनेक्शन नहीं हो पाया। कृपया LM Studio चेक करें।" }];
+                    last.parts = [{ text: "क्षमा करें, सर्वर से कनेक्शन नहीं हो पाया। कृपया कुछ ही क्षणों में पुनः प्रयास करें।" }];
                 }
                 return newMsgs;
             });
         } finally {
             setIsLoading(false);
+            abortControllerRef.current = null;
         }
     };
 
@@ -113,45 +159,49 @@ export default function AIAssistant() {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="mb-4 w-[350px] sm:w-[400px] h-[500px] overflow-hidden rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl flex flex-col ring-1 ring-white/20"
+                        className="mb-4 w-[350px] sm:w-[400px] h-[500px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl flex flex-col"
                     >
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-red-600 to-rose-600 p-4 flex items-center justify-between text-white shadow-lg">
+                        <div className="bg-gradient-to-r from-red-600 to-rose-600 p-4 flex items-center justify-between text-white shadow-xs">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md">
-                                    <Sparkles size={20} className="text-white" />
+                                    <Sparkles size={18} className="text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-sm uppercase tracking-wider">Samachar Bharat AI</h3>
-                                    <p className="text-[10px] text-red-200 font-bold uppercase tracking-widest">Advanced Analyst</p>
+                                    <h3 className="font-extrabold text-sm tracking-wide">Samachar Bharat AI</h3>
+                                    <p className="text-[10px] text-red-100 font-semibold tracking-wider">Gemini Primary • Instant Streaming</p>
                                 </div>
                             </div>
                             <button
-                                onClick={() => setIsOpen(false)}
-                                className="p-1.5 hover:bg-black/10 rounded-full transition-colors"
+                                onClick={() => {
+                                    if (abortControllerRef.current) abortControllerRef.current.abort();
+                                    setIsOpen(false);
+                                }}
+                                className="p-1.5 hover:bg-black/10 rounded-full transition-colors text-white cursor-pointer"
+                                aria-label="Close Assistant"
                             >
-                                <X size={20} />
+                                <X size={18} />
                             </button>
                         </div>
 
                         {/* Messages Area */}
                         <div
                             ref={scrollRef}
-                            className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth bg-gray-950/30"
+                            className="flex-1 overflow-y-auto p-4 space-y-3.5 scroll-smooth bg-slate-50"
                         >
                             {messages.map((msg, i) => (
                                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-sm ${msg.role === 'user'
-                                        ? 'bg-red-600 text-white rounded-tr-none border border-red-500'
-                                        : 'bg-white/5 text-gray-200 rounded-tl-none border border-white/10'
+                                    <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-2xs ${msg.role === 'user'
+                                        ? 'bg-red-600 text-white rounded-tr-none'
+                                        : 'bg-white text-gray-800 rounded-tl-none border border-gray-200'
                                         }`}>
-                                        <div className="flex items-center gap-2 mb-1.5 opacity-50">
-                                            {msg.role === 'user' ? <User size={12} /> : <Bot size={12} />}
-                                            <span className="text-[9px] font-black uppercase tracking-widest">
-                                                {msg.role === 'user' ? 'Aap' : 'Assistant'}
+                                        <div className="flex items-center gap-1.5 mb-1 opacity-70">
+                                            {msg.role === 'user' ? <User size={11} /> : <Bot size={11} />}
+                                            <span className="text-[9px] font-bold uppercase tracking-wider">
+                                                {msg.role === 'user' ? 'आप' : 'AI सहायक'}
                                             </span>
                                         </div>
-                                        <div className="prose prose-invert prose-sm break-words prose-p:leading-relaxed prose-p:mb-2 last:prose-p:mb-0">
+                                        <div className="prose prose-sm break-words prose-p:leading-relaxed prose-p:mb-1.5 last:prose-p:mb-0 text-inherit">
                                             <ReactMarkdown>
                                                 {msg.parts[0].text}
                                             </ReactMarkdown>
@@ -159,27 +209,28 @@ export default function AIAssistant() {
                                     </div>
                                 </div>
                             ))}
-                            {isLoading && (
+                            {/* Only show spinner while waiting for first token */}
+                            {isLoading && messages[messages.length - 1]?.parts[0]?.text === "" && (
                                 <div className="flex justify-start">
-                                    <div className="bg-white/5 rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-2 border border-white/10">
-                                        <Loader2 size={16} className="animate-spin text-red-500" />
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Typing...</span>
+                                    <div className="bg-white rounded-2xl rounded-tl-none px-3.5 py-2.5 flex items-center gap-2 border border-gray-200 shadow-2xs">
+                                        <Loader2 size={15} className="animate-spin text-red-600" />
+                                        <span className="text-[11px] font-semibold text-gray-500">उत्तर लिखा जा रहा है...</span>
                                     </div>
                                 </div>
                             )}
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-4 border-t border-white/10 bg-black/40">
+                        <div className="p-3.5 border-t border-gray-200 bg-white">
                             {/* Quick Actions */}
                             {!messages.some(m => m.role === 'user') && (
-                                <div className="flex gap-2 overflow-x-auto pb-3 no-scrollbar mb-1">
+                                <div className="flex gap-1.5 overflow-x-auto pb-2.5 no-scrollbar mb-1">
                                     {["आज का विश्लेषण", "प्रमुख खबरें", "राजनीति अपडेट", "खेल समाचार"].map((action) => (
                                         <button
                                             key={action}
                                             onClick={() => handleSend(action)}
                                             disabled={isLoading}
-                                            className="whitespace-nowrap bg-white/5 border border-white/10 text-gray-300 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full hover:bg-red-600/20 hover:border-red-500/50 transition-all"
+                                            className="whitespace-nowrap bg-gray-100 border border-gray-200 text-gray-700 text-[10px] font-bold px-2.5 py-1 rounded-full hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
                                         >
                                             {action}
                                         </button>
@@ -191,20 +242,22 @@ export default function AIAssistant() {
                                     type="text"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                    placeholder="नमस्ते! किसी भी खबर का विश्लेषण पूछें..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 pr-12 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                                    placeholder="किसी भी खबर या विषय पर प्रश्न पूछें..."
+                                    disabled={isLoading}
+                                    className="w-full bg-slate-50 border border-gray-200 rounded-xl py-2.5 pl-3 pr-10 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all font-medium disabled:bg-gray-100"
                                 />
                                 <button
                                     onClick={() => handleSend()}
                                     disabled={isLoading || !input.trim()}
-                                    className="absolute right-2 p-2 text-white bg-red-600 rounded-lg hover:bg-red-500 disabled:opacity-50 disabled:hover:bg-red-600 transition-colors shadow-lg"
+                                    className="absolute right-1.5 p-1.5 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-40 disabled:hover:bg-red-600 transition-colors shadow-2xs cursor-pointer"
+                                    aria-label="Send Message"
                                 >
-                                    <Send size={18} />
+                                    <Send size={15} />
                                 </button>
                             </div>
-                            <p className="text-[8px] text-center mt-3 text-gray-500 font-bold uppercase tracking-widest">
-                                Created by Raj Verma | AI is experimental.
+                            <p className="text-[9px] text-center mt-2 text-gray-400 font-medium">
+                                समाचार भारत AI • Gemini 2.5 Primary • OpenRouter Free Fallback
                             </p>
                         </div>
                     </motion.div>
@@ -216,10 +269,11 @@ export default function AIAssistant() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xl transition-all duration-300 ${isOpen ? 'bg-white text-black' : 'bg-red-600 text-white'
-                    } border-2 border-white/10`}
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-xl transition-all duration-300 cursor-pointer ${isOpen ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'
+                    } border border-white/20`}
+                aria-label="Toggle AI Assistant"
             >
-                {isOpen ? <X size={26} strokeWidth={2.5} /> : <MessageSquare size={26} strokeWidth={2.5} />}
+                {isOpen ? <X size={22} strokeWidth={2.5} /> : <MessageSquare size={22} strokeWidth={2.5} />}
 
                 {/* Notification Badge */}
                 {!isOpen && (

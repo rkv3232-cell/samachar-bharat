@@ -50,3 +50,9 @@ next-env.d.ts
 *.apk
 playwright-report/
 temp_env_val.txt
+client_secret_*.json
+local.properties
+fix*.js
+patch.js
+build.log
+check_icons.js

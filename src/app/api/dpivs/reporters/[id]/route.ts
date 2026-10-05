@@ -91,7 +91,7 @@ export async function GET(
     let reporterData: ReporterProfile | null = null;
 
     try {
-      let docRef = adminDb.collection("reporters").doc(id);
+      const docRef = adminDb.collection("reporters").doc(id);
       let docSnap = await docRef.get();
 
       if (!docSnap.exists) {

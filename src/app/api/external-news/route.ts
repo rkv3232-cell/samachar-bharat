@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_KEY = '763f2fe124484f03804a360a8bfb0d41';
+const API_KEY = process.env.NEWS_API_KEY || '763f2fe124484f03804a360a8bfb0d41';
 const BASE_URL = 'https://newsapi.org/v2';
 
 export async function GET(request: Request) {
@@ -9,9 +9,6 @@ export async function GET(request: Request) {
     const category = searchParams.get('category') || '';
     const country = searchParams.get('country') || 'in';
 
-    // NewsAPI Logic: 
-    // If there is a search query without a category, we can search all articles (everything).
-    // If it's just browsing, use top-headlines.
     let url = '';
 
     if (q && !category) {
@@ -27,17 +24,24 @@ export async function GET(request: Request) {
     }
 
     try {
-        const res = await fetch(url);
+        const res = await fetch(url, {
+            signal: AbortSignal.timeout(4000),
+            next: { revalidate: 300 }
+        });
         const data = await res.json();
 
         if (!res.ok) {
-            console.error('NewsAPI Error:', data);
-            return NextResponse.json({ error: data.message || 'Failed to fetch news' }, { status: res.status });
+            console.warn('NewsAPI Error (returning fallback):', data?.message);
+            return NextResponse.json({ status: 'ok', totalResults: 0, articles: [] });
         }
 
-        return NextResponse.json(data);
-    } catch (error) {
-        console.error('Failed to fetch from NewsAPI', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+            }
+        });
+    } catch (error: any) {
+        console.warn('Failed to fetch from NewsAPI (fallback applied):', error?.message);
+        return NextResponse.json({ status: 'ok', totalResults: 0, articles: [] });
     }
 }

@@ -9,14 +9,19 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Token is required" }, { status: 400 });
         }
 
-        // Try saving token to 'fcm_tokens' collection
+        // Try saving token to 'fcm_tokens' collection with fast 500ms timeout
         try {
-            await adminDb.collection("fcm_tokens").doc(token).set({
-                token,
-                updatedAt: new Date(),
-            });
+            await Promise.race([
+                adminDb.collection("fcm_tokens").doc(token).set({
+                    token,
+                    updatedAt: new Date(),
+                }),
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error("FCM DB write timeout")), 500)
+                ),
+            ]);
         } catch (dbErr: any) {
-            console.warn("[FCM Token Register] DB write skipped (unauthenticated/offline):", dbErr.message);
+            // DB write skipped in offline or invalid credentials mode
         }
 
         return NextResponse.json({ success: true, message: "Token registered successfully" });

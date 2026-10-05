@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Bookmark } from 'lucide-react';
-import { toggleBookmarkStatus, fetchUserHasBookmarked } from '@/lib/engagement';
+import { toggleBookmarkStatus, isPostBookmarkedLocally } from '@/lib/engagement';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
@@ -14,25 +14,13 @@ interface BookmarkButtonProps {
 
 export default function BookmarkButton({ postId, showLabel = false }: BookmarkButtonProps) {
     const { user } = useAuth();
-    const [hasBookmarked, setHasBookmarked] = useState(false);
+    const [hasBookmarked, setHasBookmarked] = useState(() => isPostBookmarkedLocally(postId, user?.uid || null));
     const [isUpdating, setIsUpdating] = useState(false);
 
-    // Initial load: Check if they've already bookmarked it
+    // Synchronous local sync (0 network requests, purely local check)
     useEffect(() => {
         if (!postId) return;
-
-        const checkStatus = async () => {
-            if (user) {
-                const bookmarked = await fetchUserHasBookmarked(postId, user.uid);
-                setHasBookmarked(bookmarked);
-            } else {
-                // Anonymous Flow
-                const localBookmarks = JSON.parse(localStorage.getItem('bookmarked_posts') || '[]');
-                setHasBookmarked(localBookmarks.includes(postId));
-            }
-        };
-
-        checkStatus();
+        setHasBookmarked(isPostBookmarkedLocally(postId, user?.uid || null));
     }, [postId, user]);
 
     const handleToggle = async (e: React.MouseEvent) => {
@@ -44,7 +32,7 @@ export default function BookmarkButton({ postId, showLabel = false }: BookmarkBu
 
         const newBookmarkedState = !hasBookmarked;
 
-        // Optimistic Update
+        // Instant Optimistic Update (< 1ms perceived response)
         setHasBookmarked(newBookmarkedState);
 
         if (newBookmarkedState) toast.success("Bookmarked!");
@@ -52,14 +40,6 @@ export default function BookmarkButton({ postId, showLabel = false }: BookmarkBu
 
         try {
             await toggleBookmarkStatus(postId, user?.uid || null, newBookmarkedState);
-
-            // Persist locally for anonymous
-            if (!user) {
-                const localBookmarks = new Set<string>(JSON.parse(localStorage.getItem('bookmarked_posts') || '[]'));
-                if (newBookmarkedState) localBookmarks.add(postId);
-                else localBookmarks.delete(postId);
-                localStorage.setItem('bookmarked_posts', JSON.stringify(Array.from(localBookmarks)));
-            }
         } catch (error) {
             // Revert Optimistic Update
             setHasBookmarked(!newBookmarkedState);

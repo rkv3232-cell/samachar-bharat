@@ -74,12 +74,13 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const [loading, setLoading] = useState(true);
-    const [localLanguage, setLocalLanguage] = useState<string>('hi');
-
-    useEffect(() => {
-        const savedLang = localStorage.getItem('user_lang');
-        if (savedLang) setLocalLanguage(savedLang);
-    }, []);
+    const [localLanguage, setLocalLanguage] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            const savedLang = localStorage.getItem('user_lang');
+            if (savedLang) return savedLang;
+        }
+        return 'hi';
+    });
 
     const applySettings = (s: SiteSettings) => {
         // 1. Apply Primary Color
@@ -87,14 +88,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             document.documentElement.style.setProperty('--primary-color', s.primaryColor);
         }
 
-        // 2. Apply Theme - handled by next-themes
-        // if (s.theme === 'dark') {
-        //     document.documentElement.classList.add('dark');
-        // } else {
-        //     document.documentElement.classList.remove('dark');
-        // }
-
-        // 3. Apply Language (html attribute)
+        // 2. Apply Language (html attribute)
         document.documentElement.setAttribute('lang', s.language || 'hi');
     };
 

@@ -15,6 +15,7 @@ const CITIES = [
 
 export default function LocalNewsMap() {
     const [selectedCity, setSelectedCity] = useState(CITIES[0]);
+    const [citySearch, setCitySearch] = useState('');
     const [news, setNews] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -36,39 +37,45 @@ export default function LocalNewsMap() {
         fetchLocalNews();
     }, [selectedCity]);
 
+    const filteredCities = CITIES.filter(c =>
+        c.name.toLowerCase().includes(citySearch.toLowerCase())
+    );
+
     return (
-        <div className="bg-white dark:bg-gray-900 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl overflow-hidden shadow-xl shadow-emerald-100/20 dark:shadow-none mb-8">
-            <div className="flex items-center gap-3 p-6 pb-4 border-b border-gray-100 dark:border-gray-800">
-                <div className="w-10 h-10 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full flex items-center justify-center">
+        <div className="bg-white border border-emerald-100 rounded-2xl overflow-hidden shadow-xl shadow-emerald-100/20 mb-8">
+            <div className="flex items-center gap-3 p-6 pb-4 border-b border-gray-100">
+                <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
                     <MapIcon size={20} />
                 </div>
                 <div>
-                    <h2 className="text-xl font-extrabold text-gray-900 dark:text-gray-100">लोकल न्यूज़ मैप (Local Maps)</h2>
+                    <h2 className="text-xl font-extrabold text-gray-900">लोकल न्यूज़ मैप (Local Maps)</h2>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-0.5">अपने शहर की ख़बरें जानें</p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-800">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                 {/* Left Side: Map/Cities */}
-                <div className="p-6 md:col-span-1 bg-gray-50/50 dark:bg-gray-800/20">
+                <div className="p-6 md:col-span-1 bg-gray-50/50">
                     <div className="relative mb-4">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             type="text"
+                            value={citySearch}
+                            onChange={(e) => setCitySearch(e.target.value)}
                             placeholder="शहर खोजें..."
-                            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        {CITIES.map(city => (
+                        {filteredCities.map(city => (
                             <button
                                 key={city.id}
                                 onClick={() => setSelectedCity(city)}
                                 className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${selectedCity.id === city.id
-                                    ? 'bg-emerald-600 text-white shadow-md'
-                                    : 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-gray-700 dark:text-gray-300'
-                                    }`}
+ ? 'bg-emerald-600 text-white shadow-md'
+ : 'hover:bg-emerald-50 text-gray-700'
+ }`}
                             >
                                 <div className="flex items-center gap-2">
                                     <MapPin size={16} className={selectedCity.id === city.id ? "text-emerald-200" : "text-emerald-500"} />
@@ -83,8 +90,8 @@ export default function LocalNewsMap() {
                 {/* Right Side: Local News Feed */}
                 <div className="p-6 md:col-span-2">
                     <div className="flex items-center gap-2 mb-4">
-                        <Navigation2 size={18} className="text-emerald-600 dark:text-emerald-400 fill-current" />
-                        <h3 className="font-extrabold text-gray-800 dark:text-gray-200">
+                        <Navigation2 size={18} className="text-emerald-600 fill-current" />
+                        <h3 className="font-extrabold text-gray-800">
                             {selectedCity.name} की ताज़ा ख़बरें
                         </h3>
                     </div>
@@ -93,11 +100,11 @@ export default function LocalNewsMap() {
                         <div className="space-y-4 animate-pulse">
                             {[1, 2, 3].map(i => (
                                 <div key={i} className="flex gap-4">
-                                    <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-lg shrink-0" />
+                                    <div className="w-20 h-20 bg-gray-200 rounded-lg shrink-0" />
                                     <div className="flex-1 space-y-2 py-1">
-                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
-                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+                                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                                        <div className="h-4 bg-gray-200 rounded w-full" />
+                                        <div className="h-3 bg-gray-200 rounded w-1/4" />
                                     </div>
                                 </div>
                             ))}
@@ -108,9 +115,9 @@ export default function LocalNewsMap() {
                                 <Link
                                     href={`/post/${post.id}`}
                                     key={post.id}
-                                    className="flex gap-4 group hover:bg-gray-50 dark:hover:bg-gray-800/50 p-2 -mx-2 rounded-xl transition"
+                                    className="flex gap-4 group hover:bg-gray-50 p-2 -mx-2 rounded-xl transition"
                                 >
-                                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg shrink-0 overflow-hidden relative">
+                                    <div className="w-20 h-20 bg-gray-100 rounded-lg shrink-0 overflow-hidden relative">
                                         {post.image ? (
                                             /* eslint-disable-next-line @next/next/no-img-element */
                                             <img
@@ -125,7 +132,7 @@ export default function LocalNewsMap() {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-gray-900 dark:text-gray-100 text-sm line-clamp-2 leading-tight group-hover:text-emerald-600 transition">
+                                        <h4 className="font-bold text-gray-900 text-sm line-clamp-2 leading-tight group-hover:text-emerald-600 transition">
                                             {post.title}
                                         </h4>
                                         <div className="flex items-center gap-2 mt-2 text-[10px] uppercase font-bold text-gray-400">

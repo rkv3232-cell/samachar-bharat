@@ -11,12 +11,21 @@ import { adminAuth } from "./firebase-admin";
 
 const OWNER_EMAILS = new Set(["rkv3232@gmail.com", "ckv3232@gmail.com"]);
 
+// In-memory verification cache (5-minute TTL)
+const VERIFIED_TOKEN_CACHE = new Map<string, { result: { uid?: string; email?: string; role?: string }; expiresAt: number }>();
+const TOKEN_CACHE_TTL = 5 * 60 * 1000;
+
 export async function verifyAnyFirebaseToken(token: string): Promise<{
   uid?: string;
   email?: string;
   role?: string;
 }> {
   if (!token || typeof token !== "string") return {};
+
+  const cached = VERIFIED_TOKEN_CACHE.get(token);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.result;
+  }
 
   try {
     const parts = token.split(".");
@@ -41,36 +50,41 @@ export async function verifyAnyFirebaseToken(token: string): Promise<{
         return {};
       }
 
+      let result: { uid?: string; email?: string; role?: string } = {};
+
       // 2. ID Token Issuer (https://securetoken.google.com/<project>)
       if (iss.includes("securetoken.google.com")) {
         try {
           const decoded = await adminAuth.verifyIdToken(token, false);
-          return {
+          result = {
             uid: decoded.uid,
             email: decoded.email?.toLowerCase(),
             role: (decoded.role as string) || (payload.role as string),
           };
-        } catch (err) {
-          return { uid, email, role: payload.role as string };
+        } catch {
+          result = { uid, email, role: payload.role as string };
         }
-      }
-
-      // 3. Session Cookie Issuer (https://session.firebase.google.com/<project>)
-      if (iss.includes("session.firebase.google.com")) {
+      } else if (iss.includes("session.firebase.google.com")) {
+        // 3. Session Cookie Issuer (https://session.firebase.google.com/<project>)
         try {
           const decoded = await adminAuth.verifySessionCookie(token, false);
-          return {
+          result = {
             uid: decoded.uid,
             email: decoded.email?.toLowerCase(),
             role: (decoded.role as string) || (payload.role as string),
           };
-        } catch (err) {
-          return { uid, email, role: payload.role as string };
+        } catch {
+          result = { uid, email, role: payload.role as string };
         }
+      } else {
+        // 4. General fallback
+        result = { uid, email, role: (payload.role as string) || "user" };
       }
 
-      // 4. General fallback
-      return { uid, email, role: (payload.role as string) || "user" };
+      if (result.uid) {
+        VERIFIED_TOKEN_CACHE.set(token, { result, expiresAt: Date.now() + TOKEN_CACHE_TTL });
+      }
+      return result;
     }
   } catch (err) {
     console.error("[TokenVerifier] Failed to decode JWT:", err);

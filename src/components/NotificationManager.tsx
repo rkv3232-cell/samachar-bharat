@@ -6,17 +6,21 @@ import { toast } from "sonner";
 
 export default function NotificationManager() {
     useEffect(() => {
-        // 1. Request Permission and get Token on mount
+        // 1. Only initialize if permission was already explicitly granted by user
         const setupNotifications = async () => {
-            // Check if browser supports notifications
-            if (!("Notification" in window)) {
-                console.log("This browser does not support desktop notification");
+            if (typeof window === 'undefined' || !("Notification" in window)) {
                 return;
             }
 
-            const token = await requestForToken();
-            if (token) {
-                console.log("Notification system initialized.");
+            // Do not prompt the user on cold page load; only register if already granted
+            if (Notification.permission !== "granted") {
+                return;
+            }
+
+            try {
+                await requestForToken();
+            } catch (err) {
+                console.warn("Silent notification init:", err);
             }
         };
 

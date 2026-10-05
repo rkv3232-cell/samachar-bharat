@@ -57,12 +57,12 @@ export default function ConfirmModal({
             />
 
             {/* Modal */}
-            <div className="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-gray-800">
+            <div className="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
                 {/* Close button */}
                 <button
                     onClick={onCancel}
                     disabled={loading}
-                    className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50 dark:hover:bg-gray-700"
+                    className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
                 >
                     <X size={18} />
                 </button>
@@ -70,18 +70,18 @@ export default function ConfirmModal({
                 {/* Icon */}
                 <div
                     className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${variant === "danger"
-                            ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                            : "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+                            ? "bg-red-100 text-red-600"
+                            : "bg-amber-100 text-amber-600"
                         }`}
                 >
                     <AlertTriangle size={24} />
                 </div>
 
                 {/* Content */}
-                <h3 className="mb-2 text-center text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="mb-2 text-center text-lg font-bold text-gray-900">
                     {title}
                 </h3>
-                <p className="mb-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                <p className="mb-6 text-center text-sm text-gray-600 leading-relaxed">
                     {message}
                 </p>
 
@@ -90,14 +90,14 @@ export default function ConfirmModal({
                     <button
                         onClick={onCancel}
                         disabled={loading}
-                        className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50"
                     >
                         {cancelLabel}
                     </button>
                     <button
                         onClick={onConfirm}
                         disabled={loading}
-                        className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-all disabled:opacity-50 ${confirmClasses}`}
+                        className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all disabled:opacity-50 ${confirmClasses}`}
                     >
                         {loading ? (
                             <>

@@ -57,9 +57,9 @@ export default function DPIVSAdminPage() {
   const [previewReporter, setPreviewReporter] = useState<ReporterProfile | null>(null);
 
   // Fetch Reporters
-  const fetchReporters = useCallback(async () => {
+  const fetchReporters = useCallback(async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (!isInitial) setLoading(true);
       // Primary: Direct Firestore Fetch
       const fsList = await fetchReportersFromFirestore(selectedStatus, debouncedSearchQuery);
       setReporters(fsList);
@@ -75,7 +75,7 @@ export default function DPIVSAdminPage() {
         if (data.success) {
           setReporters(data.data || []);
         }
-      } catch (apiErr: any) {
+      } catch (_apiErr: any) {
         toast.error("Failed to load reporter records");
       }
     } finally {
@@ -84,7 +84,7 @@ export default function DPIVSAdminPage() {
   }, [selectedStatus, debouncedSearchQuery]);
 
   useEffect(() => {
-    fetchReporters();
+    fetchReporters(true);
   }, [fetchReporters]);
 
   // Memoized Action Handlers for Table & Modals
@@ -182,7 +182,7 @@ export default function DPIVSAdminPage() {
     } catch (err: any) {
       toast.error(err.message || "Archiving error");
     }
-  }, [isOwner, user?.uid, fetchReporters]);
+  }, [isOwner, user, fetchReporters]);
 
   // CSV Export
   const handleExportCSV = useCallback(() => {
@@ -244,27 +244,27 @@ export default function DPIVSAdminPage() {
   }, [reporters]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6 lg:p-8 space-y-8">
+    <div className="space-y-4">
       {/* Header Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-200 pb-3">
         <div>
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-8 h-8 text-amber-500" />
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Digital Press Identity & Verification System (DPIVS)
+            <ShieldCheck className="w-5 h-5 text-amber-500" />
+            <h1 className="text-lg font-extrabold tracking-tight text-gray-900">
+              Press Credentials (DPIVS)
             </h1>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Autonomous Press Credential Management, Lifecycle Enforcement & Cryptographic QR Verification
+          <p className="text-xs text-gray-500">
+            Autonomous Press Credential Management & Cryptographic QR Verification
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors shadow-2xs"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             Export CSV
           </button>
 
@@ -274,78 +274,78 @@ export default function DPIVSAdminPage() {
                 setEditingReporter(null);
                 setIsFormOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-md"
+              className="inline-flex items-center gap-1.5 h-8 px-3.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-2xs active:scale-95"
             >
-              <Plus className="w-4 h-4" />
-              Issue New Press Card
+              <Plus className="w-3.5 h-3.5" />
+              Issue Press Card
             </button>
           )}
         </div>
       </div>
 
       {/* Stats Summary Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-            <BadgeCheck className="w-6 h-6" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-3 rounded-xl bg-white border border-gray-200/80 shadow-2xs flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-50 text-blue-600 shrink-0">
+            <BadgeCheck className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalCount}</div>
-            <div className="text-xs text-gray-500">Total Registered Credentials</div>
+            <div className="text-lg font-black text-gray-900 leading-tight">{totalCount}</div>
+            <div className="text-[10px] font-medium text-gray-500 truncate">Total Registered</div>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-            <UserCheck className="w-6 h-6" />
+        <div className="p-3 rounded-xl bg-white border border-gray-200/80 shadow-2xs flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+            <UserCheck className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{activeCount}</div>
-            <div className="text-xs text-gray-500">Active Verified Cards</div>
+            <div className="text-lg font-black text-gray-900 leading-tight">{activeCount}</div>
+            <div className="text-[10px] font-medium text-gray-500 truncate">Active Cards</div>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-            <Clock className="w-6 h-6" />
+        <div className="p-3 rounded-xl bg-white border border-gray-200/80 shadow-2xs flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-amber-50 text-amber-600 shrink-0">
+            <Clock className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{pendingCount}</div>
-            <div className="text-xs text-gray-500">Pending Review</div>
+            <div className="text-lg font-black text-gray-900 leading-tight">{pendingCount}</div>
+            <div className="text-[10px] font-medium text-gray-500 truncate">Pending</div>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
-            <UserX className="w-6 h-6" />
+        <div className="p-3 rounded-xl bg-white border border-gray-200/80 shadow-2xs flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-rose-50 text-rose-600 shrink-0">
+            <UserX className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{suspendedCount}</div>
-            <div className="text-xs text-gray-500">Suspended / Revoked</div>
+            <div className="text-lg font-black text-gray-900 leading-tight">{suspendedCount}</div>
+            <div className="text-[10px] font-medium text-gray-500 truncate">Suspended</div>
           </div>
         </div>
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-white p-2.5 rounded-xl border border-gray-200/80 shadow-2xs">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name, ID, phone..."
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-400" />
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-gray-400" />
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="h-8 px-2.5 text-xs rounded-lg border border-gray-200 bg-white text-gray-800 font-semibold focus:ring-1 focus:ring-red-500 outline-none"
             >
               <option value="ALL">All Statuses</option>
               <option value={ReporterStatus.ACTIVE}>Active</option>
@@ -357,11 +357,11 @@ export default function DPIVSAdminPage() {
           </div>
 
           <button
-            onClick={fetchReporters}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            onClick={() => fetchReporters(false)}
+            className="h-8 w-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
             title="Refresh List"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -383,6 +383,7 @@ export default function DPIVSAdminPage() {
         onSubmit={handleFormSubmit}
         initialData={editingReporter}
         mode={editingReporter ? "edit" : "create"}
+        reporters={reporters}
       />
 
       <StatusChangeModal

@@ -31,17 +31,31 @@ const SLUG_MAP: Record<string, string> = {
 };
 
 // Fetch category name from Firestore by slug or fallback to map
-async function getCategoryName(slug: string): Promise<string | null> {
+async function getCategoryName(rawSlug: string): Promise<string | null> {
     try {
-        // 1. Check dynamic map first (fastest)
-        if (SLUG_MAP[slug]) return SLUG_MAP[slug];
+        const decoded = decodeURIComponent(rawSlug).trim();
+        const lowerDecoded = decoded.toLowerCase();
 
-        // 2. Check Firestore
+        // 1. Check dynamic map first (fastest)
+        if (SLUG_MAP[rawSlug]) return SLUG_MAP[rawSlug];
+        if (SLUG_MAP[lowerDecoded]) return SLUG_MAP[lowerDecoded];
+
+        // 2. Check if the slug itself is one of the category values (e.g. Hindi name)
+        for (const [key, val] of Object.entries(SLUG_MAP)) {
+            if (val === decoded || val.toLowerCase() === lowerDecoded || key === lowerDecoded) return val;
+        }
+
+        // 3. Check Firestore
         const categories = await fetchCategories();
-        const match = categories.find((c) => c.slug === slug || slugify(c.name, { lower: true }) === slug);
+        const match = categories.find((c) => 
+            c.slug === rawSlug || 
+            c.slug === lowerDecoded || 
+            c.name === decoded || 
+            slugify(c.name, { lower: true }) === lowerDecoded
+        );
         return match?.name ?? null;
     } catch {
-        return SLUG_MAP[slug] || null;
+        return SLUG_MAP[rawSlug] || null;
     }
 }
 
@@ -69,10 +83,24 @@ export default async function CategoryPage({ params }: Props) {
     let hasError = false;
 
     try {
-        const results = await Promise.allSettled([
-            getPostsByCategory(slug, 30),
-        ]);
-        if (results[0].status === 'fulfilled') posts = results[0].value;
+        // Query both catLabel and slug to cover both Hindi and English category naming in Firestore
+        const queries = [getPostsByCategory(catLabel, 30)];
+        if (slug !== catLabel) {
+            queries.push(getPostsByCategory(slug, 30));
+        }
+        const results = await Promise.allSettled(queries);
+        const combined: any[] = [];
+        for (const res of results) {
+            if (res.status === 'fulfilled' && Array.isArray(res.value)) {
+                combined.push(...res.value);
+            }
+        }
+        const seen = new Set();
+        posts = combined.filter(p => {
+            if (!p || !p.id || seen.has(p.id)) return false;
+            seen.add(p.id);
+            return true;
+        });
     } catch (e) {
         hasError = true;
         console.error('Error fetching category posts:', e);

@@ -46,10 +46,10 @@ function EditorSidebar() {
     };
 
     return (
-        <aside className="flex w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex h-16 shrink-0 items-center gap-2 px-6">
-                <PenTool size={22} className="text-blue-600" />
-                <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+        <aside className="flex w-64 flex-col border-r border-gray-200 bg-white shadow-xs">
+            <div className="flex h-16 shrink-0 items-center gap-2 px-6 border-b border-gray-100">
+                <PenTool size={22} className="text-red-600" />
+                <h1 className="text-base font-bold tracking-tight text-gray-900 truncate">
                     {role === UserRole.REPORTER ? "Reporter Panel" : "Editor Panel"}
                 </h1>
             </div>
@@ -61,13 +61,13 @@ function EditorSidebar() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${isActive
-                                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                            className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${isActive
+                                ? "bg-red-50 text-red-600 border border-red-100 shadow-xs"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                 }`}
                         >
-                            {item.icon}
-                            {item.label}
+                            <span className={isActive ? "text-red-600" : "text-gray-500"}>{item.icon}</span>
+                            <span>{item.label}</span>
                         </Link>
                     );
                 })}
@@ -76,21 +76,21 @@ function EditorSidebar() {
                 {isAdmin && (
                     <Link
                         href="/admin"
-                        className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+                        className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     >
-                        <LayoutDashboard size={20} />
+                        <LayoutDashboard size={20} className="text-gray-500" />
                         Admin Panel
                     </Link>
                 )}
             </nav>
 
-            <div className="border-t border-gray-200 p-4 dark:border-gray-800">
-                <p className="mb-3 px-4 text-xs text-gray-400 truncate">
+            <div className="border-t border-gray-200 p-4">
+                <p className="mb-3 px-4 text-xs font-semibold text-gray-500 truncate">
                     {firestoreUser?.name ?? "Editor"}
                 </p>
                 <button
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-red-600 transition-all hover:bg-red-50"
                 >
                     <LogOut size={20} />
                     Sign Out

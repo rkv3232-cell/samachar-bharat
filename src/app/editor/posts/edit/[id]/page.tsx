@@ -50,6 +50,11 @@ export default function EditPostPage() {
     const [tagInput, setTagInput] = useState('');
     const [dbCategories, setDbCategories] = useState<{ name: string; slug: string }[]>([]);
 
+    const isVideoUrl = (url: string): boolean => {
+        if (!url) return false;
+        return !!(url.match(/\.(mp4|webm|ogg|mov)$/) || url.includes('/video/upload/'));
+    };
+
     useEffect(() => {
         const fetchTaxonomies = async () => {
             try {
@@ -88,11 +93,6 @@ export default function EditPostPage() {
 
         fetchTaxonomies().then(fetchPost);
     }, [id, router]);
-
-    const isVideoUrl = (url: string): boolean => {
-        if (!url) return false;
-        return !!(url.match(/\.(mp4|webm|ogg|mov)$/) || url.includes('/video/upload/'));
-    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

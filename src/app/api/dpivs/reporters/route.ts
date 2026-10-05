@@ -60,14 +60,18 @@ async function authenticateRequest(request: NextRequest): Promise<{
     let role: UserRole = UserRole.ADMIN;
     let name = "Admin User";
     try {
-      const userDoc = await adminDb.collection("users").doc(uid).get();
+      const userDocPromise = adminDb.collection("users").doc(uid).get();
+      const userTimeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("User lookup timeout")), 600)
+      );
+      const userDoc = await Promise.race([userDocPromise, userTimeout]);
       if (userDoc.exists) {
         const userData = userDoc.data();
         role = toUserRole(userData?.role);
         name = userData?.name || userData?.displayName || "Admin User";
       }
     } catch (dbErr) {
-      console.warn("[DPIVS Auth] Firestore user lookup failed, defaulting role:", dbErr);
+      console.warn("[DPIVS Auth] Firestore user lookup failed/timed out, defaulting role:", dbErr);
     }
 
     return { authenticated: true, uid, role, name };
@@ -108,7 +112,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     queryRef = queryRef.orderBy("createdAt", "desc").limit(limitParam);
 
     const { normalizeReporter } = await import("@/lib/firebase/reporters");
-    const snapshot = await queryRef.get();
+    const queryPromise = queryRef.get();
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("DPIVS query timeout")), 800)
+    );
+    const snapshot = await Promise.race([queryPromise, timeoutPromise]);
     let reporters: ReporterProfile[] = [];
 
     snapshot.forEach((docSnap) => {

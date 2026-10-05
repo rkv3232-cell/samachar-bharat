@@ -1,149 +1,158 @@
 import { NextResponse } from "next/server";
+import { executeAITask, cleanAIText, extractStructuredJSON, AITaskType } from "@/lib/ai";
 
-// ──────────────────────────────────────────
-// Helper: clean up raw AI response text
-// ──────────────────────────────────────────
-function cleanText(raw: string): string {
-    return raw
-        .replace(/^```[a-z]*\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
-}
-
-function extractJSON(raw: string): Record<string, unknown> | null {
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) return null;
-    try {
-        return JSON.parse(match[0]);
-    } catch {
-        return null;
-    }
-}
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-    try {
-        const { title, content, type, role } = await req.json();
+  try {
+    const { title = "", content = "", type } = await req.json();
 
-        let prompt = "";
-
-        if (type === "content") {
-            prompt = `तुम एक वरिष्ठ हिंदी पत्रकार हो जो "समाचार भारत" न्यूज़ पोर्टल के लिए लिखता है।
-            शीर्षक: ${title}
-            मिशन: इस शीर्षक पर एक विस्तृत और गंभीर न्यूज़ खबर लिखो।
-            अनिवार्य संरचना (HTML format में): 
-            <h2>मुख्य सुर्खी</h2>
-            <p>खबर का विवरण...</p>
-            <h3>हाइलाइट्स</h3>
-            <ul><li>बिंदु 1</li><li>बिंदु 2</li></ul>`;
-        } else if (type === "rewrite") {
-            prompt = `तुम एक वरिष्ठ हिंदी पत्रकार हो। इस खबर को और बेहतर, पेशेवर और प्रभावशाली तरीके से फिर से लिखो।
-            मूल शीर्षक: ${title}
-            मूल सामग्री: ${content}
-            मिशन: खबर को नया रूप दें लेकिन तथ्यों को न बदलें। HTML फॉर्मेट का ही उपयोग करें।`;
-        } else if (type === "tldr") {
-            prompt = `खबर का सार (TL;DR) 3-4 बुलेट्स में दें। खबर: ${content.substring(0, 2000)}। JSON array लौटाएं: ["point 1", ...]`;
-        } else if (type === "seo-tags") {
-            prompt = `खबर के लिए SEO टैग्स, मेटा डिस्क्रिप्शन और स्लॉग जनरेट करें। खबर: ${title} ${content.substring(0, 1000)}। JSON लौटाएं: {"tags": [], "seoDescription": "", "slug": "", "suggestedCategory": ""}`;
-        } else if (type === "headline") {
-            prompt = `एक सटीक और आकर्षक हिंदी हेडलाइन लिखें। सामग्री: ${content.substring(0, 1500)}। केवल हेडलाइन ही लिखें।`;
-        } else if (type === "suggest-category") {
-            prompt = `खबर की कैटेगरी चुनें: uttar-pradesh | desh | videsh | karobar | crime | dharm | rajniti | lifestyle. JSON: {"category": "..."}`;
-        } else if (type === "translate") {
-            prompt = `Translate this news to professional journalistic English. Title: ${title} Content: ${content.substring(0, 1500)}. JSON: {"translatedTitle": "...", "translatedContent": "..."}`;
-        } else if (type === "validate") {
-            prompt = `इस खबर की गुणवत्ता और तथ्यों की जाँच करें। सामग्री: ${title} ${content.substring(0, 2000)}। 
-            JSON लौटाएं: {
-                "isValid": true,
-                "score": 1-10,
-                "status": "verified" | "unverified" | "ai-generated",
-                "issues": ["मुद्दा 1", ...],
-                "suggestions": ["सुझाव 1", ...]
-            }`;
-        }
-
-        if (!prompt) {
-            return NextResponse.json({ error: "Invalid request type or missing parameters." }, { status: 400 });
-        }
-
-        // ─────────────────────────────────────────────────────────
-        // 2. AI Provider Selection (Groq or Local)
-        // ─────────────────────────────────────────────────────────
-        const groqKey = process.env.GROQ_API_KEY;
-        const useLocal = process.env.USE_LOCAL_AI === "true";
-        const isGroq = !!groqKey && !useLocal;
-
-        const apiTarget = isGroq
-            ? "https://api.groq.com/openai/v1/chat/completions"
-            : (process.env.LOCAL_AI_BASE_URL || "http://localhost:1234/v1") + "/chat/completions";
-
-        const modelName = isGroq ? "llama-3.3-70b-versatile" : "local-model";
-
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (isGroq) headers["Authorization"] = `Bearer ${groqKey}`;
-
-        const response = await fetch(apiTarget, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({
-                model: modelName,
-                messages: [
-                    {
-                        role: "system",
-                        content: `CONTEXT: News Content Transformation System.
-MISSION: Transform/Rewrite provided news data based on specific tasks.
-STRICT RULES:
-1. NO GREETINGS. 
-2. NO INTRODUCTION.
-3. NO CONVERSATION.
-4. OUTPUT ONLY THE FINAL TEXT.
-5. IF TASK IS REWRITE, POLISH THE HINDI CONTENT PROFESSIONALLY.`
-                    },
-                    {
-                        role: "user",
-                        content: `EXAMPLES:
-Task: content | Title: "Road accident in Delhi"
-Output: <h2>दिल्ली में भीषण सड़क हादसा</h2><p>राजधानी के बाहरी रिंग रोड पर आज सुबह एक दर्दनाक हादसा हुआ...</p>
-
-Task: rewrite | Title: "Monsoon hits" | Content: "rain is coming"
-Output: <h2>मानसून की दस्तक: झमाझम बारिश से बदला मौसम</h2><p>भीषण गर्मी के बाद मानसून ने आखिरकार दस्तक दे दी है...</p>
-
-CURRENT TASK: ${type}
-Title: ${title}
-Content: ${content}
-Output:`
-                    }
-                ],
-                temperature: 0.1, // Very low temperature for maximum reliability
-                stream: false,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("AI API Error:", errorText);
-            throw new Error(`AI API Error: ${errorText}`);
-        }
-
-        const data = await response.json();
-        const text = data.choices[0].message.content;
-
-        // If JSON type, extract it
-        if (["tldr", "seo-tags", "suggest-category", "validate", "translate"].includes(type)) {
-            const json = extractJSON(text);
-            if (json) return NextResponse.json(json);
-            console.error("Failed to extract JSON from AI response:", text);
-        }
-
-        // Specific handling for headline to match frontend
-        if (type === "headline") {
-            return NextResponse.json({ headline: cleanText(text), content: cleanText(text) });
-        }
-
-        return NextResponse.json({ content: cleanText(text), raw: text, version: "v3-hardened" });
-
-    } catch (error: any) {
-        console.error("Post Assistant Error:", error);
-        return NextResponse.json({ error: error.message || "AI Generator offline." }, { status: 500 });
+    if (!type) {
+      return NextResponse.json({ error: "Missing task type." }, { status: 400 });
     }
-}
 
+    let taskType: AITaskType = "article-generation";
+    let prompt = "";
+    let systemPrompt = `आप 'समाचार भारत' न्यूज़ पोर्टल के वरिष्ठ डिजिटल संपादक और पत्रकार हैं।
+नियम:
+1. कोई अभिवादन (Greetings) या परिचय न लिखें।
+2. कोई पूर्व-योजना (Plan/Thinking) न लिखें।
+3. केवल अंतिम परिणाम (Final Result) ही प्रदान करें।
+4. हिंदी पत्रकारिता की शुद्ध, तथ्यपरक और प्रभावशाली भाषा का प्रयोग करें।`;
+    let isJsonOutput = false;
+
+    if (type === "content") {
+      taskType = "article-generation";
+      prompt = `शीर्षक: ${title}
+अतिरिक्त संदर्भ: ${content || "नवीनतम घटनाक्रम"}
+मिशन: इस शीर्षक पर एक विस्तृत और गंभीर न्यूज़ खबर लिखें।
+अनिवार्य संरचना (HTML format में):
+<h2>मुख्य सुर्खी</h2>
+<p>खबर का मुख्य विवरण और पृष्ठभूमि...</p>
+<h3>प्रमुख बिंदु और हाइलाइट्स</h3>
+<ul><li>पहला महत्वपूर्ण बिंदु</li><li>दूसरा महत्वपूर्ण बिंदु</li><li>तीसरा महत्वपूर्ण बिंदु</li></ul>
+<p>आगे की कार्रवाई और निष्कर्ष...</p>`;
+    } else if (type === "rewrite") {
+      taskType = "article-rewrite";
+      prompt = `मूल शीर्षक: ${title}
+मूल सामग्री: ${content}
+मिशन: इस खबर को और बेहतर, गंभीर, पेशेवर और प्रभावशाली तरीके से फिर से लिखें। तथ्यों को न बदलें। HTML फॉर्मेट का ही उपयोग करें (<h2>, <p>, <h3>, <ul>, <li>)।`;
+    } else if (type === "tldr") {
+      taskType = "tldr";
+      isJsonOutput = true;
+      prompt = `खबर: शीर्षक: ${title} | विवरण: ${content.substring(0, 2000)}
+मिशन: खबर का सार (TL;DR) 3-4 संक्षिप्त और महत्वपूर्ण बुलेट पॉइंट्स में दें।
+JSON Array प्रारूप में उत्तर दें: ["पहला बिंदु", "दूसरा बिंदु", "तीसरा बिंदु", "चौथा बिंदु"]`;
+    } else if (type === "seo-tags") {
+      taskType = "seo-tags";
+      isJsonOutput = true;
+      prompt = `खबर: शीर्षक: ${title} | विवरण: ${content.substring(0, 1200)}
+मिशन: इस खबर के लिए SEO टैग्स, मेटा डिस्क्रिप्शन और यूआरएल स्लग जनरेट करें।
+JSON प्रारूप:
+{
+  "tags": ["टैग 1", "टैग 2", "टैग 3", "टैग 4", "टैग 5"],
+  "seoDescription": "150 अक्षरों के अंदर आकर्षक मेटा डिस्क्रिप्शन",
+  "slug": "english-url-slug-here",
+  "suggestedCategory": "desh"
+}`;
+    } else if (type === "headline") {
+      taskType = "headline";
+      prompt = `सामग्री: ${content.substring(0, 1500)}
+मौजूदा शीर्षक (यदि कोई हो): ${title}
+मिशन: इस खबर के लिए एक सटीक, आकर्षक और क्लिक-योग्य हिंदी हेडलाइन लिखें। केवल हेडलाइन ही लिखें, कोई अतिरिक्त टिप्पणी न दें।`;
+    } else if (type === "suggest-category") {
+      taskType = "suggest-category";
+      isJsonOutput = true;
+      prompt = `शीर्षक: ${title}
+विवरण: ${content.substring(0, 800)}
+मिशन: इस खबर के लिए उपयुक्त श्रेणी चुनें।
+मान्य श्रेणियां: uttar-pradesh | desh | videsh | karobar | crime | dharm | rajniti | lifestyle | sports | entertainment | technology | world
+JSON प्रारूप: { "category": "चयनित-श्रेणी" }`;
+    } else if (type === "translate") {
+      taskType = "translation";
+      isJsonOutput = true;
+      prompt = `Title: ${title}
+Content: ${content.substring(0, 1800)}
+Mission: Translate this Hindi news report into professional, journalistic English.
+JSON format:
+{
+  "translatedTitle": "English Headline",
+  "translatedContent": "<p>English journalistic paragraphs in HTML format...</p>"
+}`;
+    } else if (type === "validate") {
+      taskType = "fact-check";
+      isJsonOutput = true;
+      prompt = `शीर्षक: ${title}
+सामग्री: ${content.substring(0, 2000)}
+मिशन: इस खबर की गुणवत्ता, व्याकरण, तथ्यपरकता और विश्वसनीयता की समीक्षा करें।
+JSON प्रारूप:
+{
+  "isValid": true,
+  "score": 8,
+  "status": "verified",
+  "issues": ["मुद्दा 1 यदि कोई हो"],
+  "suggestions": ["सुझाव 1"]
+}`;
+    } else {
+      return NextResponse.json({ error: "Invalid task type specified." }, { status: 400 });
+    }
+
+    if (isJsonOutput) {
+      systemPrompt += "\nअनिवार्य नियम: केवल और केवल शुद्ध वैध JSON प्रारूप में उत्तर दें। कोई अतिरिक्त विवरण, टिप्पणी या बातचीत न लिखें।";
+    }
+
+    // Execute via central AI router (Gemini Primary -> OpenRouter Fallback)
+    const aiResponse = await executeAITask({
+      task: taskType,
+      prompt,
+      systemPrompt,
+      jsonOutput: isJsonOutput,
+    });
+
+    const rawText = aiResponse.text;
+
+    // Handle JSON return types
+    if (["tldr", "seo-tags", "suggest-category", "validate", "translate"].includes(type)) {
+      const parsed = aiResponse.json || extractStructuredJSON(rawText);
+      if (parsed) {
+        if (type === "seo-tags" && Array.isArray(parsed)) {
+          return NextResponse.json({
+            tags: parsed,
+            seoDescription: `${title || "ताज़ा समाचार"} - विस्तृत कवरेज और विश्लेषण पढ़ें समाचार भारत पर।`,
+            slug: (title || "").toLowerCase().replace(/[^a-zA-Z0-9\s-]/g, '').trim().replace(/\s+/g, '-') || `news-${Date.now()}`,
+          });
+        }
+        return NextResponse.json(parsed);
+      }
+      console.warn(`[Post Assistant] JSON parse fallback failed for ${type}. Raw:`, rawText);
+    }
+
+    // Specific handling for headline
+    if (type === "headline") {
+      const cleanedHeadline = cleanAIText(rawText);
+      return NextResponse.json({
+        headline: cleanedHeadline,
+        content: cleanedHeadline,
+        provider: aiResponse.provider,
+        model: aiResponse.model,
+      });
+    }
+
+    // General text / html content
+    const cleanedContent = cleanAIText(rawText);
+    return NextResponse.json({
+      content: cleanedContent,
+      raw: rawText,
+      provider: aiResponse.provider,
+      model: aiResponse.model,
+      fallbackUsed: aiResponse.fallbackUsed,
+      version: "v4-gemini-primary",
+    });
+  } catch (error: any) {
+    console.error("Post Assistant Route Error:", error);
+    return NextResponse.json(
+      { error: error.message || "AI सेवा से उत्तर प्राप्त नहीं हो सका।" },
+      { status: error.statusCode || 500 }
+    );
+  }
+}

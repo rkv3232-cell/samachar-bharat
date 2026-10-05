@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { fetchLiveStatus } from "@/lib/firestore";
 import type { LiveStatus } from "@/types";
 import LiveSection from "@/components/LiveSection";
-import { Loader2, Radio, Tv, Users, MessageCircle, Share2, Heart, Award } from "lucide-react";
+import { Loader2, Radio, Tv } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -27,47 +27,40 @@ export default function LivePage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-[#050505] text-white">
+        <main className="min-h-screen bg-slate-50 text-gray-900 flex flex-col">
             <Navbar />
 
-            <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+            <div className="max-w-6xl mx-auto px-4 py-6 md:py-8 flex-1 w-full">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b border-white/10 pb-8">
-                    <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/10 border border-red-600/20 text-red-500">
-                            <Radio className="w-4 h-4 animate-pulse" />
-                            <span className="text-xs font-black uppercase tracking-widest">Live Streaming Now</span>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-gray-200 pb-5">
+                    <div className="space-y-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600">
+                            <Radio className="w-3.5 h-3.5 animate-pulse" />
+                            <span className="text-[11px] font-bold uppercase tracking-wider">Live Streaming</span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-none">
+                        <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-gray-900">
                             Live <span className="text-red-600">TV</span> Hub
                         </h1>
-                        <p className="text-gray-400 font-medium max-w-xl">
-                            Watch all major news channels live in one place. Stay updated with the latest happenings from across the nation and the world.
+                        <p className="text-gray-500 text-xs md:text-sm font-medium max-w-xl">
+                            देश और दुनिया के प्रमुख समाचार चैनलों का लाइव प्रसारण एक ही स्थान पर देखें।
                         </p>
                     </div>
                 </div>
 
                 {loading ? (
-                    <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-                        <Loader2 className="w-12 h-12 text-red-600 animate-spin" />
-                        <p className="text-gray-500 font-black uppercase tracking-widest text-sm">Initializing Secure Stream...</p>
+                    <div className="h-[50vh] flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
+                        <p className="text-gray-500 font-bold uppercase tracking-wider text-xs">लाइव स्ट्रीम लोड हो रही है...</p>
                     </div>
                 ) : status ? (
-                    <div className="space-y-12">
-                        {/* Player Section */}
-                        <div className="relative animate-in fade-in zoom-in duration-500">
-                            <LiveSection status={status} />
-
-                            {/* Decorative elements */}
-                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-red-600/20 blur-[100px] -z-10 rounded-full" />
-                            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-red-600/10 blur-[100px] -z-10 rounded-full" />
-                        </div>
+                    <div className="space-y-6">
+                        <LiveSection status={status} />
                     </div>
                 ) : (
-                    <div className="p-20 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                        <Tv className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                        <h2 className="text-2xl font-bold">Offline Temporarily</h2>
-                        <p className="text-gray-500 mt-2">Live telecast is currently unavailable. Please check back later.</p>
+                    <div className="p-12 text-center bg-white rounded-2xl border border-gray-200 shadow-xs">
+                        <Tv className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <h2 className="text-lg font-bold text-gray-800">लाइव प्रसारण फ़िलहाल उपलब्ध नहीं है</h2>
+                        <p className="text-gray-500 text-xs mt-1">कृपया कुछ समय बाद पुनः प्रयास करें।</p>
                     </div>
                 )}
             </div>

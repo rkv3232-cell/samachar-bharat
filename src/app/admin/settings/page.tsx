@@ -117,129 +117,127 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="space-y-3.5 max-w-4xl">
             <Toaster position="top-right" />
 
-            <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-                {/* ── Header ── */}
-                <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-                            <div className="rounded-xl bg-purple-100 p-2 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400">
-                                <Settings size={28} />
-                            </div>
-                            Settings
-                        </h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Manage your website configuration
-                        </p>
-                    </div>
-
-                    {/* Save Button */}
-                    {settings && !settings.autoSave && (
-                        <button
-                            onClick={handleSave}
-                            disabled={saving || !hasChanges || !isOwner}
-                            className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-700 disabled:opacity-50 disabled:shadow-none"
-                        >
-                            {!isOwner ? (
-                                <>
-                                    <Lock size={16} />
-                                    Owner Only
-                                </>
-                            ) : saving ? (
-                                <>
-                                    <Loader2 size={16} className="animate-spin" />
-                                    Saving...
-                                </>
-                            ) : hasChanges ? (
-                                <>
-                                    <Save size={16} />
-                                    Save Changes
-                                </>
-                            ) : (
-                                <>
-                                    <Check size={16} />
-                                    Saved
-                                </>
-                            )}
-                        </button>
-                    )}
+            {/* ── Header ── */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 className="flex items-center gap-2 text-lg font-extrabold text-gray-900 tracking-tight">
+                        <div className="rounded-lg bg-purple-50 p-1.5 text-purple-600">
+                            <Settings size={18} />
+                        </div>
+                        Settings
+                    </h1>
+                    <p className="text-xs text-gray-500">
+                        Manage your website configuration
+                    </p>
                 </div>
 
-                {/* Role Block Banner */}
-                {!isOwner && !loading && (
-                    <div className="mb-6 rounded-xl border border-red-100 bg-red-50 p-4 flex items-center gap-3 text-red-700">
-                        <Lock size={20} className="shrink-0" />
-                        <div>
-                            <p className="font-bold text-sm">Owner Mode Required</p>
-                            <p className="text-xs opacity-80">You can view these settings, but only the Owner can modify them.</p>
-                        </div>
-                    </div>
+                {/* Save Button */}
+                {settings && !settings.autoSave && (
+                    <button
+                        onClick={handleSave}
+                        disabled={saving || !hasChanges || !isOwner}
+                        className="h-8 flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-blue-700 disabled:opacity-50 active:scale-95"
+                    >
+                        {!isOwner ? (
+                            <>
+                                <Lock size={13} />
+                                Owner Only
+                            </>
+                        ) : saving ? (
+                            <>
+                                <Loader2 size={13} className="animate-spin" />
+                                Saving...
+                            </>
+                        ) : hasChanges ? (
+                            <>
+                                <Save size={13} />
+                                Save Changes
+                            </>
+                        ) : (
+                            <>
+                                <Check size={13} />
+                                Saved
+                            </>
+                        )}
+                    </button>
                 )}
+            </div>
+
+            {/* Role Block Banner */}
+            {!isOwner && !loading && (
+                <div className="rounded-lg border border-red-100 bg-red-50 p-3 flex items-center gap-2.5 text-red-700">
+                    <Lock size={16} className="shrink-0" />
+                    <div>
+                        <p className="font-bold text-xs">Owner Mode Required</p>
+                        <p className="text-[11px] opacity-80">You can view these settings, but only the Owner can modify them.</p>
+                    </div>
+                </div>
+            )}
 
                 {/* ── Loading ── */}
                 {loading && <FormSkeleton />}
 
-                {/* ── Content ── */}
-                {settings && (
-                    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        {/* Tabs */}
-                        <div className="border-b border-gray-200 dark:border-gray-700">
-                            <div className="flex">
-                                {TABS.map((tab) => (
-                                    <button
-                                        key={tab.key}
-                                        onClick={() => setActiveTab(tab.key)}
-                                        className={`relative px-6 py-4 text-sm font-medium transition-colors ${activeTab === tab.key
-                                            ? "text-blue-600 dark:text-blue-400"
-                                            : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                            }`}
-                                    >
-                                        {tab.label}
-                                        {activeTab === tab.key && (
-                                            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600 dark:bg-blue-400" />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Tab content */}
-                        <div className={`p-6 sm:p-8 ${!isOwner ? 'pointer-events-none opacity-80 select-none' : ''}`}>
-                            {activeTab === "general" && (
-                                <GeneralTab settings={settings} onChange={handleChange} />
-                            )}
-                            {activeTab === "appearance" && (
-                                <AppearanceTab settings={settings} onChange={handleChange} />
-                            )}
-                            {activeTab === "advanced" && (
-                                <AdvancedTab
-                                    settings={settings}
-                                    onChange={handleChange}
-                                    onReset={handleReset}
-                                />
-                            )}
+            {/* ── Content ── */}
+            {settings && (
+                <div className="overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-2xs">
+                    {/* Tabs */}
+                    <div className="border-b border-gray-100 bg-gray-50/50">
+                        <div className="flex">
+                            {TABS.map((tab) => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setActiveTab(tab.key)}
+                                    className={`relative px-4 py-2 text-xs font-semibold transition-colors ${activeTab === tab.key
+                                        ? "text-blue-600 font-bold bg-white"
+                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50"
+                                        }`}
+                                >
+                                    {tab.label}
+                                    {activeTab === tab.key && (
+                                        <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600" />
+                                    )}
+                                </button>
+                            ))}
                         </div>
                     </div>
-                )}
 
-                {/* Unsaved banner */}
-                {hasChanges && settings && !settings.autoSave && (
-                    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-3 shadow-xl dark:border-amber-800 dark:bg-amber-900/30">
-                        <p className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-300">
-                            <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                            You have unsaved changes
-                            <button
-                                onClick={handleSave}
-                                className="ml-3 rounded-lg bg-amber-600 px-3 py-1 text-xs text-white hover:bg-amber-700"
-                            >
-                                Save now
-                            </button>
-                        </p>
+                    {/* Tab content */}
+                    <div className={`p-4 sm:p-5 ${!isOwner ? 'pointer-events-none opacity-80 select-none' : ''}`}>
+                        {activeTab === "general" && (
+                            <GeneralTab settings={settings} onChange={handleChange} />
+                        )}
+                        {activeTab === "appearance" && (
+                            <AppearanceTab settings={settings} onChange={handleChange} />
+                        )}
+                        {activeTab === "advanced" && (
+                            <AdvancedTab
+                                settings={settings}
+                                onChange={handleChange}
+                                onReset={handleReset}
+                            />
+                        )}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
+            {/* Unsaved banner */}
+            {hasChanges && settings && !settings.autoSave && (
+                <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 shadow-lg">
+                    <p className="flex items-center gap-2 text-xs font-semibold text-amber-800">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+                        You have unsaved changes
+                        <button
+                            onClick={handleSave}
+                            className="ml-2.5 rounded-lg bg-amber-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-700 active:scale-95"
+                        >
+                            Save now
+                        </button>
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

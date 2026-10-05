@@ -1,7 +1,5 @@
-// ============================================================
 // components/admin/ui/ConfirmDialog.tsx
-// Reusable confirmation dialog for destructive actions
-// ============================================================
+// Compact confirmation dialog
 
 "use client";
 
@@ -30,29 +28,29 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title}>
-            <div className="flex items-start gap-4 mb-6">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                    <span className="text-red-600 text-lg">⚠️</span>
+            <div className="flex items-start gap-3 mb-4">
+                <div className="shrink-0 w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-sm">
+                    ⚠️
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed pt-2">{message}</p>
+                <p className="text-gray-600 text-xs leading-relaxed pt-1">{message}</p>
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
                 <button
                     onClick={onClose}
                     disabled={loading}
-                    className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
                 >
                     Cancel
                 </button>
                 <button
                     onClick={onConfirm}
                     disabled={loading}
-                    className={`px-4 py-2.5 text-sm font-medium text-white rounded-xl transition-colors disabled:opacity-50 focus:ring-2 focus:ring-offset-2 ${confirmColor}`}
+                    className={`px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors disabled:opacity-50 focus:ring-2 focus:ring-offset-1 ${confirmColor}`}
                 >
                     {loading ? (
-                        <span className="flex items-center gap-2">
-                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             Processing...
                         </span>
                     ) : (

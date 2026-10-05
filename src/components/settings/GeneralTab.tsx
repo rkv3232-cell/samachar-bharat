@@ -33,66 +33,66 @@ export default function GeneralTab({ settings, onChange }: Props) {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3.5">
             {/* Site Name */}
             <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-xs font-semibold text-gray-700">
                     Site Name
                 </label>
                 <input
                     type="text"
                     value={settings.siteName}
                     onChange={(e) => onChange({ siteName: e.target.value })}
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    className="h-8 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 outline-none transition-all focus:border-red-500 focus:ring-1 focus:ring-red-500"
                     placeholder="Enter site name"
                 />
             </div>
 
             {/* Contact Email */}
             <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-xs font-semibold text-gray-700">
                     Contact Email
                 </label>
                 <input
                     type="email"
                     value={settings.contactEmail}
                     onChange={(e) => onChange({ contactEmail: e.target.value })}
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    className="h-8 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 outline-none transition-all focus:border-red-500 focus:ring-1 focus:ring-red-500"
                     placeholder="admin@example.com"
                 />
             </div>
 
             {/* Facebook URL */}
             <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-xs font-semibold text-gray-700">
                     Facebook Profile URL
                 </label>
                 <input
                     type="url"
                     value={settings.facebookUrl || ""}
                     onChange={(e) => onChange({ facebookUrl: e.target.value })}
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    className="h-8 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 outline-none transition-all focus:border-red-500 focus:ring-1 focus:ring-red-500"
                     placeholder="https://facebook.com/..."
                 />
             </div>
 
             {/* Instagram URL */}
             <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-xs font-semibold text-gray-700">
                     Instagram Profile URL
                 </label>
                 <input
                     type="url"
                     value={settings.instagramUrl || ""}
                     onChange={(e) => onChange({ instagramUrl: e.target.value })}
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    className="h-8 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 outline-none transition-all focus:border-red-500 focus:ring-1 focus:ring-red-500"
                     placeholder="https://instagram.com/..."
                 />
             </div>
 
             {/* Logo Upload */}
             <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-xs font-semibold text-gray-700">
                     Site Logo
                 </label>
 
@@ -101,31 +101,31 @@ export default function GeneralTab({ settings, onChange }: Props) {
                         <Image
                             src={settings.logoUrl}
                             alt="Logo"
-                            width={120}
-                            height={120}
-                            className="rounded-xl border border-gray-200 object-contain dark:border-gray-700"
+                            width={90}
+                            height={90}
+                            className="rounded-lg border border-gray-200 object-contain"
                         />
                         <button
                             onClick={() => onChange({ logoUrl: "" })}
-                            className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white shadow-lg transition-transform hover:scale-110"
+                            className="absolute -right-1.5 -top-1.5 rounded-full bg-red-500 p-0.5 text-white shadow-sm transition-transform hover:scale-110"
                         >
-                            <X size={14} />
+                            <X size={12} />
                         </button>
                     </div>
                 ) : (
                     <button
                         onClick={() => fileRef.current?.click()}
                         disabled={uploading}
-                        className="flex h-32 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 text-sm text-gray-500 transition-colors hover:border-blue-400 hover:bg-blue-50 dark:border-gray-600 dark:hover:border-blue-500 dark:hover:bg-blue-900/20"
+                        className="flex h-20 w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 text-xs text-gray-500 transition-colors hover:border-red-400 hover:bg-red-50/30"
                     >
                         {uploading ? (
                             <>
-                                <Loader2 size={20} className="animate-spin" />
+                                <Loader2 size={16} className="animate-spin" />
                                 Uploading...
                             </>
                         ) : (
                             <>
-                                <Upload size={20} />
+                                <Upload size={16} />
                                 Click to upload logo
                             </>
                         )}

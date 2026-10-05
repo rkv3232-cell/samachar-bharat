@@ -153,6 +153,24 @@ export function generateClientPressId(): string {
   return `SB-REP-${year}-${randomCode}`;
 }
 
+// ── Firestore Payload Sanitizer ────────────────────────────────────────────────
+
+export function sanitizeFirestorePayload<T extends Record<string, any>>(obj: T): T {
+  const cleaned: any = {};
+  for (const key of Object.keys(obj)) {
+    const val = obj[key];
+    if (val === undefined) {
+      continue;
+    }
+    if (val !== null && typeof val === "object" && !Array.isArray(val) && !(val instanceof Timestamp) && !(val instanceof Date)) {
+      cleaned[key] = sanitizeFirestorePayload(val);
+    } else {
+      cleaned[key] = val;
+    }
+  }
+  return cleaned as T;
+}
+
 // ── Create Reporter in Firestore ──────────────────────────────────────────────
 
 export async function createReporterInFirestore(
@@ -240,7 +258,7 @@ export async function createReporterInFirestore(
   };
 
   // Prepare dual-compatible Firestore document payload
-  const firestorePayload = {
+  const firestorePayload = sanitizeFirestorePayload({
     ...reporterProfile,
     // Dual field aliases for legacy query compatibility
     name: input.fullName.trim(),
@@ -253,7 +271,7 @@ export async function createReporterInFirestore(
     district: input.address?.district || "Ghazipur",
     state: input.address?.state || "Uttar Pradesh",
     bureau: input.department?.trim() || "Editorial",
-  };
+  });
 
   const docRef = doc(db, "reporters", docId);
   await setDoc(docRef, firestorePayload);
@@ -341,7 +359,9 @@ export async function updateReporterInFirestore(
   if (updates.validUntil) payload.validTill = updates.validUntil;
   if (updates.issueDate) payload.validFrom = updates.issueDate;
 
-  await updateDoc(docRef, payload);
+  const cleanedPayload = sanitizeFirestorePayload(payload);
+
+  await updateDoc(docRef, cleanedPayload);
 }
 
 // ── Soft Delete / Revoke Reporter in Firestore ────────────────────────────────

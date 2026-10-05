@@ -89,7 +89,7 @@ export interface Post {
 export interface SiteSettings {
     siteName: string;
     logoUrl: string;
-    theme: "light" | "dark";
+    theme: "light";
     language: "hi" | "en";
     contactEmail: string;
     instagramUrl?: string; // Social links

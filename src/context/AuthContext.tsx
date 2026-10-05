@@ -1,12 +1,12 @@
 // src/context/AuthContext.tsx
 // Production-grade authentication context for Next.js + Firebase.
 //
-// SECURITY LAYERS:
-//  1. loading=true by default → prevents flash of admin/editor content
-//  2. onSnapshot listener → role changes reflected in real-time
-//  3. Firestore document missing → auto-creates (owner email → owner role, else user)
-//  4. signOut → clears ALL state and cookie
-//  5. isAdmin/isEditor are INCLUSIVE (owner has both)
+// OPTIMIZATIONS:
+//  1. Fast instant hydration from localStorage (<1ms, no blank screen/10s spinner)
+//  2. Non-blocking background session cookie sync
+//  3. Direct onSnapshot subscription without duplicate getUserDocument network waterfall
+//  4. 1.5s fallback timeout so loading is never indefinitely stuck
+//  5. Automatic cleanup of listeners on unmount
 
 "use client";
 
@@ -42,7 +42,7 @@ import {
 import { auth } from "@/lib/firebase";
 import { UserRole, Permission, type FirestoreUser, type AuthContextType, type PlainUser, type PlainFirestoreUser } from "@/types/auth.types";
 import { hasPermission, toUserRole, hasMinimumRole } from "@/lib/permissions";
-import { createUserDocument, getUserDocument, updateLastLogin } from "@/lib/firebase/user";
+import { createUserDocument, updateLastLogin } from "@/lib/firebase/user";
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -51,39 +51,59 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<PlainUser | null>(null);
+    // ── Instant Cache Hydration ──
+    const [user, setUser] = useState<PlainUser | null>(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const s = localStorage.getItem("sb_cached_user");
+                if (s) return JSON.parse(s);
+            } catch { }
+        }
+        return null;
+    });
+
+    const [role, setRole] = useState<UserRole | null>(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const r = localStorage.getItem("sb_cached_role");
+                if (r) return toUserRole(r);
+            } catch { }
+        }
+        return null;
+    });
+
     const [firestoreUser, setFirestoreUser] = useState<PlainFirestoreUser | null>(null);
-    const [role, setRole] = useState<UserRole | null>(null);
-    const [loading, setLoading] = useState(true);
+
+    const [loading, setLoading] = useState<boolean>(() => {
+        if (typeof window !== "undefined") {
+            const hasAuth = !!localStorage.getItem("sb_cached_user");
+            if (hasAuth) return false; // Immediate render with cached user
+        }
+        return true;
+    });
+
     const [error, setError] = useState<Error | null>(null);
 
-    // ─── Debug Logs ──────────────────────────────────────────────────────────
-    useEffect(() => {
-        console.log("[AuthContext] State Update:", {
-            uid: user?.uid,
-            email: user?.email,
-            role,
-            loading,
-            hasFirestoreDoc: !!firestoreUser
-        });
-    }, [user, role, loading, firestoreUser]);
-
-    const userEmailRef = useRef(user?.email);
-    useEffect(() => {
-        userEmailRef.current = user?.email;
-    }, [user?.email]);
-
     const firestoreUnsubRef = useRef<(() => void) | null>(null);
+    const activeUidRef = useRef<string | null>(user?.uid || null);
+
+    // Safety timeout: Never let loading freeze the UI beyond 1.5 seconds
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
+    }, []);
 
     // ── Real-time Firestore listener ───────────────────────────────────────────
-    const subscribeToFirestoreUser = useCallback((uid: string) => {
+    const subscribeToFirestoreUser = useCallback((currentUser: User) => {
         if (firestoreUnsubRef.current) {
             firestoreUnsubRef.current();
             firestoreUnsubRef.current = null;
         }
 
         const db = getFirestore();
-        const userRef = doc(db, "users", uid);
+        const userRef = doc(db, "users", currentUser.uid);
 
         const unsubscribe = onSnapshot(
             userRef,
@@ -98,12 +118,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     };
                     setFirestoreUser((prev) => (JSON.stringify(prev) === JSON.stringify(plainData) ? prev : plainData));
                     const userRoleParsed = toUserRole(data.role as string);
-                    setRole((prev) => (prev === userRoleParsed ? prev : userRoleParsed));
+                    setRole(userRoleParsed);
+                    if (typeof window !== "undefined") {
+                        localStorage.setItem("sb_cached_role", userRoleParsed);
+                    }
+                    updateLastLogin(currentUser.uid).catch(() => { });
                 } else {
                     setFirestoreUser(null);
-                    const email = userEmailRef.current;
+                    const email = currentUser.email?.toLowerCase();
                     const defaultRole = (email === "rkv3232@gmail.com" || email === "ckv3232@gmail.com") ? UserRole.OWNER : UserRole.USER;
-                    setRole((prev) => (prev === defaultRole ? prev : defaultRole));
+                    setRole(defaultRole);
+                    if (typeof window !== "undefined") {
+                        localStorage.setItem("sb_cached_role", defaultRole);
+                    }
+                    // Auto-create doc in background
+                    createUserDocument(currentUser).catch(console.error);
                 }
                 setLoading(false);
             },
@@ -118,25 +147,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // ── Auth State Listener ─────────────────────────────────────────────────────
-    const activeUidRef = useRef<string | null>(null);
-
     useEffect(() => {
         setPersistence(auth, browserLocalPersistence).catch((err) => {
             console.warn("[AuthContext] setPersistence warning:", err);
         });
 
-        const syncSessionCookie = async (currentUser: User | null) => {
+        // Non-blocking background session sync
+        const syncSessionCookie = (currentUser: User | null) => {
             if (!currentUser) return;
-            try {
-                const idToken = await currentUser.getIdToken();
-                await fetch("/api/auth/session", {
+            currentUser.getIdToken().then((idToken) => {
+                fetch("/api/auth/session", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ idToken }),
+                }).catch((sessionErr) => {
+                    console.warn("[AuthContext] Session cookie sync notice:", sessionErr);
                 });
-            } catch (sessionErr) {
-                console.error("[AuthContext] Session cookie sync failed:", sessionErr);
-            }
+            }).catch(() => { });
         };
 
         const unsubscribeToken = onIdTokenChanged(auth, (currentUser) => {
@@ -145,50 +172,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         });
 
-        const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
-            if (currentUser?.uid === activeUidRef.current && currentUser) {
-                // User already initialized, avoid re-fetching user doc
+        const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+            if (currentUser?.uid === activeUidRef.current && currentUser && !loading) {
                 return;
             }
 
             activeUidRef.current = currentUser?.uid || null;
 
-            setUser(currentUser ? {
-                uid: currentUser.uid,
-                email: currentUser.email,
-                displayName: currentUser.displayName,
-                photoURL: currentUser.photoURL,
-                emailVerified: currentUser.emailVerified,
-            } : null);
-            setError(null);
-
             if (currentUser) {
+                const plainUser: PlainUser = {
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    displayName: currentUser.displayName,
+                    photoURL: currentUser.photoURL,
+                    emailVerified: currentUser.emailVerified,
+                };
+                setUser(plainUser);
+                if (typeof window !== "undefined") {
+                    localStorage.setItem("sb_cached_user", JSON.stringify(plainUser));
+                }
+                setError(null);
+
                 const isOwnerEmail = currentUser.email === "rkv3232@gmail.com" || currentUser.email === "ckv3232@gmail.com";
                 if (isOwnerEmail) {
                     setRole(UserRole.OWNER);
-                }
-
-                try {
-                    await syncSessionCookie(currentUser);
-
-                    const existingDoc = await getUserDocument(currentUser.uid);
-                    if (!existingDoc) {
-                        await createUserDocument(currentUser);
-                    } else {
-                        updateLastLogin(currentUser.uid).catch(console.error);
+                    if (typeof window !== "undefined") {
+                        localStorage.setItem("sb_cached_role", UserRole.OWNER);
                     }
-
-                    subscribeToFirestoreUser(currentUser.uid);
-                } catch (err) {
-                    console.error("[AuthContext] Critical sync error:", err);
-                    setError(err as Error);
-                    setLoading(false);
                 }
+
+                // Sync session cookie in background
+                syncSessionCookie(currentUser);
+
+                // Direct listener without blocking waterfall
+                subscribeToFirestoreUser(currentUser);
             } else {
                 if (firestoreUnsubRef.current) {
                     firestoreUnsubRef.current();
                     firestoreUnsubRef.current = null;
                 }
+                if (typeof window !== "undefined") {
+                    localStorage.removeItem("sb_cached_user");
+                    localStorage.removeItem("sb_cached_role");
+                }
+                setUser(null);
                 setFirestoreUser(null);
                 setRole(null);
                 setLoading(false);
@@ -198,9 +225,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => {
             unsubscribeToken();
             unsubscribeAuth();
-            if (firestoreUnsubRef.current) firestoreUnsubRef.current();
+            if (firestoreUnsubRef.current) {
+                firestoreUnsubRef.current();
+                firestoreUnsubRef.current = null;
+            }
         };
-    }, [subscribeToFirestoreUser]);
+    }, [subscribeToFirestoreUser, loading]);
 
     // ── Auth Methods ────────────────────────────────────────────────────────────
 
@@ -231,11 +261,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signOut = useCallback(async (): Promise<void> => {
         setError(null);
         activeUidRef.current = null;
+        if (typeof window !== "undefined") {
+            localStorage.removeItem("sb_cached_user");
+            localStorage.removeItem("sb_cached_role");
+        }
+        setUser(null);
+        setFirestoreUser(null);
+        setRole(null);
         try {
             await fetch("/api/auth/session", { method: "DELETE" });
-        } catch {
-            // Non-critical
-        }
+        } catch { }
         await firebaseSignOut(auth);
     }, []);
 

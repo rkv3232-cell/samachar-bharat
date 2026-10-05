@@ -52,45 +52,47 @@ export default function AdminDashboard() {
 
 
     return (
-        <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-extrabold text-gray-800">Dashboard</h1>
-                <p className="text-gray-500 text-sm mt-1">NewsPortal Admin Overview</p>
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">Dashboard</h1>
+                    <p className="text-gray-500 text-xs">Samachar Bharat CMS Overview</p>
+                </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-                <div className="bg-white rounded-2xl shadow-md p-6 flex items-center gap-4">
-                    <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center">
-                        <Newspaper className="w-7 h-7 text-red-600" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="bg-white rounded-xl border border-gray-200/80 shadow-2xs p-3.5 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center shrink-0">
+                        <Newspaper className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-gray-500 text-sm">कुल खबरें</p>
-                        <p className="text-3xl font-extrabold text-gray-900">
+                        <p className="text-gray-500 text-xs font-medium">कुल खबरें</p>
+                        <p className="text-xl font-black text-gray-900 leading-tight">
                             {loading ? '—' : posts.length}
                         </p>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-md p-6 flex items-center gap-4">
-                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <BarChart3 className="w-7 h-7 text-blue-600" />
+                <div className="bg-white rounded-xl border border-gray-200/80 shadow-2xs p-3.5 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                        <BarChart3 className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-gray-500 text-sm">श्रेणियाँ</p>
-                        <p className="text-3xl font-extrabold text-gray-900">
+                        <p className="text-gray-500 text-xs font-medium">श्रेणियाँ</p>
+                        <p className="text-xl font-black text-gray-900 leading-tight">
                             {loading ? '—' : Object.keys(categoryCount).length}
                         </p>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-md p-6 flex items-center gap-4">
-                    <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-                        <TrendingUp className="w-7 h-7 text-green-600" />
+                <div className="bg-white rounded-xl border border-gray-200/80 shadow-2xs p-3.5 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center shrink-0">
+                        <TrendingUp className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-gray-500 text-sm">आज की खबरें</p>
-                        <p className="text-3xl font-extrabold text-gray-900">
+                        <p className="text-gray-500 text-xs font-medium">आज की खबरें</p>
+                        <p className="text-xl font-black text-gray-900 leading-tight">
                             {loading ? '—' : posts.filter(p => {
                                 if (!p.createdAt) return false;
                                 const d = p.createdAt.toDate ? p.createdAt.toDate() : new Date(p.createdAt);
@@ -102,50 +104,52 @@ export default function AdminDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Link
                     href="/admin/posts/new"
-                    className="group bg-gradient-to-br from-red-600 to-red-700 text-white rounded-2xl shadow-lg p-6 flex items-center gap-4 hover:shadow-xl transition-all"
+                    prefetch={true}
+                    className="group bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl shadow-xs p-3.5 flex items-center gap-3 hover:shadow-sm transition-all active:scale-[0.99]"
                 >
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                        <PlusCircle className="w-6 h-6" />
+                    <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
+                        <PlusCircle className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-lg">नई खबर जोड़ें</h3>
-                        <p className="text-red-100 text-sm">नया पोस्ट लिखें और publish करें</p>
+                        <h3 className="font-bold text-sm">नई खबर जोड़ें</h3>
+                        <p className="text-red-100 text-xs">नया पोस्ट लिखें और तुरंत प्रकाशित करें</p>
                     </div>
                 </Link>
 
                 <Link
                     href="/"
+                    prefetch={true}
                     target="_blank"
-                    className="group bg-white rounded-2xl shadow-md p-6 flex items-center gap-4 hover:shadow-xl transition-all border border-gray-100"
+                    className="group bg-white rounded-xl border border-gray-200/90 shadow-2xs p-3.5 flex items-center gap-3 hover:border-red-300 hover:shadow-xs transition-all active:scale-[0.99]"
                 >
-                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
-                        <Eye className="w-6 h-6 text-gray-600" />
+                    <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 text-gray-600 group-hover:text-red-600 transition-colors">
+                        <Eye className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-lg text-gray-800">Website देखें</h3>
-                        <p className="text-gray-500 text-sm">Public website खोलें</p>
+                        <h3 className="font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors">Website देखें</h3>
+                        <p className="text-gray-500 text-xs">Public website एक नए टैब में खोलें</p>
                     </div>
                 </Link>
             </div>
 
             {/* Category Breakdown */}
             {!loading && Object.keys(categoryCount).length > 0 && (
-                <div className="bg-white rounded-2xl shadow-md p-6">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4">श्रेणी अनुसार खबरें</h2>
-                    <div className="space-y-3">
+                <div className="bg-white rounded-xl border border-gray-200/80 shadow-2xs p-4">
+                    <h2 className="text-sm font-bold text-gray-800 mb-3">श्रेणी अनुसार खबरें</h2>
+                    <div className="space-y-2">
                         {Object.entries(categoryCount).map(([cat, count]) => (
-                            <div key={cat} className="flex items-center gap-3">
-                                <span className="text-sm text-gray-600 w-32 shrink-0">{categoryMap[cat] || cat}</span>
-                                <div className="flex-1 bg-gray-100 rounded-full h-2.5">
+                            <div key={cat} className="flex items-center gap-3 text-xs">
+                                <span className="text-gray-600 w-28 shrink-0 truncate">{categoryMap[cat] || cat}</span>
+                                <div className="flex-1 bg-gray-100 rounded-full h-2">
                                     <div
-                                        className="bg-red-600 h-2.5 rounded-full transition-all"
+                                        className="bg-red-600 h-2 rounded-full transition-all"
                                         style={{ width: `${Math.min((count / posts.length) * 100, 100)}%` }}
                                     />
                                 </div>
-                                <span className="text-sm font-bold text-gray-700 w-8 text-right">{count}</span>
+                                <span className="font-bold text-gray-700 w-6 text-right">{count}</span>
                             </div>
                         ))}
                     </div>

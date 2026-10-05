@@ -37,13 +37,13 @@ export default function CommentsPage() {
     const { addToast } = useToast();
 
     // ─── Load Comments ──────────────────────────────
-    const loadComments = useCallback(async () => {
+    const loadComments = useCallback(async (isInitial = false) => {
         try {
-            setLoading(true);
+            if (!isInitial) setLoading(true);
             const data = await fetchAllComments();
             setComments(data);
-        } catch (error) {
-            console.error("Failed to load comments:", error);
+        } catch (_error) {
+            console.error("Failed to load comments:", _error);
             addToast("Failed to load comments", "error");
         } finally {
             setLoading(false);
@@ -51,7 +51,7 @@ export default function CommentsPage() {
     }, [addToast]);
 
     useEffect(() => {
-        loadComments();
+        loadComments(true);
     }, [loadComments]);
 
     // ─── Filtering & Search ─────────────────────────
@@ -83,11 +83,6 @@ export default function CommentsPage() {
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
     );
-
-    // Reset to page 1 when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filter, search]);
 
     // ─── Actions ────────────────────────────────────
     const handleStatusChange = async (
@@ -145,81 +140,87 @@ export default function CommentsPage() {
 
     // ─── Render ─────────────────────────────────────
     return (
-        <div>
+        <div className="space-y-4">
             {/* Page Header */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">
-                    💬 Comments Management
+            <div>
+                <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">
+                    Comments Management
                 </h1>
-                <p className="text-gray-500 mt-1">
-                    Moderate and manage comments across all posts
+                <p className="text-xs text-gray-500">
+                    Moderate and manage reader comments across all published articles
                 </p>
             </div>
 
             {/* ─── Stats Cards ───────────────────────── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                     {
-                        label: "Total",
+                        label: "Total Comments",
                         count: stats.total,
-                        color: "bg-blue-50 text-blue-700 border-blue-200",
-                        icon: "📊",
+                        color: "border-gray-200/80",
+                        icon: "💬",
                     },
                     {
                         label: "Pending",
                         count: stats.pending,
-                        color: "bg-amber-50 text-amber-700 border-amber-200",
+                        color: "border-gray-200/80",
                         icon: "⏳",
                     },
                     {
                         label: "Approved",
                         count: stats.approved,
-                        color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+                        color: "border-gray-200/80",
                         icon: "✅",
                     },
                     {
                         label: "Rejected",
                         count: stats.rejected,
-                        color: "bg-red-50 text-red-700 border-red-200",
+                        color: "border-gray-200/80",
                         icon: "❌",
                     },
                 ].map((stat) => (
                     <div
                         key={stat.label}
-                        className={`rounded-xl p-4 border ${stat.color}`}
+                        className={`rounded-xl p-3 bg-white border ${stat.color} shadow-2xs`}
                     >
                         <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium opacity-80">{stat.label}</p>
-                            <span className="text-lg">{stat.icon}</span>
+                            <p className="text-[11px] font-medium text-gray-500">{stat.label}</p>
+                            <span className="text-base">{stat.icon}</span>
                         </div>
-                        <p className="text-2xl font-bold mt-1">{stat.count}</p>
+                        <p className="text-lg font-black text-gray-900 mt-0.5 leading-tight">{stat.count}</p>
                     </div>
                 ))}
             </div>
 
             {/* ─── Filters & Search ──────────────────── */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-                <div className="flex flex-col sm:flex-row gap-4">
+            <div className="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-2.5">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex-1">
                         <SearchBar
                             value={search}
-                            onChange={setSearch}
-                            placeholder="Search by name, comment, or post title..."
+                            onChange={(val) => {
+                                setSearch(val);
+                                setCurrentPage(1);
+                            }}
+                            placeholder="Search comments by name or text..."
                         />
                     </div>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-1.5 flex-wrap">
                         {(["all", "pending", "approved", "rejected"] as const).map((f) => (
                             <button
                                 key={f}
-                                onClick={() => setFilter(f)}
-                                className={`px-4 py-2.5 text-sm font-medium rounded-xl capitalize transition-all ${filter === f
-                                    ? "bg-blue-600 text-white shadow-sm"
+                                onClick={() => {
+                                    setFilter(f);
+                                    setCurrentPage(1);
+                                }}
+                                className={`h-8 px-3 text-xs font-semibold rounded-lg capitalize transition-all active:scale-95 ${filter === f
+                                    ? "bg-red-600 text-white shadow-2xs"
                                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                                     }`}
                             >
                                 {f}
                                 {f !== "all" && (
-                                    <span className="ml-1.5 text-xs opacity-75">
+                                    <span className="ml-1 text-[10px] opacity-80">
                                         (
                                         {f === "pending"
                                             ? stats.pending
@@ -236,16 +237,16 @@ export default function CommentsPage() {
             </div>
 
             {/* ─── Table ─────────────────────────────── */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-2xs border border-gray-200/80 overflow-hidden">
                 {loading ? (
-                    <LoadingSpinner message="Loading comments..." />
+                    <div className="p-4"><LoadingSpinner message="Loading comments..." /></div>
                 ) : paginatedComments.length === 0 ? (
-                    <div className="text-center py-16">
-                        <p className="text-4xl mb-3">💬</p>
-                        <p className="text-lg font-medium text-gray-900">
+                    <div className="text-center py-10">
+                        <p className="text-2xl mb-1">💬</p>
+                        <p className="text-xs font-bold text-gray-900">
                             No comments found
                         </p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-[11px] text-gray-500 mt-0.5">
                             {search || filter !== "all"
                                 ? "Try adjusting your search or filter"
                                 : "Comments will appear here once users start commenting"}
@@ -253,53 +254,39 @@ export default function CommentsPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full">
+                        <table className="w-full text-left text-xs">
                             <thead>
-                                <tr className="bg-gray-50/80 border-b border-gray-200">
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        User
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Comment
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Post
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Date
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
+                                <tr className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                    <th className="px-3.5 py-2">User</th>
+                                    <th className="px-3.5 py-2">Comment</th>
+                                    <th className="px-3.5 py-2">Post</th>
+                                    <th className="px-3.5 py-2">Date</th>
+                                    <th className="px-3.5 py-2">Status</th>
+                                    <th className="px-3.5 py-2 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-gray-100 bg-white">
                                 {paginatedComments.map((comment) => (
                                     <tr
                                         key={comment.id}
-                                        className="hover:bg-blue-50/30 transition-colors"
+                                        className="hover:bg-gray-50/60 transition-colors"
                                     >
                                         {/* User */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
-                                                    <span className="text-white font-bold text-sm">
-                                                        {(comment.name || "?").charAt(0).toUpperCase()}
-                                                    </span>
+                                        <td className="px-3.5 py-1.5 whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shrink-0 text-white font-bold text-[10px]">
+                                                    {(comment.name || "?").charAt(0).toUpperCase()}
                                                 </div>
-                                                <span className="text-sm font-semibold text-gray-900">
+                                                <span className="text-xs font-semibold text-gray-900 truncate max-w-[120px]">
                                                     {comment.name}
                                                 </span>
                                             </div>
                                         </td>
 
                                         {/* Comment */}
-                                        <td className="px-6 py-4">
+                                        <td className="px-3.5 py-1.5">
                                             <p
-                                                className="text-sm text-gray-700 max-w-[250px] truncate"
+                                                className="text-xs text-gray-700 max-w-[260px] truncate"
                                                 title={comment.message}
                                             >
                                                 {comment.message}
@@ -307,36 +294,34 @@ export default function CommentsPage() {
                                         </td>
 
                                         {/* Post Title */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-sm text-gray-600 font-medium">
-                                                {comment.postTitle}
+                                        <td className="px-3.5 py-1.5 whitespace-nowrap">
+                                            <span className="text-xs text-gray-500 truncate max-w-[150px] inline-block">
+                                                {comment.postTitle || "—"}
                                             </span>
                                         </td>
 
                                         {/* Date */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-sm text-gray-500">
-                                                {formatDate(comment.createdAt)}
-                                            </span>
+                                        <td className="px-3.5 py-1.5 whitespace-nowrap text-[11px] text-gray-400">
+                                            {formatDate(comment.createdAt)}
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-3.5 py-1.5 whitespace-nowrap">
                                             <StatusBadge status={comment.status as any || "pending"} />
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center justify-end gap-2">
+                                        <td className="px-3.5 py-1.5 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
                                                 {comment.status !== "approved" && (
                                                     <button
                                                         onClick={() =>
                                                             handleStatusChange(comment, "approved")
                                                         }
                                                         disabled={actionLoading === comment.id}
-                                                        className="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 disabled:opacity-50 transition-colors"
+                                                        className="h-6 px-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 rounded hover:bg-emerald-100 disabled:opacity-50 transition-colors"
                                                     >
-                                                        ✓ Approve
+                                                        Approve
                                                     </button>
                                                 )}
                                                 {comment.status !== "rejected" && (
@@ -345,17 +330,17 @@ export default function CommentsPage() {
                                                             handleStatusChange(comment, "rejected")
                                                         }
                                                         disabled={actionLoading === comment.id}
-                                                        className="px-3 py-1.5 text-xs font-semibold text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 disabled:opacity-50 transition-colors"
+                                                        className="h-6 px-2 text-[11px] font-semibold text-amber-700 bg-amber-50 rounded hover:bg-amber-100 disabled:opacity-50 transition-colors"
                                                     >
-                                                        ✕ Reject
+                                                        Reject
                                                     </button>
                                                 )}
                                                 <button
                                                     onClick={() => setDeleteTarget(comment)}
                                                     disabled={actionLoading === comment.id}
-                                                    className="px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
+                                                    className="h-6 px-2 text-[11px] font-semibold text-red-700 bg-red-50 rounded hover:bg-red-100 disabled:opacity-50 transition-colors"
                                                 >
-                                                    🗑 Delete
+                                                    Delete
                                                 </button>
                                             </div>
                                         </td>

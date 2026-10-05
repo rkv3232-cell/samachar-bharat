@@ -67,8 +67,7 @@ export default function InteractivePoll() {
                     setPoll({ ...DEFAULT_POLL, id: pollId });
                 }
             } catch (e) {
-                console.error("Poll Server Error:", e);
-                toast.error("जनमत लोड करने में विफल");
+                console.warn("Poll Server fetch fallback to default:", e);
             }
         };
         fetchPoll();
@@ -109,18 +108,18 @@ export default function InteractivePoll() {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-6 shadow-xl shadow-indigo-100/20 dark:shadow-none mb-8 transition-colors">
+        <div className="bg-white border border-indigo-100 rounded-2xl p-6 shadow-xl shadow-indigo-100/20 mb-8 transition-colors">
             <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-full flex items-center justify-center shadow-inner">
+                <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center shadow-inner">
                     <BarChart3 size={20} />
                 </div>
                 <div>
-                    <h2 className="text-xl font-black text-gray-900 dark:text-gray-100">जनमत (Public Poll)</h2>
+                    <h2 className="text-xl font-black text-gray-900">जनमत (Public Poll)</h2>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{poll.totalVotes} ताज़ा वोट</p>
                 </div>
             </div>
 
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-6 leading-tight">
+            <h3 className="text-lg font-bold text-gray-800 mb-6 leading-tight">
                 {poll.question}
             </h3>
 
@@ -133,26 +132,26 @@ export default function InteractivePoll() {
                     const isSelected = selectedOptionId === option.id;
 
                     return (
-                        <div key={option.id} className="relative overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800">
+                        <div key={option.id} className="relative overflow-hidden rounded-xl border border-gray-100">
                             <button
                                 onClick={() => handleVote(option.id)}
                                 disabled={hasVoted}
                                 className={`w-full relative z-10 flex items-center justify-between p-4 transition-all text-left
-                                    ${hasVoted
-                                        ? isSelected
-                                            ? 'bg-indigo-50/50 dark:bg-indigo-900/20'
-                                            : 'opacity-70'
-                                        : 'bg-white dark:bg-gray-900 hover:bg-gray-50'
-                                    }`}
+ ${hasVoted
+ ? isSelected
+ ? 'bg-indigo-50/50'
+ : 'opacity-70'
+ : 'bg-white hover:bg-gray-50'
+ }`}
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-indigo-600 scale-125' : 'bg-gray-300 dark:bg-gray-700'}`} />
-                                    <span className={`font-bold text-sm ${isSelected ? 'text-indigo-950 dark:text-indigo-200' : 'text-gray-600'}`}>
+                                    <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-indigo-600 scale-125' : 'bg-gray-300'}`} />
+                                    <span className={`font-bold text-sm ${isSelected ? 'text-indigo-950' : 'text-gray-600'}`}>
                                         {option.text}
                                     </span>
                                 </div>
                                 {hasVoted && (
-                                    <span className="font-black text-indigo-600 dark:text-indigo-400 text-sm">
+                                    <span className="font-black text-indigo-600 text-sm">
                                         {percentage}%
                                     </span>
                                 )}
@@ -160,7 +159,7 @@ export default function InteractivePoll() {
 
                             {hasVoted && (
                                 <div
-                                    className="absolute inset-y-0 left-0 bg-indigo-100/40 dark:bg-indigo-600/10 transition-all duration-1000 ease-out z-0"
+                                    className="absolute inset-y-0 left-0 bg-indigo-100/40 transition-all duration-1000 ease-out z-0"
                                     style={{ width: `${percentage}%` }}
                                 />
                             )}
@@ -170,7 +169,7 @@ export default function InteractivePoll() {
             </div>
 
             {hasVoted && (
-                <div className="mt-6 flex justify-center items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                <div className="mt-6 flex justify-center items-center gap-2 text-indigo-600">
                     <CheckCircle2 size={16} />
                     <span className="text-[10px] font-black uppercase tracking-widest">वोट देने के लिए धन्यवाद!</span>
                 </div>

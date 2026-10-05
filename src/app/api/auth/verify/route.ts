@@ -12,6 +12,7 @@ import { UserRole } from "@/types/auth.types";
 import { toUserRole } from "@/lib/permissions";
 
 const SESSION_COOKIE_NAME = "__session";
+const ROLE_CACHE = new Map<string, { role: UserRole; expiresAt: number }>();
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
     try {
@@ -42,17 +43,22 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             );
         }
 
-        // Fetch the role from Firestore (authoritative source for everyone else)
+        // Fetch the role from Firestore with in-memory caching (authoritative source for everyone else)
         let role: UserRole = UserRole.ADMIN;
-        try {
-            const userDoc = await adminDb.collection("users").doc(uid).get();
-            if (userDoc.exists) {
-                const rawRole = userDoc.data()?.role as string | undefined;
-                role = toUserRole(rawRole);
+        const cachedRole = ROLE_CACHE.get(uid);
+        if (cachedRole && Date.now() < cachedRole.expiresAt) {
+            role = cachedRole.role;
+        } else {
+            try {
+                const userDoc = await adminDb.collection("users").doc(uid).get();
+                if (userDoc.exists) {
+                    const rawRole = userDoc.data()?.role as string | undefined;
+                    role = toUserRole(rawRole);
+                    ROLE_CACHE.set(uid, { role, expiresAt: Date.now() + 5 * 60 * 1000 });
+                }
+            } catch (dbErr) {
+                console.warn("[GET /api/auth/verify] Firestore query failed, defaulting role:", dbErr);
             }
-        } catch (dbErr) {
-            // If Firestore Admin SDK query fails, grant authenticated status
-            console.warn("[GET /api/auth/verify] Firestore query failed, defaulting role:", dbErr);
         }
 
         return NextResponse.json(

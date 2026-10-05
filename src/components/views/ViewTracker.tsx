@@ -14,18 +14,25 @@ export default function ViewTracker({ postId, initialViews = 0 }: ViewTrackerPro
     const [views, setViews] = useState(initialViews);
 
     useEffect(() => {
-        if (!postId) return;
+        if (!postId || typeof window === 'undefined') return;
 
-        // Layer 1: Session Storage Duplicate Protection
-        const sessionKey = `viewed_${postId}`;
-        const hasViewed = sessionStorage.getItem(sessionKey);
+        try {
+            // Layer 1: Session Storage Duplicate Protection
+            const sessionKey = `viewed_${postId}`;
+            const hasViewed = window.sessionStorage.getItem(sessionKey);
 
-        if (!hasViewed) {
-            // Optimistic fast update
-            setViews(prev => prev + 1);
-            sessionStorage.setItem(sessionKey, 'true');
+            if (!hasViewed) {
+                window.sessionStorage.setItem(sessionKey, 'true');
+                // Deferred update to avoid synchronous cascading re-render
+                queueMicrotask(() => {
+                    setViews(prev => prev + 1);
+                });
 
-            // Fire and forget
+                // Fire and forget
+                incrementPostView(postId);
+            }
+        } catch {
+            // Private browsing/cookies disabled fallback
             incrementPostView(postId);
         }
     }, [postId]);

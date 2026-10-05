@@ -8,11 +8,8 @@
 
 import { ReporterProfile, ReporterStatus } from "@/types/dpivs";
 
-// Initial Demo Reporters: empty for production
-const INITIAL_DEMO_REPORTERS: ReporterProfile[] = [];
-
 // Global in-memory storage array
-let globalReportersStore: ReporterProfile[] = [];
+const globalReportersStore: ReporterProfile[] = [];
 
 export function getReportersFromStore(status?: string, search?: string): ReporterProfile[] {
   let list = [...globalReportersStore];

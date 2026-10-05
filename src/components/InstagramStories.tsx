@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { X, Play, Clock } from "lucide-react";
+import { X, Play } from "lucide-react";
 import { type Post } from "@/lib/posts";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -11,14 +10,29 @@ interface StoriesProps {
     posts: Post[];
 }
 
+function formatStoryDate(dateVal: any): string {
+    if (!dateVal) return 'ताज़ा';
+    try {
+        if (typeof dateVal?.toDate === 'function') {
+            return dateVal.toDate().toLocaleDateString('hi-IN');
+        }
+        if (dateVal instanceof Date) {
+            return dateVal.toLocaleDateString('hi-IN');
+        }
+        const parsed = new Date(dateVal);
+        return isNaN(parsed.getTime()) ? 'ताज़ा' : parsed.toLocaleDateString('hi-IN');
+    } catch {
+        return 'ताज़ा';
+    }
+}
+
 export default function InstagramStories({ posts }: StoriesProps) {
-    const [videoPosts, setVideoPosts] = useState<Post[]>([]);
     const [activeStory, setActiveStory] = useState<Post | null>(null);
     const [progress, setProgress] = useState(0);
     const videoRef = useRef<HTMLVideoElement>(null);
 
-    // Filter posts that are videos
-    useEffect(() => {
+    // Filter posts that are videos with useMemo to avoid unnecessary re-renders
+    const videoPosts = useMemo(() => {
         const vp = posts.filter(post =>
             post.image && (
                 post.image.match(/\.(mp4|webm|ogg|mov)$/i) ||
@@ -28,17 +42,34 @@ export default function InstagramStories({ posts }: StoriesProps) {
             // Note: Since cloudinary images also have 'cloud', we do a strict check for video format
             && (post.image.includes('.mp4') || post.image.includes('.mov') || post.image.includes('/video/'))
         );
-        setVideoPosts(vp.slice(0, 10)); // Top 10 latest videos
+        return vp.slice(0, 10); // Top 10 latest videos
     }, [posts]);
+
+    const handleNext = useCallback(() => {
+        if (!activeStory) return;
+        const currentIndex = videoPosts.findIndex(p => p.id === activeStory.id);
+        setProgress(0);
+        if (currentIndex < videoPosts.length - 1) {
+            setActiveStory(videoPosts[currentIndex + 1]);
+        } else {
+            setActiveStory(null);
+        }
+    }, [activeStory, videoPosts]);
+
+    const handlePrev = useCallback(() => {
+        if (!activeStory) return;
+        const currentIndex = videoPosts.findIndex(p => p.id === activeStory.id);
+        setProgress(0);
+        if (currentIndex > 0) {
+            setActiveStory(videoPosts[currentIndex - 1]);
+        }
+    }, [activeStory, videoPosts]);
 
     // Handle Story Timer/Progress
     useEffect(() => {
         if (!activeStory) return;
-        setProgress(0);
 
         let animationFrame: number;
-        const start = Date.now();
-        const duration = 15000; // 15 seconds per story
 
         const updateProgress = () => {
             if (videoRef.current) {
@@ -54,38 +85,22 @@ export default function InstagramStories({ posts }: StoriesProps) {
             }
         };
 
-        if (activeStory) {
-            animationFrame = requestAnimationFrame(updateProgress);
-        }
+        animationFrame = requestAnimationFrame(updateProgress);
 
-        return () => cancelAnimationFrame(animationFrame);
-    }, [activeStory]);
-
-    const handleNext = () => {
-        if (!activeStory) return;
-        const currentIndex = videoPosts.findIndex(p => p.id === activeStory.id);
-        if (currentIndex < videoPosts.length - 1) {
-            setActiveStory(videoPosts[currentIndex + 1]);
-        } else {
-            setActiveStory(null);
-        }
-    };
-
-    const handlePrev = () => {
-        if (!activeStory) return;
-        const currentIndex = videoPosts.findIndex(p => p.id === activeStory.id);
-        if (currentIndex > 0) {
-            setActiveStory(videoPosts[currentIndex - 1]);
-        }
-    };
+        return () => {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+        };
+    }, [activeStory, handleNext]);
 
     if (videoPosts.length === 0) return null;
 
     return (
-        <div className="w-full my-6 bg-white dark:bg-gray-900 overflow-hidden">
+        <div className="w-full my-6 bg-white overflow-hidden">
             <div className="flex items-center gap-2 mb-3 px-4">
                 <Play className="w-5 h-5 text-red-600 fill-current animate-pulse" />
-                <h2 className="font-extrabold text-lg text-gray-900 dark:text-gray-100">Video Shorts</h2>
+                <h2 className="font-extrabold text-lg text-gray-900">Video Shorts</h2>
             </div>
 
             {/* Horizontal Scroll Stories */}
@@ -97,8 +112,11 @@ export default function InstagramStories({ posts }: StoriesProps) {
                     return (
                         <div
                             key={story.id}
-                            onClick={() => setActiveStory(story)}
-                            className="relative flex-none w-24 h-40 rounded-xl overflow-hidden cursor-pointer flex flex-col justify-end p-2 group ring-2 ring-red-500 ring-offset-2 dark:ring-offset-gray-900 transition-all hover:scale-105"
+                            onClick={() => {
+                                setProgress(0);
+                                setActiveStory(story);
+                            }}
+                            className="relative flex-none w-24 h-40 rounded-xl overflow-hidden cursor-pointer flex flex-col justify-end p-2 group ring-2 ring-red-500 ring-offset-2 transition-all hover:scale-105"
                         >
                             <div className="absolute inset-0 bg-black/40 z-10 group-hover:bg-black/20 transition-all" />
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -149,8 +167,8 @@ export default function InstagramStories({ posts }: StoriesProps) {
                                     <span className="text-white font-bold text-xs font-serif">NP</span>
                                 </div>
                                 <div className="text-white text-sm drop-shadow-md">
-                                    <p className="font-bold">NewsPortal</p>
-                                    <p className="text-xs opacity-80">{new Date(activeStory.createdAt as any).toLocaleDateString()}</p>
+                                    <p className="font-bold">समाचार भारत</p>
+                                    <p className="text-xs opacity-80">{formatStoryDate(activeStory.createdAt)}</p>
                                 </div>
                             </div>
                             <button
@@ -184,7 +202,7 @@ export default function InstagramStories({ posts }: StoriesProps) {
                                     {activeStory.title}
                                 </h3>
                                 <p className="text-gray-300 text-xs line-clamp-2 leading-relaxed">
-                                    {activeStory.content.replace(/<[^>]+>/g, '')}
+                                    {(activeStory.content || '').replace(/<[^>]+>/g, '')}
                                 </p>
                             </div>
                         </div>

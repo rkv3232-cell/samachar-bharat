@@ -14,32 +14,27 @@ const roleConfig: Record<
     [UserRole.OWNER]: {
         label: "Owner",
         icon: <Crown size={12} />,
-        classes:
-            "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",
+        classes: "bg-amber-50 text-amber-800 border-amber-300 font-semibold",
     },
     [UserRole.ADMIN]: {
         label: "Admin",
         icon: <Shield size={12} />,
-        classes:
-            "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800",
+        classes: "bg-red-50 text-red-700 border-red-200 font-semibold",
     },
     [UserRole.EDITOR]: {
         label: "Editor",
         icon: <Edit3 size={12} />,
-        classes:
-            "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
+        classes: "bg-purple-50 text-purple-700 border-purple-200 font-semibold",
     },
     [UserRole.REPORTER]: {
         label: "Reporter",
         icon: <PenTool size={12} />,
-        classes:
-            "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
+        classes: "bg-blue-50 text-blue-700 border-blue-200 font-semibold",
     },
     [UserRole.USER]: {
         label: "User",
         icon: <User size={12} />,
-        classes:
-            "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600",
+        classes: "bg-gray-100 text-gray-700 border-gray-300 font-medium",
     },
 };
 

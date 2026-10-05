@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { fetchRssFeeds } from '@/lib/rssParser';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -10,26 +11,38 @@ export async function GET(req: Request) {
     const q = searchParams.get('q') || '';
     const category = searchParams.get('category') || '';
 
-    // Pagination (using Firebase limits or offset, but typically offset is expensive in Firestore). 
-    // We'll use simple limit for now. Production pagination via cursor can be added later.
-
     try {
-        let query: any = adminDb.collection('rss_news').orderBy('publishedAt', 'desc');
+        let articles: any[] = [];
 
-        if (source) {
-            query = query.where('source', '==', source);
+        try {
+            let query: any = adminDb.collection('rss_news').orderBy('publishedAt', 'desc');
+
+            if (source) {
+                query = query.where('source', '==', source);
+            }
+
+            const dbPromise = query.limit(limit).get();
+            const timeoutPromise = new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error("News DB query timeout")), 800)
+            );
+            const snapshot = await Promise.race([dbPromise, timeoutPromise]);
+            articles = snapshot.docs.map((doc: any) => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    // Ensure correct ISO string
+                    publishedAt: data.publishedAt?.toDate ? data.publishedAt.toDate().toISOString() : data.publishedAt
+                };
+            });
+        } catch (dbErr: any) {
+            console.warn('API /news DB query skipped, falling back to live RSS:', dbErr?.message || dbErr);
+            const liveRss = await fetchRssFeeds();
+            articles = liveRss.map((item, idx) => ({
+                id: `rss-${idx}`,
+                ...item,
+            }));
         }
-
-        const snapshot = await query.limit(limit).get();
-        let articles = snapshot.docs.map((doc: any) => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                // Ensure correct ISO string
-                publishedAt: data.publishedAt?.toDate ? data.publishedAt.toDate().toISOString() : data.publishedAt
-            };
-        });
 
         // Filter by category in-memory for now to avoid Firestore Index requirement crashes
         if (category && category !== 'general') {

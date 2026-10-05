@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllPosts, deletePost, Post, formatDate } from '@/lib/posts';
@@ -31,13 +31,24 @@ export default function EditorPostsPage() {
     const [error, setError] = useState('');
     const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
 
-    useEffect(() => {
-        if (user?.uid) {
-            loadData();
+    const loadPosts = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await getAllPosts(true); // true to include drafts
+            // Security: Reporters only see their own posts. Editors/Admins see all.
+            if (role === UserRole.REPORTER) {
+                setPosts(data.filter(p => p.authorId === user?.uid));
+            } else {
+                setPosts(data);
+            }
+        } catch (e: any) {
+            setError('Posts load नहीं हो सके: ' + e.message);
+        } finally {
+            setLoading(false);
         }
-    }, [user?.uid]);
+    }, [role, user?.uid]);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             // Fetch categories first
@@ -53,24 +64,13 @@ export default function EditorPostsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [loadPosts]);
 
-    const loadPosts = async () => {
-        setLoading(true);
-        try {
-            const data = await getAllPosts(true); // true to include drafts
-            // Security: Reporters only see their own posts. Editors/Admins see all.
-            if (role === UserRole.REPORTER) {
-                setPosts(data.filter(p => p.authorId === user?.uid));
-            } else {
-                setPosts(data);
-            }
-        } catch (e: any) {
-            setError('Posts load नहीं हो सके: ' + e.message);
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (user?.uid) {
+            loadData();
         }
-    };
+    }, [user?.uid, loadData]);
 
     const handleDelete = async (id: string, title: string) => {
         if (!confirm(`क्या आप "${title}" को delete करना चाहते हैं?`)) return;

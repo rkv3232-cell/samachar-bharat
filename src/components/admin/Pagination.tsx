@@ -44,8 +44,8 @@ export default function Pagination({
     }
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-gray-100">
-            <p className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 border-t border-gray-100">
+            <p className="text-xs text-gray-500">
                 Showing{" "}
                 <span className="font-semibold text-gray-700">{start}</span>–
                 <span className="font-semibold text-gray-700">{end}</span> of{" "}
@@ -56,23 +56,23 @@ export default function Pagination({
                 <button
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="h-7 px-2.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
                 >
                     ← Prev
                 </button>
 
                 {getPages().map((page, i) =>
                     page === "dots" ? (
-                        <span key={`d${i}`} className="px-1 text-gray-400 select-none">
+                        <span key={`d${i}`} className="px-1 text-gray-400 select-none text-xs">
                             ···
                         </span>
                     ) : (
                         <button
                             key={page}
                             onClick={() => onPageChange(page as number)}
-                            className={`min-w-[36px] h-9 text-sm font-medium rounded-lg transition-colors ${currentPage === page
-                                    ? "bg-blue-600 text-white shadow-sm"
-                                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                            className={`min-w-[28px] h-7 px-1.5 text-xs font-semibold rounded-lg transition-colors ${currentPage === page
+                                ? "bg-red-600 text-white shadow-2xs"
+                                : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                                 }`}
                         >
                             {page}
@@ -83,7 +83,7 @@ export default function Pagination({
                 <button
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="h-7 px-2.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
                 >
                     Next →
                 </button>

@@ -29,18 +29,8 @@ export default function CategoryPostList({ initialPosts, category }: Props) {
 
     const { posts, loading, error, setSort: setApiSort } = useSortedPosts(sort, category);
 
-    // Initial SSR posts displayed until client finishes
-    const [displayPosts, setDisplayPosts] = useState<Post[]>(initialPosts);
-
-    useEffect(() => {
-        setApiSort(sort);
-    }, [sort, setApiSort]);
-
-    useEffect(() => {
-        if (!loading && !error) {
-            setDisplayPosts(posts);
-        }
-    }, [posts, loading, error]);
+    // Render fetched sorted posts or fallback to initial SSR posts
+    const displayPosts = (posts && posts.length > 0) ? posts : initialPosts;
 
     return (
         <div>

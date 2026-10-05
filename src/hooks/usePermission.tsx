@@ -2,18 +2,11 @@
 
 import { useAuth } from "@/lib/auth-context";
 import { Action, hasPermission } from "@/lib/rbac";
-import { UserRole } from "@/types";
-import { useEffect, useState } from "react";
+import React from "react";
 
 export function usePermission(action: Action) {
     const { userRole, loading } = useAuth();
-    const [allowed, setAllowed] = useState(false);
-
-    useEffect(() => {
-        if (!loading) {
-            setAllowed(hasPermission(userRole, action));
-        }
-    }, [userRole, loading, action]);
+    const allowed = !loading && hasPermission(userRole, action);
 
     return { allowed, loading };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Sun, Moon, Palette } from "lucide-react";
+import { Palette, Globe } from "lucide-react";
 import type { SiteSettings } from "@/types";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 }
 
 const colorOptions = [
+    { name: "Samachar Red", value: "#dc2626" },
     { name: "Blue", value: "#2563eb" },
     { name: "Emerald", value: "#059669" },
     { name: "Purple", value: "#7c3aed" },
@@ -19,85 +20,69 @@ const colorOptions = [
 
 export default function AppearanceTab({ settings, onChange }: Props) {
     return (
-        <div className="space-y-8">
-            {/* Theme Toggle */}
+        <div className="space-y-4">
+            {/* Primary Accent Color */}
             <div>
-                <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Theme
+                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-gray-800">
+                    <Palette size={14} className="text-red-600" />
+                    Primary Accent Color
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                    <button
-                        onClick={() => onChange({ theme: "light" })}
-                        className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all ${settings.theme === "light"
-                                ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md dark:bg-blue-900/30 dark:text-blue-400"
-                                : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                            }`}
-                    >
-                        <Sun size={20} />
-                        Light Mode
-                    </button>
-                    <button
-                        onClick={() => onChange({ theme: "dark" })}
-                        className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all ${settings.theme === "dark"
-                                ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md dark:bg-blue-900/30 dark:text-blue-400"
-                                : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                            }`}
-                    >
-                        <Moon size={20} />
-                        Dark Mode
-                    </button>
-                </div>
-            </div>
-
-            {/* Primary Color */}
-            <div>
-                <label className="mb-3 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <Palette size={16} />
-                    Primary Color
-                </label>
-                <div className="flex flex-wrap gap-3">
-                    {colorOptions.map((color) => (
-                        <button
-                            key={color.value}
-                            onClick={() => onChange({ primaryColor: color.value })}
-                            className={`group flex items-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm transition-all ${settings.primaryColor === color.value
-                                    ? "border-gray-900 shadow-md dark:border-white"
-                                    : "border-gray-200 hover:border-gray-400 dark:border-gray-700"
+                <p className="text-[11px] text-gray-500 mb-2">
+                    Select the main brand color used across buttons, links, and highlights.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                    {colorOptions.map((color) => {
+                        const isSelected = settings.primaryColor === color.value;
+                        return (
+                            <button
+                                key={color.value}
+                                type="button"
+                                onClick={() => onChange({ primaryColor: color.value })}
+                                className={`h-8 flex items-center gap-2 rounded-lg border px-2.5 text-xs font-semibold transition-all active:scale-95 ${
+                                    isSelected
+                                        ? "border-gray-900 bg-gray-50 text-gray-900 shadow-2xs font-bold ring-1 ring-gray-900/10"
+                                        : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                                 }`}
-                        >
-                            <span
-                                className="h-5 w-5 rounded-full shadow-inner"
-                                style={{ backgroundColor: color.value }}
-                            />
-                            {color.name}
-                        </button>
-                    ))}
+                            >
+                                <span
+                                    className="h-3.5 w-3.5 rounded-full shadow-inner ring-1 ring-black/10"
+                                    style={{ backgroundColor: color.value }}
+                                />
+                                {color.name}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
             {/* Language */}
             <div>
-                <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Language
+                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-gray-800">
+                    <Globe size={14} className="text-blue-600" />
+                    Platform Default Language
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 max-w-sm">
                     <button
-                        onClick={() => onChange({ language: "en" })}
-                        className={`rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${settings.language === "en"
-                                ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : "border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300"
-                            }`}
+                        type="button"
+                        onClick={() => onChange({ language: "hi" })}
+                        className={`h-9 rounded-lg border px-3 text-xs font-bold transition-all active:scale-95 ${
+                            settings.language === "hi"
+                                ? "border-red-600 bg-red-50 text-red-700 shadow-2xs ring-1 ring-red-600/10"
+                                : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
                     >
-                        🇺🇸 English
+                        🇮🇳 हिन्दी (Hindi)
                     </button>
                     <button
-                        onClick={() => onChange({ language: "hi" })}
-                        className={`rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${settings.language === "hi"
-                                ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : "border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300"
-                            }`}
+                        type="button"
+                        onClick={() => onChange({ language: "en" })}
+                        className={`h-9 rounded-lg border px-3 text-xs font-bold transition-all active:scale-95 ${
+                            settings.language === "en"
+                                ? "border-red-600 bg-red-50 text-red-700 shadow-2xs ring-1 ring-red-600/10"
+                                : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
                     >
-                        🇮🇳 हिन्दी
+                        🌐 English
                     </button>
                 </div>
             </div>

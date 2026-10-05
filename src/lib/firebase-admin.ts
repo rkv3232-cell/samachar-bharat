@@ -4,7 +4,11 @@ import { getFirestore, Firestore } from "firebase-admin/firestore";
 import { getMessaging, Messaging } from "firebase-admin/messaging";
 
 function formatPrivateKey(key: string): string {
-    return key.replace(/\\n/g, "\n");
+    let cleaned = key.trim();
+    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+        cleaned = cleaned.slice(1, -1);
+    }
+    return cleaned.replace(/\\n/g, "\n");
 }
 
 let app: App;

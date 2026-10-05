@@ -1,8 +1,6 @@
 // ============================================================
 // app/admin/categories/page.tsx
-// COMPLETE CATEGORIES & TAGS MANAGEMENT SYSTEM
-// Features: Add/Delete Categories with auto-slug,
-//           Add/Delete Tags, Integration guide
+// COMPLETE COMPACT CATEGORIES & TAGS MANAGEMENT SYSTEM
 // ============================================================
 
 "use client";
@@ -39,24 +37,24 @@ export default function CategoriesPage() {
     const { addToast } = useToast();
 
     // ─── Load Data ──────────────────────────────────
-    const loadCategories = useCallback(async () => {
+    const loadCategories = useCallback(async (isInitial = false) => {
         try {
-            setCatLoading(true);
+            if (!isInitial) setCatLoading(true);
             const data = await fetchCategories();
             setCategories(data);
-        } catch (error) {
+        } catch (_error) {
             addToast("Failed to load categories", "error");
         } finally {
             setCatLoading(false);
         }
     }, [addToast]);
 
-    const loadTags = useCallback(async () => {
+    const loadTags = useCallback(async (isInitial = false) => {
         try {
-            setTagLoading(true);
+            if (!isInitial) setTagLoading(true);
             const data = await fetchTags();
             setTags(data);
-        } catch (error) {
+        } catch (_error) {
             addToast("Failed to load tags", "error");
         } finally {
             setTagLoading(false);
@@ -64,8 +62,8 @@ export default function CategoriesPage() {
     }, [addToast]);
 
     useEffect(() => {
-        loadCategories();
-        loadTags();
+        loadCategories(true);
+        loadTags(true);
     }, [loadCategories, loadTags]);
 
     // ─── Slug Generator ────────────────────────────
@@ -99,21 +97,16 @@ export default function CategoriesPage() {
             return;
         }
 
-        const slug = newCatSlug || generateSlug(name);
-
         try {
             setAddingCat(true);
-            const id = await addCategory(name, slug);
-            setCategories((prev) =>
-                [...prev, { id, name, slug }].sort((a, b) =>
-                    a.name.localeCompare(b.name)
-                )
-            );
+            const slug = newCatSlug.trim() || generateSlug(name);
+            const newId = await addCategory(name, slug);
+            setCategories((prev) => [...prev, { id: newId, name, slug }]);
             setNewCatName("");
             setNewCatSlug("");
-            addToast("Category added successfully", "success");
-        } catch (error) {
-            addToast("Failed to add category", "error");
+            addToast(`Category "${name}" created!`, "success");
+        } catch (error: any) {
+            addToast(error.message || "Failed to add category", "error");
         } finally {
             setAddingCat(false);
         }
@@ -122,22 +115,21 @@ export default function CategoriesPage() {
     // ─── Delete Category ───────────────────────────
     const handleDeleteCategory = async () => {
         if (!deleteCatTarget) return;
+
         try {
             setActionLoading(true);
             await deleteCategory(deleteCatTarget.id);
-            setCategories((prev) =>
-                prev.filter((c) => c.id !== deleteCatTarget.id)
-            );
-            addToast("Category deleted", "success");
+            setCategories((prev) => prev.filter((c) => c.id !== deleteCatTarget.id));
+            addToast(`Category "${deleteCatTarget.name}" deleted`, "success");
+            setDeleteCatTarget(null);
         } catch (error) {
             addToast("Failed to delete category", "error");
         } finally {
             setActionLoading(false);
-            setDeleteCatTarget(null);
         }
     };
 
-    // ─── Add Tag ────────────────────────────────────
+    // ─── Add Tag ───────────────────────────────────
     const handleAddTag = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -155,85 +147,84 @@ export default function CategoriesPage() {
 
         try {
             setAddingTag(true);
-            const id = await addTag(name);
-            setTags((prev) =>
-                [...prev, { id, name }].sort((a, b) => a.name.localeCompare(b.name))
-            );
+            const newId = await addTag(name);
+            setTags((prev) => [...prev, { id: newId, name }]);
             setNewTagName("");
-            addToast("Tag added successfully", "success");
-        } catch (error) {
-            addToast("Failed to add tag", "error");
+            addToast(`Tag "${name}" created!`, "success");
+        } catch (error: any) {
+            addToast(error.message || "Failed to add tag", "error");
         } finally {
             setAddingTag(false);
         }
     };
 
-    // ─── Delete Tag ─────────────────────────────────
+    // ─── Delete Tag ────────────────────────────────
     const handleDeleteTag = async () => {
         if (!deleteTagTarget) return;
+
         try {
             setActionLoading(true);
             await deleteTag(deleteTagTarget.id);
             setTags((prev) => prev.filter((t) => t.id !== deleteTagTarget.id));
-            addToast("Tag deleted", "success");
+            addToast(`Tag "${deleteTagTarget.name}" deleted`, "success");
+            setDeleteTagTarget(null);
         } catch (error) {
             addToast("Failed to delete tag", "error");
         } finally {
             setActionLoading(false);
-            setDeleteTagTarget(null);
         }
     };
 
-    // ─── Render ─────────────────────────────────────
     return (
-        <div>
+        <div className="space-y-4">
             {/* Page Header */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">
-                    🏷️ Categories & Tags
+            <div>
+                <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">
+                    Categories & Tags
                 </h1>
-                <p className="text-gray-500 mt-1">
+                <p className="text-xs text-gray-500">
                     Organize your posts with categories and tags
                 </p>
             </div>
 
             {/* ─── Stats ─────────────────────────────── */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="rounded-xl p-5 bg-indigo-50 border border-indigo-200 text-indigo-700">
-                    <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium opacity-80">Categories</p>
-                        <span className="text-xl">📂</span>
+            <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl p-3.5 bg-white border border-gray-200/80 shadow-2xs flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-500">Categories</p>
+                        <p className="text-xl font-black text-gray-900 leading-tight mt-0.5">{categories.length}</p>
                     </div>
-                    <p className="text-3xl font-bold mt-1">{categories.length}</p>
+                    <span className="text-lg">📂</span>
                 </div>
-                <div className="rounded-xl p-5 bg-teal-50 border border-teal-200 text-teal-700">
-                    <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium opacity-80">Tags</p>
-                        <span className="text-xl">🏷️</span>
+                <div className="rounded-xl p-3.5 bg-white border border-gray-200/80 shadow-2xs flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-500">Tags</p>
+                        <p className="text-xl font-black text-gray-900 leading-tight mt-0.5">{tags.length}</p>
                     </div>
-                    <p className="text-3xl font-bold mt-1">{tags.length}</p>
+                    <span className="text-lg">🏷️</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* ═══════════════════════════════════════ */}
                 {/* CATEGORIES SECTION                      */}
                 {/* ═══════════════════════════════════════ */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-2xs border border-gray-200/80 overflow-hidden">
                     {/* Header */}
-                    <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
-                        <h2 className="text-lg font-bold text-gray-900">📂 Categories</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            {categories.length}{" "}
-                            {categories.length === 1 ? "category" : "categories"} total
-                        </p>
+                    <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                        <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                            <span>📂</span> Categories
+                        </h2>
+                        <span className="text-xs text-gray-500">
+                            {categories.length} total
+                        </span>
                     </div>
 
                     {/* Add Form */}
-                    <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-                        <form onSubmit={handleAddCategory} className="space-y-3">
+                    <div className="p-3.5 border-b border-gray-100 bg-white">
+                        <form onSubmit={handleAddCategory} className="space-y-2.5">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                                <label className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wider mb-1">
                                     Category Name
                                 </label>
                                 <input
@@ -241,71 +232,58 @@ export default function CategoriesPage() {
                                     value={newCatName}
                                     onChange={(e) => handleCatNameChange(e.target.value)}
                                     placeholder="e.g., Technology"
-                                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+                                    className="w-full h-8 px-3 text-xs bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-shadow text-gray-900"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                                    Slug{" "}
-                                    <span className="text-gray-400 normal-case font-normal">
-                                        (auto-generated)
-                                    </span>
+                                <label className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wider mb-1">
+                                    Slug <span className="text-gray-400 normal-case font-normal">(auto-generated)</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={newCatSlug}
                                     onChange={(e) => setNewCatSlug(e.target.value)}
                                     placeholder="technology"
-                                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-500 font-mono transition-shadow"
+                                    className="w-full h-8 px-3 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none text-gray-600 font-mono transition-shadow"
                                 />
                             </div>
                             <button
                                 type="submit"
                                 disabled={addingCat || !newCatName.trim()}
-                                className="w-full px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-sm"
+                                className="w-full h-8 px-3 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-all shadow-2xs active:scale-[0.99]"
                             >
-                                {addingCat ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Adding...
-                                    </span>
-                                ) : (
-                                    "+ Add Category"
-                                )}
+                                {addingCat ? "Adding..." : "+ Add Category"}
                             </button>
                         </form>
                     </div>
 
                     {/* Categories List */}
-                    <div className="max-h-[400px] overflow-y-auto">
+                    <div className="max-h-[360px] overflow-y-auto">
                         {catLoading ? (
-                            <LoadingSpinner message="Loading categories..." />
+                            <div className="p-4"><LoadingSpinner message="Loading categories..." /></div>
                         ) : categories.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500">
-                                <p className="text-3xl mb-2">📂</p>
-                                <p className="text-sm font-medium">No categories yet</p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                    Add your first category above
-                                </p>
+                            <div className="text-center py-8 text-gray-500">
+                                <p className="text-2xl mb-1">📂</p>
+                                <p className="text-xs font-medium">No categories yet</p>
                             </div>
                         ) : (
                             <div className="divide-y divide-gray-100">
                                 {categories.map((cat) => (
                                     <div
                                         key={cat.id}
-                                        className="flex items-center justify-between px-6 py-3.5 hover:bg-gray-50/80 transition-colors group"
+                                        className="flex items-center justify-between px-3.5 py-2 hover:bg-gray-50/80 transition-colors group"
                                     >
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-semibold text-gray-900">
+                                            <p className="text-xs font-semibold text-gray-900 truncate">
                                                 {cat.name}
                                             </p>
-                                            <p className="text-xs text-gray-400 font-mono mt-0.5">
+                                            <p className="text-[11px] text-gray-400 font-mono">
                                                 /{cat.slug}
                                             </p>
                                         </div>
                                         <button
                                             onClick={() => setDeleteCatTarget(cat)}
-                                            className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-all"
+                                            className="px-2 py-0.5 text-[11px] font-semibold text-red-600 bg-red-50 rounded hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-all"
                                         >
                                             Delete
                                         </button>
@@ -319,26 +297,27 @@ export default function CategoriesPage() {
                 {/* ═══════════════════════════════════════ */}
                 {/* TAGS SECTION                            */}
                 {/* ═══════════════════════════════════════ */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-2xs border border-gray-200/80 overflow-hidden">
                     {/* Header */}
-                    <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-emerald-50">
-                        <h2 className="text-lg font-bold text-gray-900">🏷️ Tags</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            {tags.length} {tags.length === 1 ? "tag" : "tags"} total
-                        </p>
+                    <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                        <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                            <span>🏷️</span> Tags
+                        </h2>
+                        <span className="text-xs text-gray-500">
+                            {tags.length} total
+                        </span>
                     </div>
 
                     {/* Add Form */}
-                    <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-                        <form onSubmit={handleAddTag} className="flex gap-3">
+                    <div className="p-3.5 border-b border-gray-100 bg-white">
+                        <form onSubmit={handleAddTag} className="flex gap-2">
                             <input
                                 type="text"
                                 value={newTagName}
                                 onChange={(e) => setNewTagName(e.target.value)}
-                                placeholder="e.g., React, JavaScript, CSS"
-                                className="flex-1 px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-shadow"
+                                placeholder="e.g., React, Election"
+                                className="flex-1 h-8 px-3 text-xs bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-shadow text-gray-900"
                                 onKeyDown={(e) => {
-                                    // Allow adding tags with Enter
                                     if (e.key === "Enter") {
                                         e.preventDefault();
                                         handleAddTag(e);
@@ -348,7 +327,7 @@ export default function CategoriesPage() {
                             <button
                                 type="submit"
                                 disabled={addingTag || !newTagName.trim()}
-                                className="px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-all whitespace-nowrap shadow-sm"
+                                className="h-8 px-3 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-all whitespace-nowrap shadow-2xs active:scale-[0.99]"
                             >
                                 {addingTag ? "Adding..." : "+ Add"}
                             </button>
@@ -356,29 +335,26 @@ export default function CategoriesPage() {
                     </div>
 
                     {/* Tags Cloud */}
-                    <div className="px-6 py-5 max-h-[400px] overflow-y-auto">
+                    <div className="p-3.5 max-h-[360px] overflow-y-auto">
                         {tagLoading ? (
-                            <LoadingSpinner message="Loading tags..." />
+                            <div className="p-4"><LoadingSpinner message="Loading tags..." /></div>
                         ) : tags.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500">
-                                <p className="text-3xl mb-2">🏷️</p>
-                                <p className="text-sm font-medium">No tags yet</p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                    Add your first tag above
-                                </p>
+                            <div className="text-center py-8 text-gray-500">
+                                <p className="text-2xl mb-1">🏷️</p>
+                                <p className="text-xs font-medium">No tags yet</p>
                             </div>
                         ) : (
-                            <div className="flex flex-wrap gap-2.5">
+                            <div className="flex flex-wrap gap-1.5">
                                 {tags.map((tag) => (
                                     <span
                                         key={tag.id}
-                                        className="inline-flex items-center gap-2 px-3.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm font-medium text-gray-700 transition-colors group cursor-default"
+                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 hover:bg-gray-200/80 rounded-lg text-xs font-medium text-gray-700 transition-colors group cursor-default"
                                     >
-                                        <span className="text-gray-400 text-xs">#</span>
+                                        <span className="text-gray-400 text-[10px]">#</span>
                                         {tag.name}
                                         <button
                                             onClick={() => setDeleteTagTarget(tag)}
-                                            className="w-4 h-4 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-all text-xs font-bold leading-none"
+                                            className="w-3.5 h-3.5 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-100 opacity-60 group-hover:opacity-100 transition-all text-xs font-bold leading-none"
                                             title={`Delete "${tag.name}"`}
                                         >
                                             ×
@@ -390,7 +366,6 @@ export default function CategoriesPage() {
                     </div>
                 </div>
             </div>
-
 
             {/* ─── Delete Confirmations ──────────────── */}
             <ConfirmDialog

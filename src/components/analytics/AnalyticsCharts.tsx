@@ -27,12 +27,12 @@ function ChartCard({
     children: React.ReactNode;
 }) {
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="rounded-xl border border-gray-200/90 bg-white p-3.5 shadow-2xs">
+            <h3 className="mb-2.5 flex items-center gap-1.5 text-xs font-bold text-gray-900">
                 {icon}
                 {title}
             </h3>
-            <div className="h-72 w-full">{children}</div>
+            <div className="h-56 w-full">{children}</div>
         </div>
     );
 }

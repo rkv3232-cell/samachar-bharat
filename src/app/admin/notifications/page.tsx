@@ -44,80 +44,80 @@ export default function NotificationCenter() {
     };
 
     return (
-        <div className="p-6 max-w-2xl mx-auto min-h-screen bg-transparent">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 bg-red-100 rounded-xl">
-                    <Bell className="w-6 h-6 text-red-600" />
+        <div className="space-y-3.5 max-w-2xl">
+            <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-red-50 text-red-600 rounded-lg">
+                    <Bell className="w-4 h-4" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">नॉरिफिकेशन सेंटर</h1>
-                    <p className="text-gray-500 text-sm">अपने पाठकों को तुरंत ताज़ा खबरें भेजें</p>
+                    <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">नोटिफिकेशन सेंटर</h1>
+                    <p className="text-xs text-gray-500">अपने पाठकों को तुरंत ताज़ा खबरें भेजें</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSend} className="space-y-6 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">हेडलाइन (Title) *</label>
+            <form onSubmit={handleSend} className="space-y-3 bg-white p-4 rounded-xl shadow-2xs border border-gray-200/90">
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-700">हेडलाइन (Title) *</label>
                     <input
                         type="text"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         placeholder="जैसे: ब्रेकिंग न्यूज़: भारत ने जीता गोल्ड!"
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
+                        className="h-8 w-full px-2.5 text-xs border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">विवरण (Message body) *</label>
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-700">विवरण (Message body) *</label>
                     <textarea
                         value={formData.body}
                         onChange={(e) => setFormData({ ...formData, body: e.target.value })}
                         placeholder="खबर के बारे में संक्षेप में लिखें..."
-                        rows={3}
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all resize-none"
+                        rows={2}
+                        className="w-full p-2 text-xs border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all resize-none"
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                            <ImageIcon className="w-4 h-4" /> इमेज URL
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                            <ImageIcon className="w-3.5 h-3.5 text-gray-400" /> इमेज URL
                         </label>
                         <input
                             type="text"
                             value={formData.imageUrl}
                             onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                             placeholder="https://example.com/image.jpg"
-                            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition-all placeholder:text-gray-300"
+                            className="h-8 w-full px-2.5 text-xs border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 outline-none transition-all placeholder:text-gray-300"
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                            <LinkIcon className="w-4 h-4" /> क्लिक लिंक
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                            <LinkIcon className="w-3.5 h-3.5 text-gray-400" /> क्लिक लिंक
                         </label>
                         <input
                             type="text"
                             value={formData.link}
                             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                            placeholder="नॉरिफिकेशन पर क्लिक करने पर कहाँ भेजना है?"
-                            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition-all placeholder:text-gray-300"
+                            placeholder="कहाँ भेजना है? (/post/123)"
+                            className="h-8 w-full px-2.5 text-xs border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 outline-none transition-all placeholder:text-gray-300"
                         />
                     </div>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-2">
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-white transition-all ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-black shadow-lg shadow-red-100"
+                        className={`h-8 w-full flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold text-white transition-all active:scale-[0.99] ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700 shadow-xs"
                             }`}
                     >
                         {loading ? (
                             "भेजा जा रहा है..."
                         ) : (
                             <>
-                                <Send className="w-5 h-5" />
+                                <Send className="w-3.5 h-3.5" />
                                 नोटिफिकेशन ब्रॉडकास्ट करें
                             </>
                         )}
@@ -125,8 +125,8 @@ export default function NotificationCenter() {
                 </div>
             </form>
 
-            <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                <p className="text-xs text-blue-700 leading-relaxed">
+            <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+                <p className="text-[11px] text-blue-700 leading-relaxed">
                     <strong>Tip:</strong> यह नोटिफिकेशन उन सभी यूज़र्स को जाएगा जिन्होंने आपकी वेबसाइट पर 'Allow Notifications' किया है। सटीक लिंक डालने से पाठकों की संख्या (Traffic) बढ़ेगी।
                 </p>
             </div>

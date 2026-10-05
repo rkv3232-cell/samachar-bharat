@@ -1,8 +1,5 @@
-// ============================================================
 // components/admin/ui/Modal.tsx
-// Reusable modal dialog with backdrop, ESC key support,
-// and click-outside-to-close
-// ============================================================
+// Compact reusable modal dialog
 
 "use client";
 
@@ -46,27 +43,27 @@ export default function Modal({
     return (
         <div
             ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-3"
             onClick={(e) => {
                 if (e.target === overlayRef.current) onClose();
             }}
         >
             <div
-                className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} transform transition-all`}
+                className={`bg-white rounded-xl shadow-xl w-full ${maxWidth} border border-gray-100 overflow-hidden transform transition-all`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 bg-gray-50/50">
+                    <h2 className="text-sm font-bold text-gray-900">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors text-xl leading-none"
+                        className="w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none"
                     >
                         ×
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="px-6 py-5">{children}</div>
+                <div className="p-3.5 sm:p-4">{children}</div>
             </div>
         </div>
     );

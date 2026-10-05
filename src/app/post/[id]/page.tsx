@@ -92,9 +92,12 @@ export default async function PostPage({ params }: Props) {
         console.error('Error fetching categories for post page label');
     }
 
-    // Clean content from &nbsp; and other artifacts that break layout
+    // Clean content from &nbsp; and format plain-text newlines into paragraphs
     const cleanContent = (post.content || '').replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ');
     const plainContent = cleanContent.replace(/<[^>]+>/g, '') || '';
+    const formattedContent = cleanContent.includes('<p>') || cleanContent.includes('<div')
+        ? cleanContent
+        : cleanContent.split('\n\n').filter(Boolean).map(p => `<p>${p.replace(/\n/g, '<br/>')}</p>`).join('');
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -198,7 +201,7 @@ export default async function PostPage({ params }: Props) {
                         {/* Content */}
                         <div
                             className="news-content prose prose-red max-w-2xl mx-auto prose-p:leading-relaxed prose-headings:font-extrabold prose-p:text-gray-800 prose-p:text-xl mb-10"
-                            dangerouslySetInnerHTML={{ __html: cleanContent || plainContent }}
+                            dangerouslySetInnerHTML={{ __html: formattedContent || plainContent }}
                         />
 
                         {/* Comments Section */}

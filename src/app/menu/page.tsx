@@ -10,11 +10,6 @@ import { fetchCategories } from '@/lib/firestore/categories';
 import type { Category } from '@/types';
 import {
     Home,
-    Newspaper,
-    ShieldCheck,
-    LogIn,
-    UserPlus,
-    PenTool,
     Crown,
     LogOut,
     Radio,
@@ -31,7 +26,6 @@ import {
     Heart,
     Flame
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 // Fallback Categories
 const DEFAULT_CATEGORIES: Category[] = [
@@ -49,8 +43,7 @@ const ADMIN_PANEL_ROLES: UserRole[] = [UserRole.OWNER, UserRole.ADMIN];
 
 export default function MenuPage() {
     const router = useRouter();
-    const { user, firestoreUser, role, loading, signOut } = useAuth();
-    const { settings } = useSettings();
+    const { user, firestoreUser, role, signOut } = useAuth();
     const [navCategories, setNavCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
 
     useEffect(() => {
@@ -73,112 +66,132 @@ export default function MenuPage() {
     const isAdmin = isOwnerEmail || (role && ADMIN_PANEL_ROLES.includes(role));
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-white selection:bg-red-500/30">
+        <div className="min-h-screen bg-slate-50 text-gray-900">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-[#0f172a]/80 backdrop-blur-xl border-b border-white/5 mx-4 mt-4 rounded-2xl md:mx-auto md:max-w-2xl px-4 py-3 flex items-center justify-between shadow-2xl">
+            <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 mx-3 mt-3 rounded-xl md:mx-auto md:max-w-2xl px-3.5 py-2.5 flex items-center justify-between shadow-xs">
                 <button
                     onClick={() => router.back()}
-                    className="p-2 hover:bg-white/5 rounded-full transition-colors"
+                    className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors active:scale-95"
+                    aria-label="Go Back"
                 >
-                    <ArrowLeft className="w-6 h-6" />
+                    <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div className="flex flex-col items-center">
-                    <h1 className="text-sm font-black tracking-widest uppercase text-red-500">Explore</h1>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase">SAMACHAR BHARAT</p>
+                    <h1 className="text-xs font-black tracking-widest uppercase text-red-600">Explore</h1>
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">SAMACHAR BHARAT</p>
                 </div>
-                <Link href="/" className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                    <Home className="w-6 h-6" />
+                <Link
+                    href="/"
+                    className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors active:scale-95"
+                    aria-label="Home"
+                >
+                    <Home className="w-5 h-5" />
                 </Link>
             </header>
 
-            <main className="max-w-2xl mx-auto px-4 pt-8 pb-32 space-y-8">
+            <main className="max-w-2xl mx-auto px-4 pt-5 pb-24 space-y-5">
                 {/* User Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-br from-red-600 to-orange-600 p-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden group"
-                >
-                    <div className="relative z-10 flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl font-black shadow-inner ring-4 ring-white/10 group-hover:scale-110 transition-transform">
-                            {displayName.charAt(0).toUpperCase()}
+                <div className="bg-gradient-to-r from-red-600 via-red-600 to-orange-500 text-white p-5 rounded-2xl shadow-md relative overflow-hidden">
+                    <div className="relative z-10 flex items-center justify-between">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl font-black shadow-inner ring-2 ring-white/30">
+                                {displayName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-white/80">Welcome</p>
+                                <h2 className="text-lg font-black truncate max-w-[200px] leading-tight">{displayName}</h2>
+                                {role && (
+                                    <span className="inline-block mt-0.5 px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-md text-[9px] font-bold uppercase tracking-wider">
+                                        {role}
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-xs font-black uppercase tracking-widest text-white/70">Welcome back</p>
-                            <h2 className="text-2xl font-black truncate max-w-[200px]">{displayName}</h2>
-                            {role && (
-                                <span className="inline-block mt-1 px-2 py-0.5 bg-white/10 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-wider border border-white/10">
-                                    {role}
-                                </span>
-                            )}
-                        </div>
+
+                        {!user && (
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    href="/login"
+                                    className="px-3.5 py-1.5 bg-white text-red-600 rounded-lg text-xs font-bold shadow-xs hover:bg-red-50 transition-colors active:scale-95"
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    href="/login?tab=signup"
+                                    className="px-3.5 py-1.5 bg-black/25 text-white border border-white/30 rounded-lg text-xs font-bold hover:bg-black/35 transition-colors active:scale-95"
+                                >
+                                    Signup
+                                </Link>
+                            </div>
+                        )}
                     </div>
-                    {!user && (
-                        <div className="mt-6 flex gap-2">
-                            <Link href="/login" className="flex-1 py-3 bg-white text-red-600 rounded-2xl text-center font-black text-sm shadow-xl hover:bg-red-50 transition-colors">
-                                Login
-                            </Link>
-                            <Link href="/login?tab=signup" className="flex-1 py-3 bg-black/20 text-white rounded-2xl text-center font-black text-sm backdrop-blur-md border border-white/10 hover:bg-black/30 transition-colors">
-                                Signup
-                            </Link>
-                        </div>
-                    )}
-                    {/* Abstract elements */}
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-                </motion.div>
+                </div>
 
                 {/* Main Navigation Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-                        <Link href="/live" className="flex flex-col items-center justify-center gap-3 p-6 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-red-600 transition-all group">
-                            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                                <Radio className="w-6 h-6 text-red-500 group-hover:text-white" />
-                            </div>
-                            <span className="font-black text-sm tracking-wide">Live TV</span>
-                        </Link>
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}>
-                        <Link href="/explore" className="flex flex-col items-center justify-center gap-3 p-6 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-blue-600 transition-all group">
-                            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                                <Globe className="w-6 h-6 text-blue-500 group-hover:text-white" />
-                            </div>
-                            <span className="font-black text-sm tracking-wide">World News</span>
-                        </Link>
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
-                        <Link href="/bookmarks" className="flex flex-col items-center justify-center gap-3 p-6 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-amber-600 transition-all group">
-                            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                                <Bookmark className="w-6 h-6 text-amber-500 group-hover:text-white" />
-                            </div>
-                            <span className="font-black text-sm tracking-wide">Saved</span>
-                        </Link>
-                    </motion.div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <Link
+                        href="/live"
+                        prefetch={true}
+                        className="flex flex-col items-center justify-center gap-2 p-3.5 bg-white border border-gray-200/90 rounded-xl hover:border-red-400 hover:shadow-xs hover:bg-red-50/20 transition-all active:scale-[0.98] group"
+                    >
+                        <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center group-hover:bg-red-600 transition-colors">
+                            <Radio className="w-5 h-5 text-red-600 group-hover:text-white transition-colors" />
+                        </div>
+                        <span className="font-bold text-xs text-gray-800">Live TV</span>
+                    </Link>
+
+                    <Link
+                        href="/explore"
+                        prefetch={true}
+                        className="flex flex-col items-center justify-center gap-2 p-3.5 bg-white border border-gray-200/90 rounded-xl hover:border-blue-400 hover:shadow-xs hover:bg-blue-50/20 transition-all active:scale-[0.98] group"
+                    >
+                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                            <Globe className="w-5 h-5 text-blue-600 group-hover:text-white transition-colors" />
+                        </div>
+                        <span className="font-bold text-xs text-gray-800">World News</span>
+                    </Link>
+
+                    <Link
+                        href="/bookmarks"
+                        prefetch={true}
+                        className="flex flex-col items-center justify-center gap-2 p-3.5 bg-white border border-gray-200/90 rounded-xl hover:border-amber-400 hover:shadow-xs hover:bg-amber-50/20 transition-all active:scale-[0.98] group"
+                    >
+                        <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-600 transition-colors">
+                            <Bookmark className="w-5 h-5 text-amber-600 group-hover:text-white transition-colors" />
+                        </div>
+                        <span className="font-bold text-xs text-gray-800">Saved</span>
+                    </Link>
+
                     {isAdmin && (
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25 }}>
-                            <Link href="/admin" className="flex flex-col items-center justify-center gap-3 p-6 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-emerald-600 transition-all group">
-                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                                    <Crown className="w-6 h-6 text-emerald-500 group-hover:text-white" />
-                                </div>
-                                <span className="font-black text-sm tracking-wide">Admin</span>
-                            </Link>
-                        </motion.div>
+                        <Link
+                            href="/admin"
+                            prefetch={true}
+                            className="flex flex-col items-center justify-center gap-2 p-3.5 bg-white border border-gray-200/90 rounded-xl hover:border-emerald-400 hover:shadow-xs hover:bg-emerald-50/20 transition-all active:scale-[0.98] group"
+                        >
+                            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
+                                <Crown className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors" />
+                            </div>
+                            <span className="font-bold text-xs text-gray-800">Admin</span>
+                        </Link>
                     )}
                 </div>
 
                 {/* Categories */}
-                <div className="space-y-4">
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 px-2 flex items-center gap-2">
-                        <Flame className="w-4 h-4 text-orange-500" /> Categories
+                <div className="space-y-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 px-1 flex items-center gap-1.5">
+                        <Flame className="w-3.5 h-3.5 text-orange-500" /> Categories
                     </h3>
-                    <div className="bg-white/5 border border-white/10 rounded-[2.5rem] overflow-hidden">
-                        {navCategories.map((cat, idx) => (
+                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs divide-y divide-gray-100">
+                        {navCategories.map((cat) => (
                             <Link
                                 key={cat.slug}
                                 href={`/category/${cat.slug}`}
-                                className={`flex items-center justify-between p-5 hover:bg-white/5 border-b border-white/5 last:border-0 group transition-colors`}
+                                prefetch={true}
+                                className="flex items-center justify-between px-4 py-3 hover:bg-red-50/40 transition-colors group"
                             >
-                                <span className="font-bold text-lg group-hover:text-red-500 transition-colors">{cat.name}</span>
-                                <div className="p-2 bg-white/5 rounded-xl group-hover:bg-red-600 transition-all">
-                                    <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white" />
+                                <span className="font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors">{cat.name}</span>
+                                <div className="p-1 rounded-md text-gray-400 group-hover:text-red-600 transition-colors">
+                                    <ChevronRight className="w-4 h-4" />
                                 </div>
                             </Link>
                         ))}
@@ -186,62 +199,61 @@ export default function MenuPage() {
                 </div>
 
                 {/* Contact & Social */}
-                <div className="space-y-4">
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 px-2 flex items-center gap-2">
-                        <Users className="w-4 h-4 text-blue-500" /> Connect
+                <div className="space-y-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 px-1 flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-blue-500" /> Connect
                     </h3>
-                    <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6 space-y-6">
-                        <div className="space-y-4">
-                            <a href="mailto:samacharbharatgzp@gmail.com" className="flex items-center gap-4 group">
-                                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-red-600/20 group-hover:text-red-500 transition-all border border-white/5">
-                                    <Mail className="w-5 h-5" />
+                    <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3.5 shadow-xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <a href="mailto:samacharbharatgzp@gmail.com" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 border border-gray-100 transition-colors group">
+                                <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors shrink-0">
+                                    <Mail className="w-4 h-4" />
                                 </div>
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Email Us</p>
-                                    <p className="font-bold text-sm">samacharbharatgzp@gmail.com</p>
+                                <div className="min-w-0">
+                                    <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400">Email</p>
+                                    <p className="font-semibold text-xs text-gray-700 truncate">samacharbharatgzp@gmail.com</p>
                                 </div>
                             </a>
-                            <a href="tel:+917347718098" className="flex items-center gap-4 group">
-                                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-emerald-600/20 group-hover:text-emerald-500 transition-all border border-white/5">
-                                    <Phone className="w-5 h-5" />
+                            <a href="tel:+917347718098" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 border border-gray-100 transition-colors group">
+                                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
+                                    <Phone className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Call Us</p>
-                                    <p className="font-bold text-sm">+91 734 771 8098</p>
+                                    <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400">Phone</p>
+                                    <p className="font-semibold text-xs text-gray-700">+91 734 771 8098</p>
                                 </div>
                             </a>
                         </div>
-                        <div className="pt-6 border-t border-white/5 flex justify-center gap-6">
-                            <a href="https://facebook.com" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition-all border border-white/10">
-                                <Share2 className="w-6 h-6" />
+                        <div className="pt-2 border-t border-gray-100 flex justify-center gap-4">
+                            <a href="https://facebook.com" aria-label="Facebook" className="w-9 h-9 rounded-xl bg-gray-50 hover:bg-blue-600 hover:text-white flex items-center justify-center text-gray-600 transition-all border border-gray-200">
+                                <Share2 className="w-4 h-4" />
                             </a>
-                            <a href="https://instagram.com" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-pink-600 hover:scale-110 transition-all border border-white/10">
-                                <Camera className="w-6 h-6" />
+                            <a href="https://instagram.com" aria-label="Instagram" className="w-9 h-9 rounded-xl bg-gray-50 hover:bg-pink-600 hover:text-white flex items-center justify-center text-gray-600 transition-all border border-gray-200">
+                                <Camera className="w-4 h-4" />
                             </a>
-                            <a href="https://youtube.com" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-red-600 hover:scale-110 transition-all border border-white/10">
-                                <Video className="w-6 h-6" />
+                            <a href="https://youtube.com" aria-label="YouTube" className="w-9 h-9 rounded-xl bg-gray-50 hover:bg-red-600 hover:text-white flex items-center justify-center text-gray-600 transition-all border border-gray-200">
+                                <Video className="w-4 h-4" />
                             </a>
                         </div>
                     </div>
                 </div>
 
-                {/* Sign Out (Mobile only visible if logged in) */}
+                {/* Sign Out */}
                 {user && (
-                    <motion.button
-                        whileTap={{ scale: 0.98 }}
+                    <button
                         onClick={handleSignOut}
-                        className="w-full py-5 bg-red-600/10 border border-red-600/20 rounded-[2rem] text-red-500 font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all shadow-xl shadow-red-900/10"
+                        className="w-full py-2.5 bg-white border border-red-200 rounded-xl text-red-600 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all shadow-xs active:scale-[0.98]"
                     >
-                        <LogOut className="w-5 h-5" /> Sign Out from Account
-                    </motion.button>
+                        <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
                 )}
 
                 {/* Footer simple */}
-                <div className="text-center space-y-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 flex items-center justify-center gap-1">
-                        Made with <Heart className="w-3 h-3 text-red-500 inline" /> for Bharat
+                <div className="text-center pt-2 space-y-1">
+                    <p className="text-[10px] font-semibold text-gray-400 flex items-center justify-center gap-1">
+                        Made with <Heart className="w-3 h-3 text-red-500 inline fill-red-500" /> for Bharat
                     </p>
-                    <p className="text-[9px] text-gray-700 font-bold uppercase">© 2026 SAMACHAR BHARAT NEWS PORTAL</p>
+                    <p className="text-[9px] text-gray-400 font-medium">© 2026 SAMACHAR BHARAT NEWS PORTAL</p>
                 </div>
             </main>
         </div>

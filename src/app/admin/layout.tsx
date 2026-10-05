@@ -38,11 +38,9 @@ function AdminLoadingScreen() {
 }
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-    const { loading, isAdmin, role, user } = useAuth();
+    const { loading, isAdmin, user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [touchStart, setTouchStart] = useState<number | null>(null);
-    const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
     const router = useRouter();
     const pathname = usePathname();
@@ -61,37 +59,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         return () => mql.removeEventListener("change", onChange);
     }, []);
 
-    // Super Sensitive Swipe Gestures
-    const minSwipeDistance = 10; // Extremely sensitive
-
-    const onTouchStart = (e: React.TouchEvent) => {
-        setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
-    };
-
-    const onTouchMove = (e: React.TouchEvent) => {
-        setTouchEnd(e.targetTouches[0].clientX);
-    };
-
-    const onTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
-
-        if (isMobile) {
-            // Priority Swipe Detection
-            if (isRightSwipe && !isSidebarOpen && touchStart < 60) {
-                setIsSidebarOpen(true); // Open from left edge (wide hit zone)
-            } else if (isLeftSwipe && isSidebarOpen) {
-                setIsSidebarOpen(false); // Close with any leftward flick
-            }
-        }
-    };
-
     useEffect(() => {
-        if (isMobile) setIsSidebarOpen(false);
-    }, [pathname, isMobile]);
+        if (isMobile && isSidebarOpen) setIsSidebarOpen(false);
+    }, [pathname, isMobile, isSidebarOpen]);
 
     useEffect(() => {
         if (!loading) {
@@ -108,12 +78,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     return (
         <ToastProvider>
-            <div
-                className="flex h-screen bg-gray-50/50 overflow-hidden relative touch-none md:touch-auto"
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-            >
+            <div className="flex h-screen bg-slate-50 overflow-hidden relative">
                 {/* Backdrop - High Priority */}
                 {isMobile && isSidebarOpen && (
                     <div
@@ -124,10 +89,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
                 <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950 h-full overflow-hidden">
+                <div className="flex-1 flex flex-col min-w-0 bg-slate-50 h-full overflow-hidden">
                     <AdminHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
-                    <main className="flex-1 overflow-y-auto w-full h-full touch-auto">
-                        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-full">
+                    <main className="flex-1 overflow-y-auto w-full h-full">
+                        <div className="p-3 sm:p-4 lg:p-5 max-w-7xl mx-auto min-h-full">
                             {children}
                         </div>
                     </main>
